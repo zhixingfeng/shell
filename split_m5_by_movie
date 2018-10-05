@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "split_m5_by_movie m5file outdir"
+        exit 0
+fi
+
+m5file=$1
+outdir=$2
+
+if [ -d $outdir ]; then
+	echo "outdir $outdir already exist."
+	exit 1
+fi
+
+mkdir -p $outdir
+
+awk -v outdir=$outdir '{
+	split($1, buf, "/");
+	movie=buf[1];
+	outfile=outdir"/"movie".m5"
+	print $0 >> outfile
+	close(outfile)
+}' $m5file
+
+
+
