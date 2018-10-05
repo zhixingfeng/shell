@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "split_m5_by_ref m5file outdir"
+        exit 0
+fi
+
+awk -v outdir=$2 '{
+	gsub("\\|", "_", $6);
+	print $0 > outdir"/"$6".m5";
+}' $1
+
+

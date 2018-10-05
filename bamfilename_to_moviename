@@ -1,0 +1,14 @@
+#!/bin/bash
+#if [ $# -eq 0 ] ; then
+#        echo "unziphdf5dir inputdir"
+#        exit 0
+#fi
+
+while read line;
+do
+	moviename=$(samtools view $line.bam | head -1 | cut -f 1)
+	echo $line" "$moviename
+done
+
+
+

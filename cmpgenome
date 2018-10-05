@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "cmpgenome queryfastfile reffastafile outprefix"
+        exit 0
+fi
+
+
+nucmer -t 4 -c 200 -l 12 --maxmatch -p $3 $2 $1
+
+show-coords -l -T -H $3.delta > $3.coords
+
+show-snps -l -T -H $3.delta > $3.snp
+
+

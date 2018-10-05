@@ -1,0 +1,28 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "pileup_count_to_context_dir indir extension"
+        exit 0
+fi
+
+infiles=$(ls $1/*.$2)
+
+#hpcopt="submitjob 1 -c 1 -m 8 -P acc_LymeMIND -q premium"
+hpcopt="time"
+for infile in $infiles
+do
+	pufile=${infile%.*}.pileup
+	contextfile=$infile.recode_contexteffect
+	cmd=$hpcopt" igda pileup_count_to_context $infile $pufile $contextfile"
+	echo $cmd
+	$cmd
+done
+
+
+
+
+
+
+
+
+
+

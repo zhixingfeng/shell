@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "bamtofasta bamfile fastqfile"
+        exit 0
+fi
+
+samtools fasta $1 > $2
+
+

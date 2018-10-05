@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "filter_pacbio_to_fasta_dir indir outdir"
+        exit 0
+fi
+
+mkdir -p $2
+
+ls -d $1/*/ | awk -v indir=$1 -v outdir=$2 -v hpcopt="submitjob 2 -c 1 -m 4 -P acc_LymeMIND -q premium" '{cmd=hpcopt" filter_pacbio "$0" "outdir"/";gsub(indir"/","",$0); gsub("/","",$0); cmd=cmd$0".fasta";  print cmd; system(cmd)}'
+
+
+

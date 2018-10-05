@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "unziphdf5dir inputdir"
+        exit 0
+fi
+
+#ls ./$1/*.tgz | awk '{cmd="unziphdf5 "$1; print cmd; system(cmd)}'
+ls ./$1/*.tgz | awk -v hpcopt="submitjob 1 -c 1 -m 6 -P acc_LymeMIND -q premium" '{cmd=hpcopt" unziphdf5 "$1; print cmd; system(cmd)}'
+
+
+

@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "getuniqrows inputfile outputfile"
+        exit 0
+fi
+
+awk '!seen[$0]++' $1 > $2
+

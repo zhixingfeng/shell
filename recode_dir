@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+        echo "recode_dir indir"
+        exit 0
+fi
+
+m5files=$(ls $1/*.m5)
+
+hpcopt="submitjob 24 -c 1 -m 16 -P acc_LymeMIND -q premium"
+for m5file in $m5files
+do
+	varfile=${m5file%.*}.var
+	recodefile=${m5file%.*}.recode
+        cmd=$hpcopt" igda recode -f $m5file $varfile $recodefile"
+        echo $cmd
+	$cmd
+done
+
+
+
+

@@ -1,0 +1,25 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "trim_bam_by_region_dir indir outdir chr start end"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+chr=$3
+start_locus=$4
+end_locus=$5
+
+mkdir -p $outdir
+
+filelist=$(ls $indir/*.bam)
+
+for bamfile in $filelist
+do
+	#name=$(echo "$filename" | cut -f 1 -d '.')
+	outfile="$outdir/$( echo $(basename $bamfile) | cut -f 1 -d '.').sam"
+	cmd="trim_bam_by_region $bamfile $outfile $chr $start_locus $end_locus"
+	echo $cmd
+	trim_bam_by_region $bamfile $outfile $chr $start_locus $end_locus
+done
+

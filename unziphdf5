@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "unziphdf5 inputfile"
+        exit 0
+fi
+FILE=$1
+unzipdir="${FILE%.*}"
+
+mkdir -p "$unzipdir/Analysis_Results"
+
+tar -zxvf $FILE -C $unzipdir
+mv $unzipdir/*.h5 $unzipdir/Analysis_Results
+
+

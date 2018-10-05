@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "getuniqsnv_dir indir(containing snp file of nucmer) outdir"
+        exit 0
+fi
+
+
+mkdir -p $2
+
+ls $1 | egrep "*.snp$" | 
+awk -v indir=$1 -v outdir=$2 '
+{
+	cmd = "getuniqsnv "indir"/"$0;
+	gsub(".snp","",$0);
+	cmd = cmd" "outdir"/"$0".uniqsnv"
+	print(cmd)
+	system(cmd)
+}'
+
+

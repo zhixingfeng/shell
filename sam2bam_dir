@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+	echo "USAGE: sam2bam indir"
+	exit 0
+fi
+
+indir=$1
+samfile_list=$(ls $indir/*.sam)
+
+for samfile in $samfile_list
+do
+	cmd="sam2bam $samfile $samfile.tmp"
+	echo $cmd
+	submitjob 4 -c 8 -m 16 -P acc_LymeMIND -q premium sam2bam $samfile $samfile.tmp
+done
+
+

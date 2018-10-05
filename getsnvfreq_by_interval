@@ -1,0 +1,28 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "getsnvfreq_by_interval infile(interval file output by getuniqgenomealign_interval) indir(output by getuniqsnv_dir) outfile"
+        exit 0
+fi
+
+rm -r $3
+
+while read buf; do
+	read cur_chr cur_start cur_end <<< $buf
+	echo $cur_chr $cur_start $cur_end
+	awk -v chr=$cur_chr -v s=$cur_start -v e=$cur_end '
+	BEGIN{
+		snv_count = 0;
+	}{
+		if ($1==chr && $2>=s && $2<=e){
+			snv_count+=1;
+		}
+	}END{
+		print chr"\t"s"\t"e"\t"snv_count;
+	}' $2/*.uniqsnv >> $3
+
+done < $1
+
+
+
+
+

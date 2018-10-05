@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "mergefasta fastafiles"
+        exit 0
+fi
+
+for fafile in $@
+do
+	samplename=$(basename ${fafile%.*})
+	bioawk -c fastx -v samplename=$samplename '{print ">"samplename"_"$name;print $seq}' $fafile
+done
+
+

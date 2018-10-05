@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "getuniqgenomealign_sample_names indir outfile"
+        exit 0
+fi
+
+wc -l $1/*.coords | awk -v indir=$1 '{if($1==1){gsub(indir,"",$2); gsub(".coords","",$2); gsub("/","",$2); print $2}}' > $2
+
+
+
+

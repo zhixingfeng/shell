@@ -1,0 +1,18 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "canu_nanopore_dir inputdir outputdir"
+        exit 0
+fi
+
+mkdir -p $2
+
+ls $1 | egrep '*.(fa|fq|fastq|fasta|fastq.gz|fasta.gz)$' | awk -v indir=$1 -v outdir=$2 -v hpcopt="submitjob 2 -c 1 -m 4 -P acc_IcahnInstitute -q alloc" '{cmd=hpcopt" canu -d "outdir" -p canu -nanopore-raw "indir"/"$0; print cmd; system(cmd)}'
+
+
+#ls ./$1/*.fastq | awk -v outdir=$2 -v hpcopt="submitjob 1 -c 1 -m 2 -P acc_IcahnInstitute -q alloc" 'function basename(file) {
+#    sub(".*/", "", file)
+#    return file
+#  }{cmd=hpcopt" filter_nanopore "$1" "outdir"/"basename($1); print cmd; system(cmd)}'
+
+
+

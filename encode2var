@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "encode2var encodefile varfile"
+        exit 0
+fi
+
+awk '{
+	for (i=1;i<=NF;i++){
+		if ($i%4==0) cur_base = "A";
+		if ($i%4==1) cur_base = "C";
+		if ($i%4==2) cur_base = "G";
+		if ($i%4==3) cur_base = "T";
+		cur_line = int($i/4)"\t"cur_base"\t"$i"\t0\t0\t0\t0\t0\t0";
+		print cur_line;
+	}
+}' $1 > $2
+
+
+

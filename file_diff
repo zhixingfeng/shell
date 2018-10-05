@@ -1,0 +1,16 @@
+#! /bin/bash
+if [ $# != 2 ]; then
+	echo "file_intersect file1 file2 (check lines in file1 but not in file2)"
+	exit 1
+fi
+
+awk '{
+	if (NR==FNR){
+		temp[$1] = 1;
+	}else{
+		if (temp[$1]!=1){
+			print $1;
+		}
+	}
+}' $2 $1
+

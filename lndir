@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "lndir inputdir"
+	echo "link all files in inputdir"
+        exit 0
+fi
+
+ls $1 | awk -v dir=$1 '{{system("ln -s "dir"/"$0)}}'
+

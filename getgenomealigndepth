@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "getgenomealigndepth infile(coords file of nucmer) outfile"
+        exit 0
+fi
+
+
+
+awk '{for(i=$1;i<=$2;i++){x[$10,i]+=1}} END{for(i in x) {key=i;gsub("\034","\t",key);print key"\t"x[i]}}' $1 | sort -s -k1,1 -k2,2n > $2
+
+
+

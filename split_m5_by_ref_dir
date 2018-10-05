@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "split_m5_by_ref_dir indir outdir"
+        exit 0
+fi
+
+infiles=$(ls $1/*.m5)
+
+for infile in $infiles
+do
+	cmd="split_m5_by_ref $infile $2"
+	echo $cmd
+	$cmd
+done
+
+

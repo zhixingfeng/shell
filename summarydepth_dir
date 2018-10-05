@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "getdepth_dir indir outfile"
+        exit 0
+fi
+
+
+if [ -f "$2" ] ; then
+	rm $2
+fi
+
+for cur_file in $(ls $1 | egrep ".cvg$")
+do
+	#echo $cur_file
+	#awk -v indir=$1 'BEGIN{cvg=0}{cvg+=$3}END{gsub(".cvg","",FILENAME); gsub(indir,"",FILENAME);gsub("/","",FILENAME); print FILENAME"\t"cvg}' $1"/"$cur_file >> $2
+	awk -v indir=$1 'BEGIN{cvg=0;nloci=0}{cvg+=$3;nloci+=1}END{gsub(".cvg","",FILENAME); gsub(indir,"",FILENAME);gsub("/","",FILENAME); print FILENAME"\t"cvg/nloci}' $1"/"$cur_file >> $2
+done
+
+
+

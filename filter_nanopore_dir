@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "filter_nanopore_dir inputdir outputdir"
+        exit 0
+fi
+
+mkdir -p $2
+
+#hpc="submitjob 1 -c 1 -m 2 -P acc_IcahnInstitute -q alloc"
+
+ls ./$1/*.fastq | awk -v outdir=$2 -v hpcopt="submitjob 1 -c 1 -m 2 -P acc_IcahnInstitute -q alloc" 'function basename(file) {
+    sub(".*/", "", file)
+    return file
+  }{cmd=hpcopt" filter_nanopore "$1" "outdir"/"basename($1); print cmd; system(cmd)}'
+
+
+

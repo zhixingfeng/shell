@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "split_bam_by_ref samfile(or bam) outdir"
+        exit 0
+fi
+
+samtools view $1 | awk -v outdir=$2 '{
+	gsub("\\|", "_", $3);
+	print $0 > outdir"/"$3".sam";
+}'
+
+

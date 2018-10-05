@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+        echo "getdepth_dir indir"
+        exit 0
+fi
+
+ls $1 | egrep "*.bam$" | awk -v indir=$1 -v hpcopt="submitjob 2 -c 1 -m 6 -P acc_LymeMIND -q premium" '{cmd=hpcopt" bamtools coverage -in "indir"/"$0;gsub(".bam",".cvg");cmd=cmd" -out "indir"/"$0;print cmd; system(cmd)}'
+
+

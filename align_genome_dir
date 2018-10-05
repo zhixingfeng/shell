@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "align_genome_dir indir reffile outdir"
+        exit 0
+fi
+
+mkdir -p $3
+
+ls $1 | egrep ".fasta$" | awk -v indir=$1 -v reffile=$2 -v outdir=$3 '{cmd="minimap2 -ax asm20 "reffile" "indir"/"$0; gsub(".fasta",".sam",$0); cmd=cmd" > "outdir"/"$0; print cmd; system(cmd)}'
+
+
+
+
+
+#if [ "$#" -eq 4 ] ; then
+#	cat $4 | awk -v indir=$1 -v refile=$2 -v outdir=$3 -v hpcopt="submitjob 2 -c 8 -m 6 -P acc_LymeMIND -q premium" '{cmd=hpcopt" pbalign --minLength=1000 --minAccuracy=75 --algorithm=\"blasr\" --algorithmOptions=\"--clipping hard --bestn 1\" "indir"/"$0".bam "refile" "outdir"/"$0".bam" ; print cmd; system(cmd) }'
+#fi
+
+

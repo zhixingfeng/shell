@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "sam_sampling samfile(or bamfile) nreads"
+        exit 0
+fi
+
+
+
+
+

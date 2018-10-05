@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "getgenomealigndepth_dir indir (contains coords file of nucmer) outdir"
+        exit 0
+fi
+
+mkdir -p $2
+
+ls $1 | egrep "*.coords" | awk -v indir=$1 -v outdir=$2 -v hpcopt="submitjob 0.5 -c 1 -m 4 -P acc_LymeMIND -q premium" '{cmd=hpcopt" getgenomealigndepth "indir"/"$0" "outdir"/"; gsub(".coords",".cvg",$0); cmd=cmd$0; print cmd; system(cmd)}'
+
+
+
+
+
+

@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "wgetdir url"
+        exit 0
+fi
+wget -r -nH -nd -np -R index.html* $1
+

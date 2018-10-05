@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "getuniqgenomealign indir (contains .cvg output by getgenomealigndepth) outfile"
+        exit 0
+fi
+
+awk '{if($3==1) x[$1,$2]+=1 } END{for(i in x) {key=i;gsub("\034","\t",key);print key"\t"x[i]}}' $1/*.cvg | sort -s -k1,1 -k2,2n > $2
+
+
+
+
+

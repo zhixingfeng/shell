@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "backup_retrieve directory (end with /) description"
+        exit 0
+fi
+
+echo $1 " " $2
+
+dsmc retrieve -se=fengz03  -description=$2 $1 -sub=yes
+

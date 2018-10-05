@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "getchr fastafile chrname"
+        exit 0
+fi
+bioawk -v chr=$2 -c fastx '{if($name==chr) {print ">"$name; print $seq}}' $1
+

@@ -1,0 +1,34 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "split_bam_by_movie bamfile(or sam) outdir"
+        exit 0
+fi
+
+bamfile=$1
+outdir=$2
+
+mkdir -p $outdir
+
+samtools view $bamfile | awk -v outdir=$outdir '{
+	split($1, buf, "/");
+	movie=buf[1];
+	outfile=outdir"/"movie".sam.tmp"
+	print $0 > outfile
+}'
+
+tmpfile_list=$(ls $outdir/*.sam.tmp)
+
+for tmpfile in $tmpfile_list
+do
+	samfile=${tmpfile%.tmp}
+	samtools view -H $bamfile > $samfile
+	cat $tmpfile >> $samfile
+	
+	bamfile=${samfile%.sam}.bam
+	samtools view -b -o $bamfile $samfile
+	pbindex $bamfile
+done
+
+
+
+

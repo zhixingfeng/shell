@@ -1,0 +1,34 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "pbgfftolist indir list_file"
+        exit 0
+fi
+
+grep "substitution" $1/*.gff |  awk '{
+	s=index($0,"variantSeq"); 
+	e=index($0,"coverage");
+	vars = substr($0,s+11, e-s-11-1)
+	#print(substr($0,s+11, e-s-11-1));
+	
+	#ss = s+11;
+	ee = e-s-11-1;
+	for (i = 1; i<=ee; i++){
+		cur_s = $4+i-1-1;
+		if ( substr(vars,i,1)=="A" ){
+			print cur_s"\t"substr(vars,i,1)"\t"(4*cur_s)
+		}
+		if ( substr(vars,i,1)=="C" ){
+                        print cur_s"\t"substr(vars,i,1)"\t"(4*cur_s+1)
+                }
+		if ( substr(vars,i,1)=="G" ){
+                        print cur_s"\t"substr(vars,i,1)"\t"(4*cur_s+2)
+                }
+		if ( substr(vars,i,1)=="T" ){
+                        print cur_s"\t"substr(vars,i,1)"\t"(4*cur_s+3)
+                }
+	}
+
+
+}' | sort -k1,1n -u > $2
+
+

@@ -1,0 +1,35 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "filter_pacbio_to_fasta indir(unzipped folder output by hdf5tobam) out_fasta_file"
+        exit 0
+fi
+
+
+if [ "$(ls $1 | wc -l)" == 0 ] ; then
+	echo "empty folder: $1"
+	exit 0
+fi
+
+
+samtools view $1/raw.subreads.bam | awk '
+{ 	
+	for(i=1;i<=NF;i++){
+		if (substr($i,1,5) == "rq:f:"){
+			rq = substr($i, 6, length($i));
+		}
+		if (substr($i,1,5) == "zm:i:"){
+			zm = substr($i, 6, length($i));
+		}	
+	}
+	if (rq>=0.75){
+		print ">"$1;
+		print $10; 
+	} 
+}
+' > $2
+
+
+
+
+
+

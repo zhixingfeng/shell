@@ -1,0 +1,119 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "igda_align aligner infile(bam or sam file) reffile outfile nthread"
+        exit 0
+fi
+
+aligner=$1
+infile=$2
+reffile=$3
+outfile=$4
+nthread=$5
+
+echo "aligner="$aligner
+echo "infile="$infile
+echo "reffile="$reffile
+echo "outfile="$outfile
+
+
+# get fasta from bam / sam file  
+echo "get forward sequences from sam/bam"
+samtools view $infile | awk '{print ">"$1;print $10}' > $outfile.igda.tmp.fasta
+
+# realign
+echo "realign" 
+if [ $aligner = "blasr" ]; then
+	echo "run blasr"
+	#blasr --minSubreadLength 1000 --minPctAccuracy 75 --nproc $nthread --sam --clipping hard --bestn 1 --out $outfile.realign.sam $outfile.igda.tmp.fasta $reffile
+	blasr --affineOpen 3 --affineExtend 1 --minSubreadLength 1000 --minPctAccuracy 75 --nproc $nthread --sam --clipping hard --bestn 1 --out $outfile.realign.sam $outfile.igda.tmp.fasta $reffile
+fi
+
+if [ $aligner = "minimap2" ]; then
+	echo "run minimap2"
+	minimap2 --secondary=no -ax map-pb $reffile $outfile.igda.tmp.fasta > $outfile.realign.sam.tmp
+	samtools view -H $outfile.realign.sam.tmp > $outfile.realign.sam
+	samtools view $outfile.realign.sam.tmp | sort -u >> $outfile.realign.sam
+fi
+
+echo "filter realigned sam"
+if [ $aligner = "minimap2" ]; then
+	samtools view -h -q 60 -F 4095 $outfile.realign.sam > $outfile
+fi 
+if [ $aligner = "blasr" ]; then
+	samtools view -h -q 254 -F 4095 $outfile.realign.sam > $outfile
+fi
+
+
+#rm -f $outfile.realign.sam $outfile.realign.sam.tmp
+
+
+#samtools view -h -F 20 $outfile.realign.sam > $outfile
+
+exit 0 
+
+# get forward strand reads and remove soft clip end  (deprecated)
+echo "remove soft clips"
+samtools view -H $outfile.realign.sam > $outfile
+samtools view -F 20 $outfile.realign.sam | awk '
+	function parse_cigar(cigar_str, cigar_num, cigar_type){
+		delete cigar_num;
+                delete cigar_type;
+		split(cigar_str,cigar_num,"(M|I|D|N|S|H|P|=|X)");
+		cigar_str_len = length(cigar_str);		
+		k = 1;
+		for (i=1; i<=cigar_str_len; i++){
+			cur_char = substr(cigar_str,i,1);
+			if (cur_char ~ /(M|I|D|N|S|H|P|=|X)/){
+				cigar_type[k] = cur_char;
+				k++;
+			}
+		}
+	}	
+	{
+		parse_cigar($6, cigar_num, cigar_type); 
+
+		if (length(cigar_num)-1 != length(cigar_type)){
+			print "length(cigar_num)-1 != length(cigar_type)";
+			print "length(cigar_num)-1 = " length(cigar_num)-1;
+			print "length(cigar_type) = " length(cigar_type);
+			print "NR = "NR;
+			print "cigar_str = " $6;
+			exit 1;
+		}
+
+		cur_start = 1;
+		cur_end = length($10);
+		if (cigar_type[1]=="S"){
+			cur_start = cigar_num[1]+1;
+		}	
+		if (cigar_type[length(cigar_type)]=="S" && length(cigar_type)>=2){
+			cur_end = length($10) - cigar_num[length(cigar_num)-1];
+		}
+		if (cur_start > length($10) || cur_end < 1 || cur_start > cur_end){
+			print "NR = "NR;
+			print "cur_start = " cur_start;
+			print "cur_end = " cur_end;	
+			print "cur_start > length($10) || cur_end < 1 || cur_start > cur_end"
+			exit 1;
+		}
+		$10 = substr($10, cur_start, cur_end - cur_start + 1);
+
+		cigar_new="";
+		for (i=1; i<=length(cigar_type); i++){
+			if (cigar_type[i]!="S" && cigar_type[i]!="H"){
+				cigar_new=cigar_new""cigar_num[i]""cigar_type[i];
+			}
+		} 
+		$6=cigar_new;
+		
+		new_line=$1
+		for (i = 2; i <= NF; i++){
+			new_line = new_line"\t"$i
+		}
+		print new_line
+		#print $0	
+	}	
+' >> $outfile 
+
+
+

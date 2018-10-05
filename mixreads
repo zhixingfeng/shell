@@ -1,0 +1,49 @@
+#! /bin/bash
+if [ $# != 6 ]; then
+	echo "mixreads indir outdir rare_sample_list coverage_summary rare_cvg_prop seed"
+	exit 1
+fi
+
+mkdir -p $2
+
+cp $3 "$2/"
+cp $4 "$2/"
+
+total_cvg=$(awk 'BEGIN{x=0}{x+=$2}END{print x}' $4)
+echo "total_cvg=$total_cvg"
+
+awk -v indir=$1 -v outdir=$2 -v rare_sample_list=$3 -v coverage_summary=$4 -v rare_cvg_prop=$5 -v seed=$6 -v total_cvg=$total_cvg -v hpcopt="submitjob 1 -c 1 -m 4 -P acc_LymeMIND -q premium" '{
+	# load rare_sample_list
+	if (FILENAME==rare_sample_list){
+		rare_samples[$0]=1;
+	}
+
+	# load coverage summary
+	if (FILENAME==coverage_summary){
+		if (rare_samples[$1]==1){
+			cmd = "samtools view "indir"/"$1".bam | wc -l";
+			cmd | getline nreads;
+			sampling_prop = total_cvg*rare_cvg_prop/$2;
+
+			print $1"\t"nreads"\t"sampling_prop"\t"$2"\t"total_cvg"\t"rare_cvg_prop > outdir"/subsampling.log";
+
+			if (sampling_prop < 1){
+				split(sampling_prop, sampling_prop_part2, "\\.");
+				cmd=hpcopt" samtools view -h -s "seed"."sampling_prop_part2[2]" -o "outdir"/"$1".bam "indir"/"$1".bam";
+				print cmd;
+				system(cmd);
+			}else{
+				cmd=hpcopt" cp "indir"/"$1".bam "outdir"/"$1".bam";
+				print cmd;
+				system(cmd);
+			}
+			
+		}else{
+			cmd=hpcopt" cp "indir"/"$1".bam "outdir"/"$1".bam";
+			print cmd;
+			system(cmd);
+		}
+	}
+}' $3 $4 
+
+

@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "hdf5tobam indir(unzipped folder output by unziphdf5) outdir"
+        exit 0
+fi
+
+if [ "$(ls ./$1 | egrep Analysis_Results | wc -l)" == 0 ] ; then
+        echo "fail to find Analysis_Results in $1"
+        exit 0
+fi
+
+if [ "$(ls ./$1/Analysis_Results/ | egrep .bax.h5 | wc -l)" != 3 ] ; then
+	echo "fail to find enough .bax.h5 files in ./$1/Analysis_Results/"
+	exit 0
+fi
+
+mkdir -p $2
+
+
+ls ./$1/Analysis_Results/*.bax.h5 | awk -v indir=$1 -v outdir=$2 'BEGIN{cmd="bax2bam -o "outdir"/raw"} {cmd=cmd" "$0}END{print cmd; system(cmd)}'
+
+
+

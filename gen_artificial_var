@@ -1,0 +1,47 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "gen_artificial_var m5_file var_file"
+        exit 0
+fi
+
+# scan m5file to get range of alignment
+range=$(awk 'BEGIN{min_start = 4000000000; max_end = -1}
+{
+	if ($8 < min_start){
+		min_start = $8;
+	}
+	if ($9 > max_end){
+		max_end = $9;
+	}
+}END{print min_start; print max_end}' $1)
+
+i=0;
+for buf in $range
+do
+	if [ $i -eq 0 ]; then
+		gstart=$buf
+	fi
+	if [ $i -eq 1 ]; then
+                gend=$[$buf-1]
+        fi
+
+	i=$[$i+1]
+done
+
+i=$gstart
+rm -f $2.tmp
+while [ $i -le $gend ]
+do
+	echo $[4*$i] >> $2.tmp 
+	echo $[4*$i+1] >> $2.tmp
+	echo $[4*$i+2] >> $2.tmp
+	echo $[4*$i+3] >> $2.tmp
+	i=$[$i+1]
+done
+
+encode2var $2.tmp $2
+
+
+
+
+

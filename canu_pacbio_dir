@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "canu_pacbio_dir inputdir outputdir genomesize"
+        exit 0
+fi
+
+mkdir -p $2
+
+ls $1 | egrep '*.(fa|fq|fastq|fasta|fastq.gz|fasta.gz)$' | awk -v gsize=$3 -v indir=$1 -v outdir=$2 -v hpcopt="submitjob 12 -c 4 -m 32 -P acc_LymeMIND -q premium" '{outprefix=$0; gsub(".(fa|fq|fastq|fasta|fastq.gz|fasta.gz)","",outprefix);cmd=hpcopt" canu stopOnReadQuality=false useGrid=false -d "outdir"/"outprefix" -p "outprefix" genomeSize="gsize" -pacbio-raw "indir"/"$0; print cmd; system(cmd)}'
+
+
+
+
+

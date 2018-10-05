@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "backup_check directory (end with /)"
+        exit 0
+fi
+
+echo $1 " " $2
+dsmc q archive -se=fengz03 $1
+

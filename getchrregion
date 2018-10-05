@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "getchr fastafile outfile chrname start end "
+        exit 0
+fi
+
+bioawk -v chr=$3 -v s=$4 -v e=$5 -c fastx '{if($name==chr) {print ">"$name; print substr($seq, s, e - s + 1)}}' $1 > $2
+

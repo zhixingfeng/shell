@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "rename_canu_contig canu_dir outfastafile"
+        exit 0
+fi
+
+infile=$(basename $1)
+bioawk -c fastx -v infile=$infile '{gsub(".contigs.fasta","",infile); print ">"infile"_"$name; print $seq}' $1 > $2
+
+

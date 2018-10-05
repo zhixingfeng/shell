@@ -1,0 +1,37 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "getuniqgenomealign_interval infile (output of getuniqgenomealign) outfile min_nfiles"
+        exit 0
+fi
+
+awk -v min_nfiles=$3 '{ if ($3>=min_nfiles) print $0}' $1 | 
+
+awk '
+	BEGIN{prev_locus=-255; chr=""; inter_s=-1; inter_e=-1}
+	{
+		if($1!=chr || $2!=prev_locus+1){
+			if (inter_s!=-1 && inter_e!=-1){
+				print chr"\t"inter_s"\t"inter_e;
+			}
+			chr=$1;
+			inter_s=$2;
+			chr=$1;
+		}else{
+		}
+		prev_locus=$2;
+		inter_e=$2;
+	}
+' > $2
+
+awk '
+	BEGIN{max_length=0; max_idx=-1; max_line=""}
+	{
+		if ($3 - $2 + 1> max_length){
+			max_length = $3 - $2 + 1;
+			max_line = $0;
+		}
+	}
+	END{print max_line}
+' $2 > $2.max
+
+

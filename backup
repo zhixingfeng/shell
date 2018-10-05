@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "backup directory (end with /) description"
+        exit 0
+fi
+
+echo $1 " " $2
+dsmc archive -se=fengz03 $1 -sub=yes -description=$2
+

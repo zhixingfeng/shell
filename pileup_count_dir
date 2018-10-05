@@ -1,0 +1,27 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "pileup_count_dir indir extension"
+        exit 0
+fi
+
+infiles=$(ls $1/*.$2)
+
+hpcopt="submitjob 6 -c 1 -m 8 -P acc_LymeMIND -q premium"
+for infile in $infiles
+do
+	m5file=${infile%.*}.m5
+	pufile=${infile%.*}.pu_count
+	cmd=$hpcopt" igda pileup_count $infile $m5file $pufile"
+	echo $cmd
+	$cmd
+done
+
+
+
+
+
+
+
+
+
+

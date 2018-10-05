@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "faidx_dir indir"
+        exit 0
+fi
+
+fafiles=$(ls $1/*.fasta)
+for cur_file in $fafiles
+do
+	#echo $cur_file
+	samtools faidx $cur_file
+done
+
+
+
+

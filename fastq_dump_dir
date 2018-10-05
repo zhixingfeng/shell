@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "fastq_dump_dir indir outdir"
+        exit 0
+fi
+
+mkdir -p $2
+
+ls ./$1/*.sra | awk -v outdir=$2 '{cmd="fastq-dump -O "outdir" "$0; print cmd; system(cmd)}'
+
+

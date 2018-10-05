@@ -1,0 +1,34 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "filter_pacbio indir(unzipped folder output by hdf5tobam)"
+        exit 0
+fi
+
+
+if [ "$(ls $1 | wc -l)" == 0 ] ; then
+	echo "empty folder: $1"
+	exit 0
+fi
+
+#awk -F";" '{for(i=1;i<=NF;i++){if ($i ~ /rrr/){print i}}}' filename
+#samtools view -o $1/raw.subreads.sam $1/raw.subreads.bam
+
+awk '
+{ 	
+	for(i=1;i<=NF;i++){
+		if ($i ~ /^rq:f:/){
+			gsub("rq:f:","",$i);
+			rq=$i;
+		}
+		if ($i ~ /^zm:i:/){
+                	gsub("zm:i:","",$i);
+			zm=$i;
+		}
+	}
+	if (rq>0.75){
+		print zm"\t"rq
+	} 
+}
+' $1/raw.subreads.sam 
+
+
