@@ -1,0 +1,34 @@
+#!/bin/bash
+if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then
+        echo "recode_dir indir"
+	echo "or"
+	echo "recode_dir indir varfile"
+        exit 0
+fi
+
+m5files=$(ls $1/*.m5)
+
+#hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium"
+hpcopt=""
+if [ "$#" -eq 1 ]; then
+	for m5file in $m5files
+	do
+		varfile=${m5file%.*}.var
+		recodefile=${m5file%.*}.recode
+	       	cmd=$hpcopt" igda recode -f -y $m5file $varfile $recodefile"
+	       	echo $cmd
+		$cmd
+	done
+fi
+
+if [ "$#" -eq 2 ]; then
+	varfile=$2
+	for m5file in $m5files
+        do
+                recodefile=${m5file%.*}.recode
+                cmd=$hpcopt" igda recode -f -y $m5file $varfile $recodefile"
+                echo $cmd
+                $cmd
+        done
+fi
+
