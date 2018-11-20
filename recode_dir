@@ -8,8 +8,8 @@ fi
 
 m5files=$(ls $1/*.m5)
 
-#hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium"
-hpcopt=""
+hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium"
+#hpcopt=""
 if [ "$#" -eq 1 ]; then
 	for m5file in $m5files
 	do
@@ -26,7 +26,7 @@ if [ "$#" -eq 2 ]; then
 	for m5file in $m5files
         do
                 recodefile=${m5file%.*}.recode
-                cmd=$hpcopt" igda recode -f $m5file $varfile $recodefile"
+                cmd=$hpcopt" igda recode $m5file $varfile $recodefile"
                 echo $cmd
                 $cmd
         done
