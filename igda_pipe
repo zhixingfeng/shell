@@ -33,7 +33,7 @@ echo "============= cmpreads ==========="
 igda cmpreads -l 0.5 -p 20 $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads
 
 echo "============= dforest ==========="
-time igda dforest -d 10000 -r 15 $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $outdir/realign.dforest $outdir/tmp
+time igda dforest -d 10000 -r 15 $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
 igda filter -f 0.75 $outdir/realign.dforest $outdir/realign.dforest.f75
 
 echo "============= detect orphan variants ==========="
@@ -49,7 +49,7 @@ echo "============= recode ==========="
 igda recode $outdir/realign.m5 $outdir/realign.var $outdir/realign.recode
 
 echo "============= ann ==========="
-igda ann -j 0.5 -c 12 -t 20 -m 50  $outdir/realign.recode $outdir/realign.encode.rdim $outdir/realign.m5 $outdir/realign.var $reffile $outdir/realign.ann
+igda ann -j 0.5 -c 10 -t 12 -m 30  $outdir/realign.recode $outdir/realign.encode.rdim $outdir/realign.m5 $outdir/realign.var $reffile $outdir/realign.ann
 
 echo "============= test contigs ==========="
 igda test_contigs $outdir/realign.ann $outdir/realign.recode $outdir/realign.m5 $reffile
