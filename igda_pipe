@@ -39,7 +39,8 @@ igda filter -f 0.75 $outdir/realign.dforest $outdir/realign.dforest.f75
 echo "============= detect orphan variants ==========="
 igda contexteffect $outdir/realign.m5 $outdir/realign
 igda detectsingle -c 1000 -f 0.01 -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
-cat $outdir/realign.detectsingle $outdir/realign.dforest.f75 > $outdir/realign.detected
+#cat $outdir/realign.detectsingle $outdir/realign.dforest.f75 | sort -s -u -k1,1n > $outdir/realign.detected
+cat $outdir/realign.dforest.f75 $outdir/realign.detectsingle | sort -s -u -k1,1n > $outdir/realign.detected
 igda getvar -c 0 $outdir/realign.detected $outdir/realign.var
 
 echo "============= dimension reduction ==========="
