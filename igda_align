@@ -43,6 +43,10 @@ if [ $aligner = "blasr" ]; then
 	samtools view -h -q 254 -F 4095 $outfile.realign.sam > $outfile
 fi
 
+rm $outfile.realign.sam
+rm $outfile.realign.sam.tmp
+
+
 
 #rm -f $outfile.realign.sam $outfile.realign.sam.tmp
 
@@ -115,5 +119,7 @@ samtools view -F 20 $outfile.realign.sam | awk '
 	}	
 ' >> $outfile 
 
+#rm $outfile.realign.sam
+#rm $outfile.realign.sam.tmp
 
 

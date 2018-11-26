@@ -4,7 +4,7 @@ if [ "$#" -ne 2 ]; then
         exit 0
 fi
 
-ls $1 | egrep ".sam$" | awk -v indir=$1 -v reffile=$2 '{cmd="igda samtom5 "indir"/"$0" "reffile; gsub(".sam",".m5",$0); cmd=cmd" "indir"/"$0; print cmd; system(cmd)}'
+ls $1 | egrep ".sam$" | awk -v hpcopt="submitjob 2 -c 1 -m 6 -P acc_LymeMIND -q premium" -v indir=$1 -v reffile=$2 '{cmd=hpcopt" igda samtom5 "indir"/"$0" "reffile; gsub(".sam",".m5",$0); cmd=cmd" "indir"/"$0; print cmd; system(cmd)}'
 
 
 
