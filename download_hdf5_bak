@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "download_hdf5 accession_list outdir"
+        exit 0
+fi
+
+mkdir -p $2
+
+awk -v outdir=$2 '{cmd="wget --no-check-certificate http://sra-download.ncbi.nlm.nih.gov/srapub_files/"$1"_"$1"_hdf5.tgz -O "outdir"/"$1".tgz"; system(cmd);}' $1
+
+
