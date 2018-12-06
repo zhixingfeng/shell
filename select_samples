@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "select_samples indir outdir sample_list suffix"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+sample_list=$3
+suffix=$4
+
+for sample_name in $(cat $sample_list); do
+	infile=$indir/$sample_name.$suffix
+	cp $infile $outdir
+done
+
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "check_all_snv_dir indir(containing .snp files)"
+        exit 0
+fi
+
+snp_files=$(ls $1/*.snp)
+
+for snp_file in $snp_files; do
+	if [ $(check_all_snv $snp_file) -eq 1 ]; then
+		sample_name=$(basename $snp_file)
+		sample_name=${sample_name%.*}
+		echo $sample_name
+	fi
+done
+
+
