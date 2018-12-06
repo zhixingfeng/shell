@@ -1,0 +1,18 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "est_depth bamfile(or samfile) genome_size outfile"
+	echo "only work for single chromosome data"
+        exit 0
+fi
+
+bamfile=$1
+g_size=$2
+outfile=$3
+
+sample_name=$(basename $bamfile)
+sample_name=${sample_name%.*}
+
+samtools view $1 | awk -v sample_name=$sample_name -v g_size=$g_size 'BEGIN{n_base = 0} {n_base += length($10)} END{print sample_name"\t"n_base/g_size}' > $outfile
+
+
+

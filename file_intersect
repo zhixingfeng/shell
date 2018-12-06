@@ -4,21 +4,13 @@ if [ $# != 2 ]; then
 	exit 1
 fi
 
-awk 'BEGIN{n1=0; n2=0; n=0}{
+awk '{
 	if (NR==FNR){
-		n1 += 1;
 		temp[$1] = 1;
 	}else{
-		n2 += 1;
 		if (temp[$1]==1){
-			n += 1;
+			print $1
 		}
 	}
-}END{
-	print "n1 = "n1; 
-	print "n2 = "n2;
-	print "n_overlap = "n;
-	print "sensitivity = n_overlap/n1 = "n/n1;
-	print "specificity = n_overlap/n2 = "n/n2;
-}' $1 $2
+}' $2 $1
 

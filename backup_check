@@ -4,6 +4,6 @@ if [ $# -eq 0 ] ; then
         exit 0
 fi
 
-echo $1 " " $2
+echo $1
 dsmc q archive -se=fengz03 $1
 

@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "est_depth indir(has bamfiles) genome_size"
+	echo "only work for single chromosome data"
+        exit 0
+fi
+
+indir=$1
+g_size=$2
+
+bamfiles=$(ls $indir/*.bam)
+
+for bamfile in $bamfiles; do
+	outfile=${bamfile%.*}.depth
+	#est_depth $bamfile $g_size $outfile
+	submitjob 1 -c 1 -m 2 -P acc_LymeMIND -q premium est_depth $bamfile $g_size $outfile
+done
+
+
+
+

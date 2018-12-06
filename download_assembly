@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "download_assembly accession_list outdir"
+        exit 0
+fi
+
+accfile=$1
+outdir=$2
+
+mkdir -p $outdir
+
+acc_ids=$(cat $accfile)
+for acc_id in $acc_ids;do
+	id_1=${acc_id:4:3}
+	id_2=${acc_id:7:3}
+	id_3=${acc_id:10:3}
+	url="ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/$id_1/$id_2/$id_3"
+	
+	curdir=$outdir/$acc_id	
+	wget -P $curdir -r -nH -nd -np -R index.html* $url
+done
+
+
+
