@@ -1,0 +1,31 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "snptoencode snpfile encodefile offset (0-based)"
+        exit 0
+fi
+
+snpfile=$1
+encodefile=$2
+offset=$3
+
+awk -v offset=$offset '{
+	locus=offset + $1-1;
+	if ($3=="A"){
+		code=4*locus
+	}
+
+	if ($3=="C"){
+		code=4*locus + 1
+	}
+
+	if ($3=="G"){
+                code=4*locus + 2
+        }
+
+	if ($3=="T"){
+                code=4*locus + 3
+        }
+	printf "%s\t", code
+}END{ printf "\n"}'  $snpfile > $encodefile
+
+

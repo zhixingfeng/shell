@@ -7,7 +7,7 @@ fi
 mkdir -p $3
 
 if [ "$#" -eq 4 ] ; then
-	cat $4 | awk -v indir=$1 -v refile=$2 -v outdir=$3 -v hpcopt="submitjob 2 -c 4 -m 16 -P acc_LymeMIND -q premium" '{cmd=hpcopt" pbalign --minLength=1000 --minAccuracy=75 --algorithm=\"blasr\" --algorithmOptions=\"--clipping hard --bestn 1\" "indir"/"$0".bam "refile" "outdir"/"$0".bam" ; print cmd; system(cmd) }'
+	cat $4 | awk -v indir=$1 -v refile=$2 -v outdir=$3 -v hpcopt="submitjob 6 -c 4 -m 16 -P acc_LymeMIND -q premium" '{cmd=hpcopt" pbalign --minLength=1000 --minAccuracy=75 --algorithm=\"blasr\" --algorithmOptions=\"--clipping hard --bestn 1\" "indir"/"$0".bam "refile" "outdir"/"$0".bam" ; print cmd; system(cmd) }'
 fi
 
 

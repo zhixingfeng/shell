@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "snptoencode indir (have .snp files) offset (0-based)"
+        exit 0
+fi
+
+indir=$1
+offset=$2
+
+snpfiles=$(ls $indir/*.snp)
+
+for snpfile in $snpfiles; do
+	encodefile=${snpfile%.*}.encode
+	snptoencode $snpfile $encodefile $offset
+done
+
+
+
+

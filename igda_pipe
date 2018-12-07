@@ -29,7 +29,7 @@ echo "============= cmpreads ==========="
 igda cmpreads -l 0.5 -p 20 $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads
 
 echo "============= dforest ==========="
-time igda dforest -d 10000 -r 15 $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
+igda dforest -d 10000 -r 15 $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
 igda filter -f 0.75 $outdir/realign.dforest $outdir/realign.dforest.f75
 
 echo "============= detect orphan variants ==========="
