@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "fasta2upper infasta outfasta"
+        exit 0
+fi
+
+bioawk -c fastx '{print ">"$name; print toupper($seq)}' $1
+
+

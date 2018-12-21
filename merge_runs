@@ -1,0 +1,36 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "merge_runs indir (bamfiles) infofile outdir"
+	echo "merge SRA Runs of the same sample"
+        exit 0
+fi
+
+indir=$1
+infofile=$2
+outdir=$3
+
+mkdir -p $outdir
+
+sort -t$'\t' -k22,22 $infofile | awk -F '\t' 'BEGIN{prev_s=""}{
+	if (prev_s != $22){
+		if (NR>1){
+			printf "\n";
+		}
+		printf "%s\t",$22;
+		prev_s=$22;
+	}
+	printf "%s\t",$21;
+}' | awk -F '\t' -v indir=$indir -v outdir=$outdir -v hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium" '{
+	outfile=outdir"/"$1".bam"
+	cmd=hpcopt" samtools merge "outfile" ";
+	for (i=2;i<=NF;i++){
+		if($i!=""){
+			cmd=cmd""indir"/"$i".bam "
+		}
+	}
+	print cmd
+	system(cmd)	
+}'
+
+
+
