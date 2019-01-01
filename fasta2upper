@@ -4,6 +4,6 @@ if [ $# -ne 2 ] ; then
         exit 0
 fi
 
-bioawk -c fastx '{print ">"$name; print toupper($seq)}' $1
+bioawk -c fastx '{print ">"$name; print toupper($seq)}' $1 > $2
 
 

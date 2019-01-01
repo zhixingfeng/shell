@@ -3,5 +3,5 @@ if [ $# -ne 1 ] ; then
         echo "wgetdir url"
         exit 0
 fi
-wget -x -r -nH -nd -np -R index.html* $1
+wget --no-check-certificate -x -r -nH -nd -np -R index.html* $1
 

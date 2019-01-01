@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "filter_snp snpfile outfile chr start end (1-based)"
+        exit 0
+fi
+
+awk -F '\t' -v chr=$3 -v start=$4 -v end=$5 '{if ($13==chr && $1>=start && $1<=end) print $0}' $1 > $2
+
+
+

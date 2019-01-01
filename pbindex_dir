@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+        echo "pbindex_dir indir (contain bam files)"
+        exit 0
+fi
+
+bamfiles=$(ls $1/*.bam)
+
+for bamfile in $bamfiles; do
+	echo $bamfile
+	pbindex $bamfile
+done
+
