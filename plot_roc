@@ -1,0 +1,28 @@
+#!/hpc/packages/minerva-common/R/3.5.1/lib64/R/bin/Rscript
+args <- commandArgs(trailingOnly=TRUE)
+
+if (length(args) < 2 ){
+	stop("plot_roc.R roc_dat_1.txt[roc_dat_2.txt,...] pdffile")
+}
+
+
+data.files <- args[-length(args)]
+pdf.file <- args[length(args)]
+col.panel <- c('red', 'green','blue')
+
+pdf(pdf.file)
+	for (i in 1:length(data.files)){
+		cur.data.raw <- read.table(data.files[i], as.is=TRUE, sep='\t', header=FALSE)
+		cur.data <- cur.data.raw[cur.data.raw[,5]>0 | cur.data.raw[,6]>0,]
+		tpr <- c(0, rev(cur.data[,5]))
+		fdr <- c(0, 1 - rev(cur.data[,6]))
+		if (i == 1){
+			plot(fdr, tpr, xlab='False discovery rate', ylab='True positive rate', col = col.panel[i], 
+				type='b', lwd=3, xlim = c(0,1), ylim = c(0,1))
+		}else{
+			points(fdr, tpr, col = col.panel[i], type='b', lwd = 3)
+		}
+	}
+
+dev.off()
+

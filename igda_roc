@@ -1,0 +1,96 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "igda_roc algorithm(rsm or single) resultfile(.dforest or .detectsingle.raw) truefile outdir"
+        exit 0
+fi
+
+algorithm=$1
+resultfile=$2
+truefile=$3
+outdir=$4
+echo algorithm=$algorithm""
+mkdir -p $outdir
+
+if [ $algorithm = "rsm" ]; then
+	echo "rsm"
+	f_cutoffs=(0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00)
+	#f_cutoffs=($(awk '{print $3}' $resultfile | quantile))
+	rm -f $outdir/igda_acc.txt
+	for f_cutoff in ${f_cutoffs[@]}; do
+		outfile=$outdir/f_$f_cutoff.txt
+		awk -F '\t' -v f_cutoff=$f_cutoff '{if ($3 >= f_cutoff) print $1}' $resultfile > $outfile
+		tp=$(file_intersect $outfile $truefile | wc -l)
+		n_detected=$(wc -l $outfile | awk '{print $1}')
+		n_true=$(wc -l $truefile | awk '{print $1}')
+		if [ $n_true -eq 0 ]; then
+                        sensitivity=0
+                else
+                        sensitivity=`echo "scale=3; $tp/$n_true" | bc`
+                fi
+
+                if [ $n_detected -eq 0 ]; then
+                        sepcificity=0
+                else
+                        sepcificity=`echo "scale=3; $tp/$n_detected" | bc`
+                fi
+
+		echo -e $f_cutoff"\t"$tp"\t"$n_detected"\t"$n_true"\t"$sensitivity"\t"$sepcificity >> $outdir/igda_acc.txt
+	done
+
+elif [ $algorithm = "single" ]; then
+	echo "single"
+	rm -f $outdir/igda_acc_freq.txt
+	rm -f $outdir/igda_acc_bf.txt
+	#f_cutoffs=(0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20)
+	f_cutoffs=($(awk '{print $3}' $resultfile | quantile))
+	bf_cutoffs=($(awk '{print $2}' $resultfile | quantile))
+	
+	# get ROC based on frequency
+	for f_cutoff in ${f_cutoffs[@]}; do
+		outfile=$outdir/f_$f_cutoff.txt
+                awk -F '\t' -v f_cutoff=$f_cutoff '{if ($3 >= f_cutoff) print $1}' $resultfile > $outfile
+                tp=$(file_intersect $outfile $truefile | wc -l)
+                n_detected=$(wc -l $outfile | awk '{print $1}')
+                n_true=$(wc -l $truefile | awk '{print $1}')
+		if [ $n_true -eq 0 ]; then
+			sensitivity=0
+		else
+                	sensitivity=`echo "scale=3; $tp/$n_true" | bc`
+                fi
+		
+		if [ $n_detected -eq 0 ]; then
+			sepcificity=0
+		else
+			sepcificity=`echo "scale=3; $tp/$n_detected" | bc`
+                fi
+		echo -e $f_cutoff"\t"$tp"\t"$n_detected"\t"$n_true"\t"$sensitivity"\t"$sepcificity >> $outdir/igda_acc_freq.txt
+
+	done
+	
+	# get  ROC based on BF
+	for bf_cutoff in ${bf_cutoffs[@]}; do
+		outfile=$outdir/bf_$bf_cutoff.txt
+		awk -F '\t' -v bf_cutoff=$bf_cutoff '{if ($2 >= bf_cutoff) print $1}' $resultfile > $outfile
+		tp=$(file_intersect $outfile $truefile | wc -l)
+                n_detected=$(wc -l $outfile | awk '{print $1}')
+                n_true=$(wc -l $truefile | awk '{print $1}')
+		if [ $n_true -eq 0 ]; then
+                        sensitivity=0
+                else
+                        sensitivity=`echo "scale=3; $tp/$n_true" | bc`
+                fi
+
+                if [ $n_detected -eq 0 ]; then
+                        sepcificity=0
+                else
+                        sepcificity=`echo "scale=3; $tp/$n_detected" | bc`
+                fi
+		echo -e $bf_cutoff"\t"$tp"\t"$n_detected"\t"$n_true"\t"$sensitivity"\t"$sepcificity >> $outdir/igda_acc_bf.txt
+	done
+else
+	echo "incorrect type, should be rsm or single"
+fi
+
+
+
+

@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "igda_pipe_dir indir(contains sam files) reffile contextfile outdir "
+        exit 0
+fi
+
+indir=$1
+reffile=$2
+contextfile=$3
+outdir=$4
+
+echo "indir="$indir
+echo "reffile="$reffile
+echo "contextfile="$contextfile
+echo "outdir="$outdir
+
+samfiles=$(ls $indir | egrep ".sam$")
+
+for samfile in $samfiles; do
+	cur_outdir=${samfile%.*}
+	time igda_pipe $indir/$samfile $reffile $contextfile $outdir/$cur_outdir	
+done
+
+
