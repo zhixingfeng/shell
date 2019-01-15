@@ -54,7 +54,8 @@ igda recode $outdir/realign.m5 $outdir/realign.var $outdir/realign.recode
 echo "============= ann ==========="
 ann_t=$dforest_r
 ann_m=$(($ann_t+$ann_t))
-ann_c=$(($ann_t-2))
+#ann_c=$(($ann_t-2))
+ann_c=10
 echo "ann_t=$ann_t, ann_m=$ann_m, ann_c=$ann_c"
 igda ann -j 0.5 -c $ann_c -t $ann_t -m $ann_m  $outdir/realign.recode $outdir/realign.encode.rdim $outdir/realign.m5 $outdir/realign.var $reffile $outdir/realign.ann
 
