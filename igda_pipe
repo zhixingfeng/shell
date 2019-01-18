@@ -74,5 +74,7 @@ igda tred $outdir/realign.ann.tested.ft.count.ft
 echo "============= assemble ==========="
 igda assemble $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tred.dot
 
+echo "============= recalculate abundance ==========="
+igda abundance $outdir/realign.ann.tested.ft.count.ft.assembled $outdir/realign.recode $outdir/realign.m5
 
 echo "Done."
