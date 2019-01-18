@@ -62,10 +62,17 @@ igda ann -j 0.5 -c $ann_c -t $ann_t -m $ann_m  $outdir/realign.recode $outdir/re
 echo "============= test contigs ==========="
 igda test_contigs $outdir/realign.ann $outdir/realign.recode $outdir/realign.m5 $reffile
 
+echo "============= calculate abundance ==========="
+igda abundance $outdir/realign.ann.tested.ft $outdir/realign.recode $outdir/realign.m5
+
+echo "============= test contigs ==========="
+igda test_contigs_pairwise $outdir/realign.ann.tested.ft.count $outdir/realign.recode
+
 echo "============= transitive reduction ==========="
-igda tred $outdir/realign.ann.tested.ft
+igda tred $outdir/realign.ann.tested.ft.count.ft
 
 echo "============= assemble ==========="
-igda assemble $outdir/realign.ann.tested.ft $outdir/realign.ann.tested.ft.tred.dot
+igda assemble $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tred.dot
+
 
 echo "Done."
