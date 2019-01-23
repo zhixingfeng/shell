@@ -65,8 +65,8 @@ igda test_contigs $outdir/realign.ann $outdir/realign.recode $outdir/realign.m5 
 echo "============= calculate abundance ==========="
 igda abundance $outdir/realign.ann.tested.ft $outdir/realign.recode $outdir/realign.m5
 
-echo "============= test contigs ==========="
-igda test_contigs_pairwise $outdir/realign.ann.tested.ft.count $outdir/realign.recode
+echo "============= test contigs pairwisely ==========="
+igda test_contigs_pairwise $outdir/realign.ann.tested.ft.count $outdir/realign.recode $reffile
 
 echo "============= transitive reduction ==========="
 igda tred $outdir/realign.ann.tested.ft.count.ft
