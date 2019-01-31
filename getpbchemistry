@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "get_pacbio_metadata_dir pacbio_metadata_file "
+        exit 0
+fi
+
+metadatafile=$1
+chemistry=($(grep -oP '(?<=ConfigFileName>)[^<]+' "$metadatafile"))
+echo $chemistry
+
+#ls ./$1/*.tgz | awk -v hpcopt="submitjob 1 -c 1 -m 6 -P acc_LymeMIND -q premium" '{cmd=hpcopt" unziphdf5 "$1; print cmd; system(cmd)}'
+
+
+

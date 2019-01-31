@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "get_pacbio_metadata_dir hdf5_dir metadata_dir"
+        exit 0
+fi
+
+hdf5_dir=$1
+metadata_dir=$2
+
+mkdir -p $metadata_dir
+
+indirs=$(ls -d $hdf5_dir/*/)
+
+for indir in $indirs; do
+	run_name=$(basename $indir)
+	mkdir -p $metadata_dir/$run_name
+	cp $indir/*.metadata.xml $metadata_dir/$run_name/
+done
+
+
+#ls ./$1/*.tgz | awk -v hpcopt="submitjob 1 -c 1 -m 6 -P acc_LymeMIND -q premium" '{cmd=hpcopt" unziphdf5 "$1; print cmd; system(cmd)}'
+
+
+
