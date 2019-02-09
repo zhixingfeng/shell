@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "getcontexteffect_dir metadata_dir outfile"
+        exit 0
+fi
+
+metadata_dir=$(ls -d $1/*/)
+outfile=$2
+rm -f $outfile
+
+for indir in $metadata_dir; do 
+	runname=$(basename $indir)
+	cur_chemistry=$(getpbchemistry $indir/*.metadata.xml)
+	echo -e $runname'\t'$cur_chemistry >> $outfile
+done
+
+
+
+
+

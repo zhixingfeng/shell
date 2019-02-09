@@ -20,7 +20,7 @@ bamfiles=$(ls $indir/*.bam)
 
 mkdir -p $outdir
 
-hpc="submitjob 6 -c "$nthread" -m 8 -P acc_LymeMIND -q premium"
+hpc="submitjob 6 -c "$nthread" -m 16 -P acc_LymeMIND -q premium"
 for bamfile in $bamfiles; do
 	outfile=$(basename $bamfile)
 	outfile=$outdir/"${outfile%.*}".sam

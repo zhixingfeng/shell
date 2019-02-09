@@ -6,7 +6,7 @@ fi
 
 mkdir -p $3
 
-ls $1 | egrep "*.bam$" | awk -v indir=$1 -v reffile=$2 -v outdir=$3 -v hpcopt="submitjob 6 -c 1 -m 8 -P acc_LymeMIND -q premium" '{cmd=hpcopt" variantCaller "indir"/"$0" -r "reffile;gsub(".bam","",$0);cmd=cmd" -o "outdir"/"$0".gff"" -o "outdir"/"$0".fasta"" -o "outdir"/"$0".fastq"; print cmd; system(cmd)}'
+ls $1 | egrep "*.bam$" | awk -v indir=$1 -v reffile=$2 -v outdir=$3 -v hpcopt="submitjob 16 -c 4 -m 16 -P acc_LymeMIND -q premium" '{cmd=hpcopt" variantCaller -j 4 "indir"/"$0" -r "reffile;gsub(".bam","",$0);cmd=cmd" -o "outdir"/"$0".gff"" -o "outdir"/"$0".fasta"" -o "outdir"/"$0".fastq"; print cmd; system(cmd)}'
 
 
 

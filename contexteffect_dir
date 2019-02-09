@@ -1,33 +1,22 @@
 #!/bin/bash
-if [ "$#" -ne 1 ]; then
-        echo "contexteffect_dir indir"
+if [ "$#" -ne 2 ]; then
+        echo "contexteffect_dir indir outdir"
         exit 0
 fi
 
+mkdir -p $2
 m5files=$(ls $1/*.m5)
 
-hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium"
+hpcopt="submitjob 2 -c 1 -m 16 -P acc_LymeMIND -q premium"
 
 for m5file in $m5files
 do 	
-	outprefix=${m5file%.*}
-	cmd=$hpcopt" igda contexteffect -l 5 -r 5 $m5file $outprefix"
+	m5file_base=$(basename $m5file)
+	outprefix=${m5file_base%.*}
+	cmd=$hpcopt" igda contexteffect $m5file $2/$outprefix"
 	echo $cmd
 	$cmd
 done
 
-
-
-
-
-#ls $1 | egrep ".m5$" | awk -v indir=$1 -v reffile=$2 '{cmd="igda encode -t "indir"/"$0; gsub(".m5",".encode",$0); cmd=cmd" "indir"/"$0; print cmd; system(cmd)}'
-
-
-
-
-
-#if [ "$#" -eq 4 ] ; then
-#	cat $4 | awk -v indir=$1 -v refile=$2 -v outdir=$3 -v hpcopt="submitjob 2 -c 8 -m 6 -P acc_LymeMIND -q premium" '{cmd=hpcopt" pbalign --minLength=1000 --minAccuracy=75 --algorithm=\"blasr\" --algorithmOptions=\"--clipping hard --bestn 1\" "indir"/"$0".bam "refile" "outdir"/"$0".bam" ; print cmd; system(cmd) }'
-#fi
 
 
