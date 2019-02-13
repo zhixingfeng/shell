@@ -6,5 +6,8 @@ fi
 
 echo $1 " " $2
 
-dsmc retrieve -se=fengz03  -description=$2 $1 -sub=yes
+if [ $# -eq 1 ]; then
+	dsmc retrieve -se=fengz03 $1 -sub=yes
+fi 
+
 

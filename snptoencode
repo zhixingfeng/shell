@@ -25,7 +25,9 @@ awk -v offset=$offset '{
 	if ($3=="T"){
                 code=4*locus + 3
         }
-	printf "%s\t", code
+	if ($3=="A" || $3=="C" || $3=="G" || $3=="T"){
+		printf "%s\t", code
+	}
 }END{ printf "\n"}'  $snpfile > $encodefile
 
 
