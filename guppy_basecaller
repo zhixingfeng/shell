@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        guppy_basecaller indir outdir config
+	#singularity run /hpc/users/fengz03/SBTI/tools/guppy/guppy_latest.sif /opt/ont/guppy/bin/guppy_basecaller
+        exit 0
+fi
+
+indir=$(pwd)/$1
+outdir=$(pwd)/$2
+mkdir -p $2
+singularity run --bind $indir:/hdf5,$outdir:/basecall /hpc/users/fengz03/SBTI/tools/guppy/guppy_latest.sif /opt/ont/guppy/bin/guppy_basecaller -i /hdf5 -s /basecall -c $3
+
+

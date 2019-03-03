@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "unziphont indir"
+        exit 0
+fi
+indir=$1
+hpcopt="submitjob 6 -c 1 -m 2 -P acc_LymeMIND -q premium"
+
+
+tarfiles=$(ls $indir/*.tgz)
+for tarfile in $tarfiles; do
+	$hpcopt unzipont $tarfile
+done
+
+

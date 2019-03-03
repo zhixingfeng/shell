@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+        echo "unziphont inputfile"
+        exit 0
+fi
+FILE=$1
+unzipdir="${FILE%.*}"
+
+mkdir -p "$unzipdir"
+
+tar -zxvf $FILE -C $unzipdir
+
+fast5_files=$(find $unzipdir -name *.fast5)
+for fast5_file in $fast5_files; do
+	fast5_file_base=$(basename $fast5_file)
+	mv $fast5_file $unzipdir/$fast5_file_base
+done
+legacy_dir=$(find $unzipdir/* -type d)
+rm -rf $legacy_dir
+
