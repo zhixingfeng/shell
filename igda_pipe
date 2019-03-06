@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 4 ] ; then
-        echo "igda_align infile(bam or sam file) reffile contextfile outdir"
+        echo "igda_pipe infile(bam or sam file) reffile contextfile outdir"
         exit 0
 fi
 
