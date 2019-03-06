@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "qc_nanopore indir(Guppy output) fastq_outfile"
+        exit 0
+fi
+
+indir=$1
+fastq_outfile=$2
+
+awk -F '\t' '{if ($8=="TRUE") {print ">"$2; print "A"}}' $indir/sequencing_summary.txt > $indir/read_id_passed.fa
+
+
+bioawk -c fastx '{
+	if (FNR==NR){
+		read_id_passed[$name] = 1
+	}else{
+		if (read_id_passed[$name] == 1){
+			print ">"$name
+			print $seq
+		}
+	}
+}' $indir/read_id_passed.fa $indir/*.fastq > $fastq_outfile
+
