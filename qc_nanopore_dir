@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "qc_nanopore_dir indir(folder of Guppy ouput folders) outdir"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+
+mkdir -p $outdir
+
+guppy_dirs=$(ls -d $indir/*/)
+for guppy_dir in $guppy_dirs; do
+	sample_name=$(basename $guppy_dir)
+	outfile=$outdir/$sample_name".fastq"
+	echo $sample_name
+	qc_nanopore $guppy_dir $outfile
+done
+
+
