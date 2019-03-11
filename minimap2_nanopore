@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "minimap2_nanopore_dir ref infile outfile"
+        exit 0
+fi
+
+minimap2 --secondary=no -ax map-ont $1 $2 > $3
+
+
+
+
+

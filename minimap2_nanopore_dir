@@ -8,7 +8,10 @@ mkdir -p $3
 
 
 ls $2 | egrep '*.(fa|fq|fastq|fasta|fastq.gz|fasta.gz)$' | awk -v ref=$1 -v indir=$2 -v outdir=$3 -v hpcopt="submitjob 6 -c 4 -m 16 -P acc_LymeMIND -q premium" '{
-	cmd=hpcopt" minimap2 --secondary=no -ax map-ont "ref" ./"indir"/"$0" > ./"outdir"/"$0".sam"; print cmd; system(cmd);
+	sample_name=$0; gsub(".fastq","",sample_name)
+	cmd=hpcopt" minimap2_nanopore "ref" "indir"/"$0" "outdir"/"sample_name".sam"; 
+	print cmd; 
+	system(cmd);
 
 }'
 
