@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "getbambyregion_dir indir outdir chr start end (1-based)"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+chr=$3
+start_locus=$4
+end_locus=$5
+
+mkdir -p $outdir
+
+filelist=$(ls $indir/*.bam)
+
+for bamfile in $(ls $indir | grep .bam$)
+do
+	getbambyregion $indir/$bamfile $outdir/$bamfile $chr $start_locus $end_locus
+done
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ "$#" -ne 4 ]; then
+        echo "rand_sel_reads_from_bam inbamfile(or insamfile) outsamfile nreads seed"
+        exit 0
+fi
+
+inbamfile=$1
+outbamfile=$2
+nreads=$3
+seed=$4
+
+
+

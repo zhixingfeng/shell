@@ -1,0 +1,48 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "getvar_from_m5 m5file outfile (can extract indels, locus is 0-based)"
+        exit 0
+fi
+
+m5file=$1
+outfile=$2
+
+#awk '{print $8"\t"$17"\t"$18"\t"$19}' $m5file
+
+awk '{
+	split($17, query, "");
+	split($19, ref, "");
+	if (length($17) != length($19)){
+		exit(1)
+	}
+	
+	cur_locus = $8
+	for (i=1; i <= length($19); i++) {
+  		if (ref[i] != "-"){
+			if (query[i] == "-"){
+				print cur_locus"\tD\t"ref[i]"\t-"
+			}else{
+				if (query[i] != ref[i]){
+					print cur_locus"\tM\t"ref[i]"\t"query[i]
+				}
+			}
+			cur_locus++;
+		}else{
+			printf("%d\tI\t%s\t",cur_locus, ref[i]);
+			while(ref[i] == "-"){
+				printf("%s", query[i]);
+				i++;
+				if (i > length($19)){
+                                        break;
+                                }
+			}
+			printf("\n");
+			i--;
+		}
+	}
+	
+}' $m5file > $outfile
+
+
+
+

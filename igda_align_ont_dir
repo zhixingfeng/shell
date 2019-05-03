@@ -1,0 +1,34 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "igda_align_ont_dir indir(contains bam files) reffile outdir nthread"
+        exit 0
+fi
+
+indir=$1
+reffile=$2
+outdir=$3
+nthread=$4
+
+echo "indir="$indir
+echo "reffile="$reffile
+echo "outdir="$outdir
+echo "nthread="$nthread
+
+bamfiles=$(ls $indir/*.bam)
+
+mkdir -p $outdir
+
+#hpc="submitjob 6 -c "$nthread" -m 16 -P acc_LymeMIND -q premium"
+hpc=""
+for bamfile in $bamfiles; do
+	outfile=$(basename $bamfile)
+	outfile=$outdir/"${outfile%.*}".sam
+	cmd=$hpc" igda_align_ont "$bamfile" "$reffile" "$outfile" "$nthread
+	echo $cmd
+	$cmd
+done
+
+
+
+
+

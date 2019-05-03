@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 3 ] ; then
-        guppy_basecaller indir outdir config
+        echo "guppy_basecaller indir outdir config"
 	#singularity run /hpc/users/fengz03/SBTI/tools/guppy/guppy_latest.sif /opt/ont/guppy/bin/guppy_basecaller
         exit 0
 fi

@@ -1,12 +1,13 @@
 #!/bin/bash
-if [ $# -ne 3 ] ; then
-        echo "minimap2_nanopore_dir ref infile outfile"
+if [ $# -ne 4 ] ; then
+        echo "minimap2_nanopore ref infile outfile nthread"
         exit 0
 fi
 
-minimap2 --secondary=no -ax map-ont $1 $2 > $3
+#minimap2 --split-prefix $3.tmp  --secondary=no -ax map-ont -t $4 $1 $2 > $3
+minimap2 --secondary=no -ax map-ont -t $4 $1 $2 > "$3.tmp"
 
-
-
+samtools view -h --threads $4 -F 4079 "$3.tmp" > $3
+rm "$3.tmp"
 
 

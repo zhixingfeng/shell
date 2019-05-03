@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ "$#" -ne 4 ]; then
+        echo "pbmm2_align inbamfile outbamfile reffile nthread"
+        exit 0
+fi
+
+inbamfile=$1
+outbamfile=$2
+reffile=$3
+nthread=$4
+
+pbmm2 align $reffile $inbamfile $outbamfile".pbmm5.tmp.bam" -j $nthread
+
+samtools view --threads $nthread -b -F 4079 $outbamfile".pbmm5.tmp.bam" > $outbamfile".unsorted.bam"
+rm $outbamfile".pbmm5.tmp.bam"
+
+samtools sort --threads $nthread -T $outbamfile".sort.tmp" -o $outbamfile $outbamfile".unsorted.bam"
+rm $outbamfile".unsorted.bam"
+
+samtools index $outbamfile
+
+#submitjob 8 -c $nthread -m 8 -P acc_LymeMIND -q premium pbmm2 align $reffile $indir/$bamfile $outdir/$bamfile --sort -j $nthread
+
+

@@ -1,0 +1,21 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 2 & length(args) != 3){
+	cat("r_sample_int n size\n")
+	cat("r_sample_int n size seed\n")
+	cat("randomly select size of elements from 1:n with NO replacement\n")
+}else{
+	n <- as.integer(args[1])
+	size <- as.integer(args[2])
+	if (length(args) == 3){
+		seed <- as.integer(args[3])
+		set.seed(seed)
+	}
+	x <- sample.int(n, size)
+	cat(x)
+}
+
+
+
+
+

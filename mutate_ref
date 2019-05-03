@@ -1,0 +1,29 @@
+#!/usr/bin/env Rscript
+library(seqinr)
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 2 && length(args) != 5 ){
+	cat("mutate_ref fafile mutation_rate\n")
+	cat("mutate_ref fafile mutation_rate chr start end (1-based)\n")
+}
+
+if (length(args) == 2){
+
+}
+
+if (length(args) == 5){
+	fafile <- args[1]
+	mutation_rate <- as.numeric(args[2])
+	chr <- args[3]
+	start <- as.integer(args[4])
+	end <- as.integer(args[5])
+	
+	cat('fafile =', fafile, '\n')
+	cat('mutation_rate =', mutation_rate, '\n')
+	cat('chr =', chr, '\n')
+	cat('start =', start, '\n')
+	cat('end =', end , '\n')
+}
+
+
+
+

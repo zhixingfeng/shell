@@ -19,8 +19,8 @@ bamfile_unsorted="${samfile:0:(name_len-4)}_unsorted.bam"
 bamfile="${samfile:0:(name_len-4)}.bam"
 
 echo "bamfile is $bamfile"
-samtools view -b -o $bamfile_unsorted $samfile
-samtools sort -T $2 -o $bamfile $bamfile_unsorted
+samtools view --threads 8 -h -b -o $bamfile_unsorted $samfile
+samtools sort --threads 8 -T $2 -o $bamfile $bamfile_unsorted
 samtools index $bamfile
 rm $bamfile_unsorted
 

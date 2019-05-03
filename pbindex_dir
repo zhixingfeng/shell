@@ -7,7 +7,7 @@ fi
 bamfiles=$(ls $1/*.bam)
 
 for bamfile in $bamfiles; do
-	echo $bamfile
-	pbindex $bamfile
+	#echo $bamfile
+	submitjob 6 -c 1 -m 8 -P acc_LymeMIND -q premium pbindex $bamfile
 done
 

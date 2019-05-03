@@ -1,0 +1,23 @@
+#!/usr/bin/env Rscript
+library(rGDA)
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 2){
+	stop("get_16rRNA_region coords_file bed_file\n")	
+}
+
+coords_file <- args[1]
+bed_file <- args[2]
+
+coords.data <- parse.nucmer(coords_file)
+coords.data.gp <- split(coords.data, coords.data$read_name)
+
+if (length(table(sapply(coords.data.gp, nrow))) != 1){
+	stop("length(table(sapply(coords.data.gp, nrow))) != 1")
+}
+
+coords.data.region <- unique(coords.data[coords.data$Idt == 100, c(10,1,2)])
+coords.data.region <- coords.data.region[order(coords.data.region$ref_start),]
+write.table(coords.data.region, file = bed_file, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = '\t')
+
+
+

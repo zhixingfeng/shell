@@ -5,7 +5,8 @@ if [ $# -ne 3 ] ; then
 fi
 
 
-nucmer -c 200 -l 12 --maxmatch -p $3 $2 $1
+#nucmer -c 200 -l 12 --maxmatch -p $3 $2 $1
+nucmer -c 100 -g 500 -l 12 --maxmatch -p $3 $2 $1 
 
 show-coords -l -T -H $3.delta > $3.coords
 

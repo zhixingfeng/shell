@@ -1,0 +1,25 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "igda_mcontexteffect_dir indir(m5files) outdir leftlen rightlen"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+leftlen=$3
+rightlen=$4
+
+hpc="submitjob 4 -c 1 -m 16 -P acc_LymeMIND -q premium"
+mkdir -p $outdir
+for m5file in $(ls $indir/ | grep .m5$);do
+	cur_outdir=${m5file%.m5}
+	cmd=$hpc" igda_mcontexteffect $indir/$m5file $outdir/$cur_outdir $leftlen $rightlen"
+	echo $cmd
+	$cmd
+done
+
+
+
+
+
+

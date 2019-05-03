@@ -1,0 +1,44 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "igda_mcontext m5file outdir leftlen rightlen"
+        exit 0
+fi
+
+m5file=$1
+outdir=$2
+leftlen=$3
+rightlen=$4
+
+mkdir -p $outdir
+
+# count number of reads mapped to each reference
+echo "count number of reads mapped to each reference"
+awk '{print $6}' $m5file | sort | uniq -c > $outdir/ref_count.txt
+
+# split m5file
+echo "split m5file"
+sample_id=$(basename $m5file)
+sample_id=${sample_id%.*}
+
+for ref in $(awk '{print $2}' $outdir/ref_count.txt);do
+	outfile=$outdir/"tmp_"$sample_id"_"$ref".m5"
+	grep -w $ref $m5file > $outfile
+done
+
+# pileup
+echo "pileup"
+for tmp_m5file in $(ls $outdir/*.m5);do
+	outprefix=$(basename ${tmp_m5file%.*})
+	outprefix=$outdir/${outprefix#tmp_}	
+	cmd="igda contexteffect -l $leftlen -r $rightlen $tmp_m5file $outprefix"
+	echo $cmd
+	$cmd
+done
+
+rm $outdir/tmp_*.m5
+
+
+
+
+
+

@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "get_ont_flowcell fast5_file"
+	exit 0
+fi
+
+
+
+

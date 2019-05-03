@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ "$#" -ne 5 ]; then
+        echo "getbambyregion inbamfile outbamfile chr start end (1-based)"
+        exit 0
+fi
+
+inbamfile=$1
+outbamfile=$2
+chr=$3
+start_locus=$4
+end_locus=$5
+
+sam_region=$chr":"$start_locus"-"$end_locus
+
+samtools view --threads 7 -h -b -o $outbamfile $inbamfile $sam_region
+

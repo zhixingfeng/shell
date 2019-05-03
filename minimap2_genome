@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "minimap2_genome ref infile outfile nthread"
+        exit 0
+fi
+
+minimap2 --secondary=no -ax map-ont -t $4 $1 $2 > $3
+
+
+

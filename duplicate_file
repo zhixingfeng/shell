@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "duplicate_file infile num_duplicate"
+	echo "useful when duplicating reads"
+        exit 0
+fi
+
+infile=$1
+dup=$2
+outfile="$1.$dup""x"
+
+for i in $(seq $dup); do
+	if [ $i -eq 1 ]; then
+		cat $infile > $outfile
+	else
+		cat $infile >> $outfile
+	fi	
+done
+
+
+
+
+
+

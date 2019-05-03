@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ "$#" -ne 4 ]; then
+        echo "annotate_bam bamfile(or samfile) refbamfile(or refsamfile) outfile nthread"
+        exit 0
+fi
+
+bamfile=$1
+refbamfile=$2
+outfile=$3
+nthread=$4
+
+samtools view --thread $nthread $bamfile | awk '{print $1}' > $outfile".tmp"
+samtools view --thread $nthread $refsamfile | awk '{print $1"\t"$3}' | fgrep -w -f $outfile".tmp" > $outfile
+
+
+

@@ -3,5 +3,5 @@ if [ $# -eq 0 ] ; then
 	echo "getchrlen fastafile"
 	exit 0
 fi
-bioawk -c fastx '{print length($seq)}' $1
+bioawk -c fastx '{print $name"\t"length($seq)}' $1
 

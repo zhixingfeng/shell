@@ -1,19 +1,23 @@
 #!/bin/bash
-if [ "$#" -ne 2 ]; then
-        echo "contexteffect_dir indir outdir"
+if [ "$#" -ne 4 ]; then
+        echo "contexteffect_dir indir outdir leftlen rightlen"
         exit 0
 fi
 
 mkdir -p $2
 m5files=$(ls $1/*.m5)
+leftlen=$3
+rightlen=$4
+
 
 hpcopt="submitjob 2 -c 1 -m 16 -P acc_LymeMIND -q premium"
+#hpcopt=""
 
 for m5file in $m5files
 do 	
 	m5file_base=$(basename $m5file)
 	outprefix=${m5file_base%.*}
-	cmd=$hpcopt" igda contexteffect $m5file $2/$outprefix"
+	cmd=$hpcopt" igda contexteffect -l $leftlen -r $rightlen $m5file $2/$outprefix"
 	echo $cmd
 	$cmd
 done
