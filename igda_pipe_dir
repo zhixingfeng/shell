@@ -14,11 +14,17 @@ echo "reffile="$reffile
 echo "contextfile="$contextfile
 echo "outdir="$outdir
 
+mkdir -p $outdir
+
+hpc="submitjob 4 -c 4 -m 8 -P acc_LymeMIND -q premium"
+
 samfiles=$(ls $indir | egrep ".sam$")
 
 for samfile in $samfiles; do
 	cur_outdir=${samfile%.*}
-	time igda_pipe $indir/$samfile $reffile $contextfile $outdir/$cur_outdir	
+	cmd=$hpc" igda_pipe $indir/$samfile $reffile $contextfile $outdir/$cur_outdir"
+	echo $cmd
+	$cmd
 done
 
 

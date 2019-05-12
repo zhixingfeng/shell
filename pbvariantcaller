@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ "$#" -ne 4 ]; then
+        echo "pbvariantcaller bamfile(output of pbmm2) reffile outdir nthread"
+        exit 0
+fi
+
+bamfile=$1
+reffile=$2
+outdir=$3
+nthread=$4
+
+
+samplename=$(basename $bamfile)
+samplename=${samplename%.*}
+
+mkdir -p $outdir
+cmd="variantCaller -j $nthread -r $reffile -o $outdir/$samplename.gff -o $outdir/$samplename.fasta -o $outdir/$samplename.fastq  $bamfile"
+echo $cmd
+$cmd
+
+
+
+

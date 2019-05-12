@@ -38,13 +38,14 @@ fi
 echo "filter realigned sam"
 if [ $aligner = "minimap2" ]; then
 	samtools view -h -q 60 -F 4095 $outfile.realign.sam > $outfile
+	
 fi 
 if [ $aligner = "blasr" ]; then
 	samtools view -h -q 254 -F 4095 $outfile.realign.sam > $outfile
 fi
 
-rm $outfile.realign.sam
-rm $outfile.realign.sam.tmp
+#rm $outfile.realign.sam
+#rm $outfile.realign.sam.tmp
 
 
 

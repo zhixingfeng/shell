@@ -1,0 +1,28 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "fasta_subseq_batch fasta_file bed_file out_fafile"
+        exit 0
+fi
+
+fasta_file=$1
+bed_file=$2
+out_fafile=$3
+
+fasta_name=$(basename $fasta_file)
+
+bioawk -c fastx '{print $name"\t"$seq}' $fasta_file > $fasta_file.table
+awk -F "\t" -v fasta_name=$fasta_name '{
+	if (FNR==NR){
+		refseq[$1]=$2
+	}else{
+		if (refseq[$1]!=""){
+			print ">"fasta_name"|"$1_"_"$2"_"$3
+			print substr(refseq[$1], $2, $3-$2+1)
+		}else{
+			print $1" is not found in fasta_file." > "/dev/stderr"
+			exit 1
+		}
+	}
+}' $fasta_file.table $bed_file > $out_fafile 
+
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ "$#" -ne 4 ]; then
+        echo "fasta_subseq fasta_file chr start end"
+        exit 0
+fi
+
+fasta_file=$1
+chr=$2
+rstart=$3
+rend=$4
+
+
+

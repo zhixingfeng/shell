@@ -4,9 +4,24 @@ if [ "$#" -ne 2 ]; then
         exit 0
 fi
 
-samtools view $1 | awk -v outdir=$2 '{
-	gsub("\\|", "_", $3);
-	print $0 > outdir"/"$3".sam";
+mkdir -p $2
+samtools view $1 | awk -F "\t" -v outdir=$2 '{
+	outfile=$3
+	gsub("\\|", "_", outfile);
+	#for (i=1; i<=NF; ++i){
+	#	if ($i!=""){
+	#		printf("%s\t", $i) > outdir"/"outfile".sam.tmp";
+	#	}
+	#}
+	#printf("\n") > outdir"/"outfile".sam.tmp";
+	print $0 > outdir"/"outfile".sam.tmp";
 }'
 
+
+for samtmpfile in $(ls $2/*.sam.tmp);do
+	samfile=${samtmpfile%.tmp}
+	samtools view -H $1 > $samfile
+	cat $samtmpfile >> $samfile
+	rm $samtmpfile
+done
 

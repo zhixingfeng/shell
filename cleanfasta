@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "cleanfasta fastafile outfafile"
+        exit 0
+fi
+
+fastafile=$1
+outfafile=$2
+
+bioawk -c fastx '{gsub(/[R|Y|S|W|K|M|B|D|H|V]/, "N", $seq); print ">"$name; print $seq  }' $fastafile > $outfafile
+
+
+
