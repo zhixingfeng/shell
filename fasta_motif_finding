@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "fasta_motif_finding fasta_file out_file"
+        exit 0
+fi
+
+fasta_file=$1
+out_file=$2
+
+
+mosdi-discovery discovery -i 4 seq-count $fasta_file > $out_file
+for motif_size in $(seq 5 15); do
+	echo "motif_size = $motif_size"
+	mosdi-discovery discovery -i $motif_size seq-count $fasta_file >> $out_file
+done
+
+
+
+

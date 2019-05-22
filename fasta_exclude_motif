@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "fasta_exclude_motif fasta_file motif out_fafile"
+        exit 0
+fi
+
+fasta_file=$1
+motif=$2
+out_fafile=$3
+
+echo "motif is $motif"
+
+
+bioawk -c fastx -v motif=$motif '{if (match($seq, motif) == 0) {print ">"$name; print $seq}}' $fasta_file > $out_fafile
+
+
+

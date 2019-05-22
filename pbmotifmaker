@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "pbmotifmaker gff_file ref_file outprefix"
+        java -jar /hpc/users/fengz03/SBTI/tools/pacbio/MotifMaker/MotifMaker-assembly-0.3.1.jar
+	exit 0
+fi
+
+gff_file=$1
+ref_file=$2
+outprefix=$3
+
+csvfile=$outprefix.csv
+xmlfile=$outprefix.xml
+
+
+java -jar /hpc/users/fengz03/SBTI/tools/pacbio/MotifMaker/MotifMaker-assembly-0.3.1.jar find -p -g $gff_file -f $ref_file -o $csvfile -x $xmlfile
+
+
+
+
