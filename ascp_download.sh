@@ -15,7 +15,7 @@ srrnum=${srrfile:0:6}
 srrtype=${srrfile:0:3}
 echo $srrtype
 #wget ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/$srrnum/$srrfile/${srrfile}.sra
-ascp -QTr -k 1 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh -l 600m anonftp@ftp.ncbi.nlm.nih.gov:/sra/sra-instant/reads/ByRun/sra/$srrtype/$srrnum/$srrfile/${srrfile}.sra $2
+ascp -QTr -k 1 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh -l 10000m anonftp@ftp.ncbi.nlm.nih.gov:/sra/sra-instant/reads/ByRun/sra/$srrtype/$srrnum/$srrfile/${srrfile}.sra $2
 done
 
 

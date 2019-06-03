@@ -12,6 +12,6 @@ nreads=$4
 mkdir -p $outdir
 
 
-fastp --reads_to_process $nreads --thread $nthread --disable_adapter_trimming --disable_trim_poly_g --qualified_quality_phred 10 --unqualified_percent_limit 50 --trim_front1 75 --trim_tail1 200 --length_required 1275 --length_limit 65534 -i $fastq_file -o $outdir/reads_filtered.fastq --json $outdir/reads_filtered.json --html $outdir/reads_filtered.html
+fastp --reads_to_process $nreads --thread $nthread --disable_adapter_trimming --disable_trim_poly_g --qualified_quality_phred 12 --unqualified_percent_limit 50 --trim_front1 75 --trim_tail1 200 --length_required 1275 --length_limit 65534 -i $fastq_file -o $outdir/reads_filtered.fastq --json $outdir/reads_filtered.json --html $outdir/reads_filtered.html
 
 

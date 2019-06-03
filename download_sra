@@ -4,16 +4,17 @@ if [ $# -ne 2 ] ; then
         exit 0
 fi
 
-file=$1
-files=`cat $file`
-files=($(echo $files | tr -d "\n"))
+accession_list=$1
+outdir=$2
 
-for srrfile in ${files[@]}
-do
-echo ${srrfile}
-srrnum=${srrfile:0:6}
-srrtype=${srrfile:0:3}
-wget -c ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/$srrtype/$srrnum/$srrfile/${srrfile}.sra -O $2/${srrfile}.sra
 
+for run_id in $(cat $accession_list); do 
+	curpath=$(srapath $run_id)
+	echo $curpath
+	wget -c $curpath -O $outdir/$run_id.sra
 done
+
+
+#wget -c ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/$srrtype/$srrnum/$srrfile/${srrfile}.sra -O $2/${srrfile}.sra
+
 

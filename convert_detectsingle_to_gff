@@ -1,0 +1,42 @@
+#!/usr/bin/env Rscript
+options(scipen=999)
+library(seqinr)
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 4){
+	stop("convert_detectsingle_to_gff detectsingle_file ref_file chrname gff_file\n")
+}
+
+detectsingle_file <- args[1]
+ref_file <- args[2]
+chrname <- args[3]
+gff_file <- args[4]
+
+convert_detectsingle_to_gff_getcontext <- function(x, cur.ref)
+{
+        cur.locus <- floor(as.numeric(x[1])/4) + 1
+        cur.start <- max(1, cur.locus - 20)
+        cur.end <- min(length(cur.ref),  cur.locus + 20)
+        c2s(cur.ref[cur.start : cur.end])
+}
+
+if (file.info(detectsingle_file)$size > 0){
+	detectsingle_data <- read.table(detectsingle_file, as.is = TRUE, header = FALSE, sep = '\t')
+	ref_data <- read.fasta(ref_file, forceDNAtolower = FALSE)
+
+	loci <- floor(floor(detectsingle_data[,1]/4)+1)
+	detectsingle_data_ft <- detectsingle_data[loci - 20 >= 1 &loci + 20 <= length(ref_data[[chrname]]), ]
+
+	context <- apply(detectsingle_data_ft, 1, convert_detectsingle_to_gff_getcontext , cur.ref = ref_data[[chrname]])
+
+	gff.attr <- paste('coverage=',detectsingle_data_ft[,5],';context=',context,';IPDRatio=10;frac=0.950;fracLow=0.900;fracUp=1.000;identificationQv=200', sep = '')
+	#gff.data <- cbind(chrname, 'kinModCall', 'modified_base', format(floor(detectsingle_data_ft[,1]/4)+1, scientific=FALSE), format(floor(detectsingle_data_ft[,1]/4)+1, scientific=FALSE), 50,
+			# '+', '.', gff.attr)
+	
+	gff.data <- cbind(chrname, 'kinModCall', 'modified_base', floor(detectsingle_data_ft[,1]/4)+1, floor(detectsingle_data_ft[,1]/4)+1, 50, '+', '.', gff.attr)
+
+	write.table(gff.data, file = gff_file, quote = FALSE, sep = '\t', row.names = FALSE, col.names = FALSE)
+}
+
+
+
+
