@@ -31,7 +31,7 @@ if (length(args) != 3){
 		        forward.range <- as.vector( mapply(function(x,y) (x-5):(y+5), x=start(motif.loci[[j]]$forward), y = end(motif.loci[[j]]$forward)) )
 		        revcomp.range <- as.vector( mapply(function(x,y) (x-5):(y+5), x=start(motif.loci[[j]]$revcomp), y = end(motif.loci[[j]]$revcomp)) )
 
-		        methyl.range[[j]] <- sort(unique(c(forward.range, revcomp.range)))
+		        methyl.range[[j]] <- sort(unique(c(unlist(forward.range), unlist(revcomp.range))))
         	}
         	methyl.range.pool <- unique(unlist( methyl.range))
 
