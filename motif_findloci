@@ -1,0 +1,46 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 3){
+	cat("motif_findloci motif_list_file ref_fa_file outdir\n")
+}else{
+	suppressMessages(library(seqinr))
+	suppressMessages(library(Biostrings))
+
+	motif_list_file	<- args[1]
+	ref_fa_file <- args[2]
+	outdir <- args[3]
+	
+	cmd <- paste("mkdir -p", outdir)
+	system(cmd)
+	
+	motifs <- read.table(motif_list_file, header = FALSE, as.is=TRUE, sep ='\t')[,1]
+	ref.seqs <- read.fasta(ref_fa_file, forceDNAtolower=FALSE, as.string = TRUE)
+	
+	for (i in 1:length(ref.seqs)){
+		print(names(ref.seqs)[i])
+		ref.seq <- DNAString(as.character(ref.seqs[[i]]))
+
+		motif.loci <- list()
+		methyl.range <- list()
+		for (j in 1:length(motifs)){
+		        motif.loci[[j]] <- list()
+
+		        motif.loci[[j]]$forward <- matchPattern(motifs[j], ref.seq, fixed = FALSE)
+		        motif.loci[[j]]$revcomp <- matchPattern(reverseComplement(DNAString(motifs[j])), ref.seq, fixed = FALSE)
+
+		        forward.range <- as.vector( mapply(function(x,y) (x-5):(y+5), x=start(motif.loci[[j]]$forward), y = end(motif.loci[[j]]$forward)) )
+		        revcomp.range <- as.vector( mapply(function(x,y) (x-5):(y+5), x=start(motif.loci[[j]]$revcomp), y = end(motif.loci[[j]]$revcomp)) )
+
+		        methyl.range[[j]] <- sort(unique(c(forward.range, revcomp.range)))
+        	}
+        	methyl.range.pool <- unique(unlist( methyl.range))
+
+		outfile <- paste(outdir, "/", names(ref.seqs)[i], ".txt",  sep = "")
+		write.table(methyl.range.pool - 1, quote=FALSE, col.names=FALSE, row.names=FALSE, file= outfile)
+	}
+}
+
+
+
+
+

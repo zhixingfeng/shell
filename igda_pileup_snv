@@ -1,0 +1,22 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 3){
+	stop("igda_pileup_snv recode_file m5_file outfile\n")
+}
+
+library(rGDA)
+recode_file <- args[1]
+m5_file <- args[2]
+out_file <- args[3]
+
+recode_ref_file <- paste(recode_file, '.ref', sep = '')
+
+recode.data <- load.encodefile(recode_file)
+recode.ref.data <- load.encodefile(recode_ref_file)
+var.data <- list()
+var.data$locus <- sort( unique(c(floor(unlist(recode.data)/4), floor(unlist(recode.ref.data)/4))) )
+
+pu.data <- pileup_var_count_recode(recode.data, recode.ref.data, var.data)
+
+write.table(pu.data, col.names=FALSE, row.names=FALSE, quote = FALSE, sep = "\t", file = out_file)
+

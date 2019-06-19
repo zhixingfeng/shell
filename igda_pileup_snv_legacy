@@ -1,0 +1,29 @@
+#!/bin/bash
+if [ $# -ne 3 ];then
+	echo "igda_pileup_snv recode_file m5_file outprefix"
+	exit 0
+fi
+
+recode_file=$1
+m5_file=$2
+outprefix=$3
+
+# pileup recode_file
+igda pileup_count $recode_file $m5_file $outprefix.var.pileup
+
+# pileup recode_ref_file
+igda pileup_count $recode_file.ref $m5_file $outprefix.ref.pileup
+
+# calculate frequency of SNV (no indel)
+awk -F "\t" '{
+	if (NR==FNR){
+		ref_count[$1]=$4
+	}else{
+		cvg=ref_count[$1]
+		freq=$4 / cvg
+		print $1"\t"$2"\t"$3"\t"$4"\t"cvg"\t"freq
+	}
+}' $outprefix.ref.pileup $outprefix.var.pileup > $outprefix.snv.pileup
+
+
+
