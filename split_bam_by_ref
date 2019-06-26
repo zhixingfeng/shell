@@ -8,13 +8,8 @@ mkdir -p $2
 samtools view $1 | awk -F "\t" -v outdir=$2 '{
 	outfile=$3
 	gsub("\\|", "_", outfile);
-	#for (i=1; i<=NF; ++i){
-	#	if ($i!=""){
-	#		printf("%s\t", $i) > outdir"/"outfile".sam.tmp";
-	#	}
-	#}
-	#printf("\n") > outdir"/"outfile".sam.tmp";
-	print $0 > outdir"/"outfile".sam.tmp";
+	outpath=outdir"/"outfile".sam.tmp"
+	print $0 > outpath;
 }'
 
 
