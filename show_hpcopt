@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "submitjob 8 -c 1 -m 8 -P acc_LymeMIND -q premium"

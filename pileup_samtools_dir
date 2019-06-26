@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "pileup_samtools indir(bamfiles) outdir"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+
+mkdir -p $outdir
+hpcopt="submitjob 8 -c 1 -m 16 -P acc_LymeMIND -q premium"
+for bamfile in $(ls $indir/*.bam); do
+	sample_name=$(basename $bamfile)
+	sample_name=${sample_name%.bam}
+	outprefix=$outdir/$sample_name
+	cmd=$hpcopt" pileup_samtools $bamfile $outprefix"
+	echo $cmd
+	$cmd
+done
+
+
+
+

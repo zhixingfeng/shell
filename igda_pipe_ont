@@ -23,10 +23,6 @@ igda samtom5 $infile $reffile $outdir/realign.m5
 echo "============= pileup ==========="
 igda contexteffect $outdir/realign.m5 $outdir/realign
 dforest_r=25
-#dforest_r=$(awk -F '\t' 'BEGIN{n_loci=0; n_bases=0}{n_loci+=1; n_bases+=$9}END{print int(0.0008*n_bases/n_loci)}' $outdir/realign.pileup)
-#if [ $dforest_r -le 15 ]; then
-#	dforest_r=15
-#fi
 
 echo "============= encode ==========="
 igda encode -t $outdir/realign.m5 $outdir/realign.encode
@@ -40,9 +36,8 @@ igda dforest -d 10000 -r $dforest_r $outdir/realign.encode $outdir/realign.m5 $o
 igda filter -f 0.75 $outdir/realign.dforest $outdir/realign.dforest.f75
 
 echo "============= detect orphan variants ==========="
-#igda contexteffect $outdir/realign.m5 $outdir/realign
 igda detectsingle -c 1000 -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
-igda detectsingle -c 1000 -f 0.05 -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
+igda detectsingle -c 1000 -f 0.20 -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
 cat $outdir/realign.dforest.f75 $outdir/realign.detectsingle | sort -s -u -k1,1n > $outdir/realign.detected
 igda getvar -c 0 $outdir/realign.detected $outdir/realign.var
 

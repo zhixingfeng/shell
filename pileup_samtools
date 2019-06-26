@@ -1,0 +1,32 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "pileup_samtools bamfile outprefix"
+        exit 0
+fi
+
+bamfile=$1
+outprefix=$2
+splileup_file=$2.spileup
+
+
+samtools mpileup -B -Q 0 -q 0 -o $splileup_file $bamfile
+
+awk -F "\t" 'BEGIN{for(n=0;n<256;n++)ord[sprintf("%c",n)]=n} {
+        printf("%s\t%s\t%s\t%s\t", $1, $2, $3, $4)
+        
+	split($6, qs, "")
+        avg_qv = 0;
+        for (i = 1; i <= length($6); i++){
+                avg_qv += ord[qs[i]] - 33
+                #printf("%d,", ord[qs[i]] - 33)
+        }
+        if (length($6) > 0){
+                avg_qv = avg_qv / length($6)
+        }
+        printf("%lf\n", avg_qv)
+}' $splileup_file > $splileup_file.qv
+
+
+
+
+
