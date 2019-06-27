@@ -14,16 +14,18 @@ echo "reffile="$reffile
 echo "outfile="$outfile
 echo "nthread="$nthread
 
-# get fasta from bam / sam file  
+# get fastq from bam / sam file  
 echo "get forward sequences from sam/bam"
-samtools view --threads $nthread $infile | awk '{print ">"$1;print $10}' > $outfile.igda.tmp.fasta
+sam2fq $infile $outfile.igda.tmp.fastq nthread
+
+#samtools view --threads $nthread $infile | awk '{print ">"$1;print $10}' > $outfile.igda.tmp.fasta
 
 echo "run minimap2"
-minimap2 -t $nthread --secondary=no -ax map-ont $reffile $outfile.igda.tmp.fasta > $outfile.realign.sam
+minimap2 -t $nthread --secondary=no -ax map-ont $reffile $outfile.igda.tmp.fastq > $outfile.realign.sam
 
 
 echo "filter realigned sam"
 samtools view --threads $nthread -h -F 4095 $outfile.realign.sam > $outfile
 rm $outfile.realign.sam
-rm $outfile.igda.tmp.fasta
+rm $outfile.igda.tmp.fastq
 

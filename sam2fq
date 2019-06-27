@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -ne 3 ]; then
+	echo "USAGE: sam2fq samfile fqfile nthread"
+	exit 0
+fi
+
+samfile=$1
+fqfile=$2
+nthread=$3
+samtools view --threads $nthread $samfile | awk -F "\t" '{print "@"$1; print $10; print "+"$1; print $11}' > $fqfile
+
+
+
+
