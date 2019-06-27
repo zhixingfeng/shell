@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "pileup_qv_dir indir reffile outdir"
+        exit 0
+fi
+
+hpcopt="submitjob 6 -c 1 -m 8 -P acc_LymeMIND -q premium"
+
+indir=$1
+reffile=$2
+outdir=$3
+
+
+
+
+
+
+
+

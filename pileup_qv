@@ -1,0 +1,32 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "pileup_qv samfile reffile outdir"
+        exit 0
+fi
+
+hpcopt="submitjob 6 -c 1 -m 8 -P acc_LymeMIND -q premium"
+
+samfile=$1
+reffile=$2
+outdir=$3
+
+mkdir -p $outdir
+
+#split samfile
+split_bam_by_ref $samfile $outdir
+
+# pileup
+for samfile in $(ls $outdir | grep .sam$); do
+	samplename=${samfile%.sam}
+	getchr $reffile $samplename > $outdir/$samplename.fa
+	cmd="igda pileup_qv -c $outdir/$samfile $outdir/$samplename.fa $outdir/$samplename.pu.qv"
+	echo $cmd
+done
+
+
+
+
+
+
+
+

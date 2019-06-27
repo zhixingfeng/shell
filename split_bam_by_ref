@@ -15,7 +15,10 @@ samtools view $1 | awk -F "\t" -v outdir=$2 '{
 
 for samtmpfile in $(ls $2/*.sam.tmp);do
 	samfile=${samtmpfile%.tmp}
-	samtools view -H $1 > $samfile
+	samplename=$(basename $samfile)
+	samplename=${samplename%.sam}
+	samtools view -H $1 | grep @SQ | grep $samplename > $samfile
+	samtools view -H $1 | grep @PG >> $samfile
 	cat $samtmpfile >> $samfile
 	rm $samtmpfile
 done
