@@ -21,6 +21,7 @@ for samfile in $(ls $outdir | grep .sam$); do
 	getchr $reffile $samplename > $outdir/$samplename.fa
 	cmd="igda pileup_qv -c $outdir/$samfile $outdir/$samplename.fa $outdir/$samplename.pu.qv"
 	echo $cmd
+	$cmd
 done
 
 

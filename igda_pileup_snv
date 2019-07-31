@@ -20,3 +20,4 @@ pu.data <- pileup_var_count_recode(recode.data, recode.ref.data, var.data)
 
 write.table(pu.data, col.names=FALSE, row.names=FALSE, quote = FALSE, sep = "\t", file = out_file)
 
+
