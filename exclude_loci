@@ -1,11 +1,11 @@
 #!/bin/bash
 if [ "$#" -ne 3 ]; then
-        echo "pileup_exclude_loci loci_list pileup_file out_file"
+        echo "exclude_loci loci_list in_file(column 1 is locus) out_file"
         exit 0
 fi
 
 loci_list=$1
-pileup_file=$2
+in_file=$2
 out_file=$3
 
 awk -F "\t" '{
@@ -17,7 +17,7 @@ awk -F "\t" '{
 		}
 	}
 	
-}' $loci_list $pileup_file > $out_file
+}' $loci_list $in_file > $out_file
 
 
 
