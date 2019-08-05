@@ -7,6 +7,7 @@ fi
 accession_list=$1
 outdir=$2
 
+mkdir -p $outdir
 
 for run_id in $(cat $accession_list); do 
 	curpath=$(srapath $run_id)

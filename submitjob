@@ -1,0 +1,60 @@
+#!/usr/bin/bash
+#!/usr/bin/bash
+jobcore=1
+jobmem=2000
+jobwalltime=02:00
+jobname=""
+jobproject=acc_LymeMIND
+jobqueue=premium
+joboutdir=/tmp/lsf-output
+
+while getopts ":c:m:w:j:p:q:o:" opt; do
+        case ${opt} in
+                c )
+                        jobcore=$OPTARG;;
+                m )
+                        jobmem=$OPTARG;;
+		w )
+			jobwalltime=$OPTARG;;
+		j )
+                        jobname=$OPTARG;;
+		p )
+                        jobproject=$OPTARG;;
+                q )
+                        jobqueue=$OPTARG;;
+		o )
+			joboutdir=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+#echo jobcore=$jobcore
+#echo jobmem=$jobmem
+#echo jobwalltime=$jobwalltime
+#echo jobname=$jobname
+#echo jobproject=$jobproject
+#echo jobqueue=$jobqueue
+#echo joboutdir=$joboutdir
+
+jobcmd=$1
+mkdir -p $joboutdir
+
+if test "$jobcmd" == "" ; then
+	echo "no cmd"
+else
+	echo $jobcmd
+	if test "$jobname" == "" ; then
+		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/%J.out $jobcmd
+	else
+		echo "job has name"
+		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/$jobname.out -J "$jobname" $jobcmd
+	fi
+fi
+
+
+
+
