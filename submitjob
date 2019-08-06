@@ -50,7 +50,7 @@ shift $((OPTIND - 1))
 #echo jobqueue=$jobqueue
 #echo joboutdir=$joboutdir
 
-jobcmd=$1
+jobcmd=$@
 mkdir -p $joboutdir
 
 if test "$jobcmd" == "" ; then
@@ -68,7 +68,6 @@ else
 	if test "$jobname" == "" ; then
 		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/%J.out $jobcmd
 	else
-		echo "job has name"
 		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/$jobname.out -J "$jobname" $jobcmd
 	fi
 fi

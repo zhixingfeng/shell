@@ -13,7 +13,7 @@ mkdir -p $logdir
 
 for srafile in $(ls $indir | grep .sra$);do 
 	samplename=${srafile%.*}
-	submitjob 4 -c 4 -m 8 -P acc_LymeMIND -q premium fastq-dump -O $outdir/$samplename $indir/$srafile
+	submitjob -w 4 -c 4 -m 8 -o $logdir -j $samplename fastq-dump -O $outdir/$samplename $indir/$srafile
 done
 
 #ls ./$1/*.sra | awk -v outdir=$2 '{cmd="fastq-dump -O "outdir" "$0; print cmd; system(cmd)}'
