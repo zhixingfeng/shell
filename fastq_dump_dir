@@ -1,13 +1,15 @@
 #!/bin/bash
-if [ $# -ne 2 ] ; then
-        echo "fastq_dump_dir indir outdir"
+if [ $# -ne 3 ] ; then
+        echo "fastq_dump_dir indir outdir logdir"
         exit 0
 fi
 
 indir=$1
 outdir=$2
+logdir=$3
 
 mkdir -p $outdir
+mkdir -p $logdir
 
 for srafile in $(ls $indir | grep .sra$);do 
 	samplename=${srafile%.*}

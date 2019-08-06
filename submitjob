@@ -8,8 +8,18 @@ jobproject=acc_LymeMIND
 jobqueue=premium
 joboutdir=/tmp/lsf-output
 
-while getopts ":c:m:w:j:p:q:o:" opt; do
+while getopts ":h:c:m:w:j:p:q:o:" opt; do
         case ${opt} in
+		h )
+			echo "submitjob -c ncore -m memory(Mb) -w walltime -j jobname -p project_account -q queue -o logdir command"
+        		echo "default:"
+		        echo -e "\t-c 1"
+		        echo -e "\t-m 2000"
+		        echo -e "\t-w 02:00"
+		        echo -e "\t-j job id"
+		        echo -e "\t-p LymeMind"
+		        echo -e "\t-q premium"
+		        echo -e "\t-o /tmp/lsf-output";;
                 c )
                         jobcore=$OPTARG;;
                 m )
@@ -44,7 +54,15 @@ jobcmd=$1
 mkdir -p $joboutdir
 
 if test "$jobcmd" == "" ; then
-	echo "no cmd"
+	echo "submitjob -c ncore -m memory(Mb) -w walltime -j jobname -p project_account -q queue -o logdir command"
+	echo "default:"
+	echo -e "\t-c 1"
+	echo -e "\t-m 2000"
+	echo -e "\t-w 02:00"
+	echo -e "\t-j job id"
+	echo -e "\t-p LymeMind"
+	echo -e "\t-q premium"
+	echo -e "\t-o /tmp/lsf-output"
 else
 	echo $jobcmd
 	if test "$jobname" == "" ; then
