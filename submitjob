@@ -11,11 +11,11 @@ joboutdir=/tmp/lsf-output
 while getopts ":h:c:m:w:j:p:q:o:" opt; do
         case ${opt} in
 		h )
-			echo "submitjob -c ncore -m memory(Gb) -w walltime -j jobname -p project_account -q queue -o logdir command"
+			echo "submitjob -c ncore -m memory(Gb) -w walltime(hour) -j jobname -p project_account -q queue -o logdir command"
         		echo "default:"
 		        echo -e "\t-c 1"
 		        echo -e "\t-m 2"
-		        echo -e "\t-w 02:00"
+		        echo -e "\t-w 2"
 		        echo -e "\t-j job id"
 		        echo -e "\t-p LymeMind"
 		        echo -e "\t-q premium"
@@ -51,15 +51,16 @@ shift $((OPTIND - 1))
 #echo joboutdir=$joboutdir
 
 jobmem=$jobmem"000"
+jobwalltime=$jobwalltime":00"
 jobcmd=$@
 mkdir -p $joboutdir
 
 if test "$jobcmd" == "" ; then
-	echo "submitjob -c ncore -m memory(Gb) -w walltime -j jobname -p project_account -q queue -o logdir command"
+	echo "submitjob -c ncore -m memory(Gb) -w walltime(hour) -j jobname -p project_account -q queue -o logdir command"
 	echo "default:"
 	echo -e "\t-c 1"
 	echo -e "\t-m 2"
-	echo -e "\t-w 02:00"
+	echo -e "\t-w 2"
 	echo -e "\t-j job id"
 	echo -e "\t-p LymeMind"
 	echo -e "\t-q premium"

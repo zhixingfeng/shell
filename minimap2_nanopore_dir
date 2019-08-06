@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ $# -ne 4 ] ; then
-        echo "minimap2_nanopore_dir reffile indir outdir nthread"
+if [ $# -ne 5 ] ; then
+        echo "minimap2_nanopore_dir reffile indir outdir nthread logdir"
         exit 0
 fi
 
@@ -8,12 +8,14 @@ reffile=$1
 indir=$2
 outdir=$3
 nthread=$4
+logdir=$5
 
 mkdir -p $outdir
+mkdir -p $logdir
 
 for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta)$'); do
 	sample_name=${infile%.*}
-	cmd="submitjob 2 -c $nthread -m 8 -P acc_LymeMIND -q premium minimap2_nanopore $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
+	cmd="submitjob -w 2 -c $nthread -m 8 -j $sample_name -o $logdir  minimap2_nanopore $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
 	#cmd="minimap2_nanopore $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
 	echo $cmd
 	$cmd

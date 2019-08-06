@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ $# -ne 4 ] ; then
-        echo "qc_fastq_stat fastq_file outdir nthread nreads"
+if [ $# -ne 5 ] ; then
+        echo "qc_fastq_stat fastq_file outdir nthread nreads minqv"
         exit 0
 fi
 
@@ -8,10 +8,11 @@ fastq_file=$1
 outdir=$2
 nthread=$3
 nreads=$4
+minqv=$5
 
 mkdir -p $outdir
 
 
-fastp --reads_to_process $nreads --thread $nthread --disable_adapter_trimming --disable_trim_poly_g --qualified_quality_phred 12 --unqualified_percent_limit 50 --trim_front1 75 --trim_tail1 200 --length_required 1275 --length_limit 65534 -i $fastq_file -o $outdir/reads_filtered.fastq --json $outdir/reads_filtered.json --html $outdir/reads_filtered.html
+fastp --reads_to_process $nreads --thread $nthread --disable_adapter_trimming --disable_trim_poly_g --qualified_quality_phred $minqv --unqualified_percent_limit 50 --trim_front1 75 --trim_tail1 200 --length_required 1275 --length_limit 65534 -i $fastq_file -o $outdir/reads_filtered.fastq --json $outdir/reads_filtered.json --html $outdir/reads_filtered.html
 
 
