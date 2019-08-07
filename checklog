@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+        echo "check_log logdir"
+        exit 0
+fi
+
+logdir=$1
+n_success="$(grep Success $logdir/*.out | wc -l)"
+n_logfile="$(ls $logdir/*.out | wc -l)"
+
+if [ $n_success -eq $n_logfile ]; then
+	echo "$n_success/$n_logfile success. Pass"
+else
+	echo "$n_success/$n_logfile success. Fail"
+fi
+
