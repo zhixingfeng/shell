@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 5 ] ; then
-        echo "trim_bam_by_region bamfile outfile chr start end (1-based)"
+        echo "trim_bam_by_region bamfile outfile chr start end(1-based)"
         exit 0
 fi
 

@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ $# -ne 5 ] ; then
-        echo "getbambyregion_dir indir outdir chr start end (1-based)"
+if [ $# -ne 7 ] ; then
+        echo "getbambyregion_dir indir outdir chr start end(1-based) nthread logdir"
         exit 0
 fi
 
@@ -9,13 +9,18 @@ outdir=$2
 chr=$3
 start_locus=$4
 end_locus=$5
+nthread=$6
+logdir=$7
+
 
 mkdir -p $outdir
+mkdir -p $logdir
 
 filelist=$(ls $indir/*.bam)
 
 for bamfile in $(ls $indir | grep .bam$)
 do
-	getbambyregion $indir/$bamfile $outdir/$bamfile $chr $start_locus $end_locus
+	jobname=${bamfile%/*}
+	submitjob -w 1 -c $nthread -m 8 -j $jobname -o $logdir getbambyregion $indir/$bamfile $outdir/$bamfile $chr $start_locus $end_locus $nthread
 done
 

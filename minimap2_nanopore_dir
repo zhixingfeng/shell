@@ -16,20 +16,10 @@ mkdir -p $logdir
 for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta)$'); do
 	sample_name=${infile%.*}
 	cmd="submitjob -w 2 -c $nthread -m 8 -j $sample_name -o $logdir  minimap2_nanopore $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
-	#cmd="minimap2_nanopore $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
 	echo $cmd
 	$cmd
 done
 
-
-
-#ls $2 | egrep '*.(fa|fq|fastq|fasta|fastq.gz|fasta.gz)$' | awk -v ref=$1 -v indir=$2 -v outdir=$3 -v hpcopt="submitjob 6 -c 4 -m 16 -P acc_LymeMIND -q premium" '{
-#	sample_name=$0; gsub(".fastq","",sample_name)
-#	cmd=hpcopt" minimap2_nanopore "ref" "indir"/"$0" "outdir"/"sample_name".sam"; 
-#	print cmd; 
-#	system(cmd);
-#
-#}'
 
 
 

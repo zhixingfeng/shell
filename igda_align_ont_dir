@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ $# -ne 4 ] ; then
-        echo "igda_align_ont_dir indir(contains bam files) reffile outdir nthread"
+if [ $# -ne 5 ] ; then
+        echo "igda_align_ont_dir indir(contains bam files) reffile outdir nthread logdir"
         exit 0
 fi
 
@@ -8,23 +8,23 @@ indir=$1
 reffile=$2
 outdir=$3
 nthread=$4
-
-echo "indir="$indir
-echo "reffile="$reffile
-echo "outdir="$outdir
-echo "nthread="$nthread
+logdir=$5
 
 bamfiles=$(ls $indir/*.bam)
 
 mkdir -p $outdir
+mkdir -p $logdir
 
-#hpc="submitjob 6 -c "$nthread" -m 16 -P acc_LymeMIND -q premium"
-hpc=""
+
+hpc="submitjob 6 -c $nthread -m 16 "
+#hpc=""
 for bamfile in $bamfiles; do
 	outfile=$(basename $bamfile)
 	outfile=$outdir/"${outfile%.*}".sam
-	cmd=$hpc" igda_align_ont "$bamfile" "$reffile" "$outfile" "$nthread
-	echo $cmd
+	jobname=$(basename ${outfile%.*})
+	hpc="submitjob -w 6 -c $nthread -m 16 -j $jobname -o $logdir"
+	cmd="$hpc igda_align_ont $bamfile $reffile $outfile $nthread"
+	#echo $cmd
 	$cmd
 done
 
