@@ -1,18 +1,21 @@
 #!/bin/bash
-if [ $# -ne 1 ]; then
-	echo "USAGE: sam2bam indir"
+if [ $# -ne 3 ]; then
+	echo "USAGE: sam2bam_dir indir nthread logdir"
 	exit 0
 fi
 
 indir=$1
+nthread=$2
+logdir=$3
 samfile_list=$(ls $indir/*.sam)
+
+mkdir -p $logdir
 
 for samfile in $samfile_list
 do
-	cmd="sam2bam $samfile $samfile.tmp"
-	echo $cmd
-	submitjob 4 -c 8 -m 16 -P acc_LymeMIND -q premium sam2bam $samfile $samfile.tmp
-	#sam2bam $samfile $samfile.tmp
+	jobname=$(basename $samfile)
+	jobname=${jobname%.*}
+	submitjob -w 4 -c $nthread -m 16 -j $jobname -o $logdir sam2bam $samfile $nthread
 done
 
 

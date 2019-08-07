@@ -1,33 +1,21 @@
 #!/bin/bash
 if [ $# -ne 2 ]; then
-	echo "USAGE: sam2bam samfile tmp_prefix"
+	echo "USAGE: sam2bam samfile nthread"
 	exit 0
 fi
 
 samfile=$1
-name_len=${#samfile}
-#ext.s name_len
+nthread=$2
 
-ext=${samfile:0-4:4} 
-
-if [ "$ext" != ".sam" ]; then
-	echo "$samfile is not a .sam file"
-	exit 0 
-fi
-
-bamfile_unsorted="${samfile:0:(name_len-4)}_unsorted.bam"
-bamfile="${samfile:0:(name_len-4)}.bam"
+bamfile_unsorted=${samfile%.*}.unsorted.bam
+bamfile=${samfile%.*}.bam 
+tmpfile=$samfile.tmp
 
 echo "bamfile is $bamfile"
-samtools view --threads 8 -h -b -o $bamfile_unsorted $samfile
-samtools sort --threads 8 -T $2 -o $bamfile $bamfile_unsorted
+
+samtools view --threads $nthread -h -b -o $bamfile_unsorted $samfile
+samtools sort --threads $nthread -T $tmpfile -o $bamfile $bamfile_unsorted
 samtools index $bamfile
 rm $bamfile_unsorted
-
-
-
-
-#echo $name_len
-#echo #{$1:}
 
 
