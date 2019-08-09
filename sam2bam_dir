@@ -1,6 +1,31 @@
 #!/bin/bash
+walltime=4
+memory=16
+while getopts ":hw:m:" opt; do
+        case ${opt} in
+                h )
+                        echo "USAGE: sam2bam_dir -w walltime -m memory indir nthread logdir"
+			echo "default:"
+                        echo -e "\t-w 4"
+			echo -e "\t-m 16"
+			exit 0;;
+                w )
+                        walltime=$OPTARG;;
+		m )
+			memory=$OPTARG;;
+        	\? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
 if [ $# -ne 3 ]; then
-	echo "USAGE: sam2bam_dir indir nthread logdir"
+	echo "USAGE: sam2bam_dir -w walltime -m memory indir nthread logdir"
+        echo "default:"
+        echo -e "\t-w 4"
+        echo -e "\t-m 16"
 	exit 0
 fi
 
@@ -15,7 +40,8 @@ for samfile in $samfile_list
 do
 	jobname=$(basename $samfile)
 	jobname=${jobname%.*}
-	submitjob -w 4 -c $nthread -m 16 -j $jobname -o $logdir sam2bam $samfile $nthread
+	#echo "submitjob -w $walltime -c $nthread -m $memory -j $jobname -o $logdir sam2bam $samfile $nthread"
+	submitjob -w $walltime -c $nthread -m $memory -j $jobname -o $logdir sam2bam $samfile $nthread
 done
 
 
