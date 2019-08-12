@@ -1,0 +1,29 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "igda_auc igda_roc_file"
+        exit 0
+fi
+
+igda_roc_file=$1
+
+awk -F "\t" 'BEGIN{auc=0}{
+	cur_fdr=1-$6
+	cur_tpr=$5
+	
+	if (NR>1){
+		y=(cur_tpr + prev_tpr) / 2
+		if (prev_fdr >= cur_fdr){
+			dx=(prev_fdr - cur_fdr)
+		}else{
+			dx=(cur_fdr - prev_fdr)
+		}
+		auc += dx*y
+	}
+	
+	prev_fdr=cur_fdr
+        prev_tpr=cur_tpr
+
+}END{print auc}' $igda_roc_file
+
+
+

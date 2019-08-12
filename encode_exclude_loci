@@ -1,0 +1,37 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "encode_exclude_loci loci_list encode_file out_file"
+        exit 0
+fi
+
+loci_list=$1
+encode_file=$2
+out_file=$3
+
+awk -F "\t" '{
+	if (NR==FNR){
+		methyl_loci[$1]=1
+	}else{
+		for (i=1; i<=NF; i++){
+			if ($i!=""){
+				if (methyl_loci[int($i/4)]!=1){
+					printf("%s\t", $i)
+				}
+			}
+		}
+		printf("\n")
+		#if (methyl_loci[int($1/4)]!=1){
+		#	print
+		#}
+	}
+	
+}' $loci_list $encode_file > $out_file
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ "$#" -ne 3 ]; then
-        echo "exclude_loci loci_list in_file(column 1 is locus) out_file"
+        echo "exclude_loci_by_code loci_list in_file(column 1 is code) out_file"
         exit 0
 fi
 
