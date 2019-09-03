@@ -1,16 +1,16 @@
 #!/bin/bash
-if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then
-        echo "recode_dir indir"
+if [ "$#" -ne 2 ] && [ "$#" -ne 3 ]; then
+        echo "recode_dir indir logdir"
 	echo "or"
-	echo "recode_dir indir varfile"
+	echo "recode_dir indir varfile logdir"
         exit 0
 fi
 
 m5files=$(ls $1/*.m5)
 
-hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium"
+#hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium"
 #hpcopt=""
-if [ "$#" -eq 1 ]; then
+if [ "$#" -eq 2 ]; then
 	for m5file in $m5files
 	do
 		varfile=${m5file%.*}.var
@@ -21,14 +21,16 @@ if [ "$#" -eq 1 ]; then
 	done
 fi
 
-if [ "$#" -eq 2 ]; then
+if [ "$#" -eq 3 ]; then
 	varfile=$2
 	for m5file in $m5files
         do
                 recodefile=${m5file%.*}.recode
-                cmd=$hpcopt" igda recode $m5file $varfile $recodefile"
-                echo $cmd
-                $cmd
+		jobname=$(basename ${m5file%.*})
+                submitjob -w 2 -c 1 -m 8 -o $3 -j $jobname igda recode $m5file $varfile $recodefile
+		#cmd=$hpcopt" igda recode $m5file $varfile $recodefile"
+                #echo $cmd
+                #$cmd
         done
 fi
 

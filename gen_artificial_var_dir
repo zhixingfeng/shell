@@ -1,16 +1,19 @@
 #!/bin/bash
-if [ "$#" -ne 1 ]; then
-        echo "gen_artificial_var_dir indir"
+if [ "$#" -ne 2 ]; then
+        echo "gen_artificial_var_dir indir logdir"
         exit 0
 fi
 
-m5files=$(ls $1/*.m5)
+indir=$1
+logdir=$2
+m5files=$(ls $indir/*.m5)
 
-hpcopt="submitjob 1 -c 1 -m 6 -P acc_LymeMIND -q premium"
+#hpcopt="submitjob 1 -c 1 -m 6 -P acc_LymeMIND -q premium"
 for m5file in $m5files
 do
 	varfile=${m5file%.*}.var
-	cmd=$hpcopt" gen_artificial_var $m5file $varfile"
+	jobname=$(basename ${m5file%.*})
+	cmd="submitjob -w 1 -c 1 -m 6 -o $logdir -j $jobname gen_artificial_var $m5file $varfile"
 	echo $cmd
 	$cmd
 done

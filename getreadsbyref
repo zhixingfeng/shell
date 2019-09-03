@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -ne 3 ]; then
+        echo "USAGE: getreadsbyref bamfile(samfile) ref outfile"
+        exit 0
+fi
+
+samfile=$1
+ref=$2
+outfile=$3
+
+samtools view -H $samfile | egrep "@PG|SN:$ref" > $outfile
+samtools view $samfile | awk -v ref=$ref '{if ($3==ref) print $0}' >>$outfile
+
+

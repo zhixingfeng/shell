@@ -1,11 +1,20 @@
 #!/bin/bash
 exclude_loci_file=""
-while getopts ":hx:" opt; do
+min_condprob=0.7
+min_prob=0.4
+while getopts ":hc:p:x:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_detect_ont -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
+                        echo "igda_pipe_detect_ont -c min_condprob -p min_prob -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
                         echo "default:"
-                        echo -e "\t-x (empty)";;
+                        echo -e "\t-x (empty)"
+			echo -e "\t-c 0.7"
+			echo -e "\t-p 0.4"
+			exit 0;;
+		c )
+			min_condprob=$OPTARG;;
+		p )
+			min_prob=$OPTARG;;
                 x )
                         exclude_loci_file=$OPTARG;;
                 \? )
@@ -17,9 +26,11 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
-        echo "igda_pipe_detect_ont -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
+	echo "igda_pipe_detect_ont -c min_condprob -p min_prob -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
         echo "default:"
         echo -e "\t-x (empty)"
+        echo -e "\t-c 0.7"
+        echo -e "\t-p 0.4"
 	exit 0
 fi
 
@@ -54,14 +65,14 @@ igda cmpreads -l 0.5 -p 20 $outdir/realign.encode $outdir/realign.m5 $outdir/rea
 echo "============= rsm ==========="
 echo "dforest_r=$dforest_r"
 igda dforest -d 10000 -r $dforest_r $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
-igda filter -f 0.75 $outdir/realign.dforest $outdir/realign.dforest.f75
+igda filter -f $min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
 
 echo "============= detect orphan variants ==========="
 igda detectsingle -c 1000 -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
-igda detectsingle -c 1000 -f 0.40 -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
+igda detectsingle -c 1000 -f $min_prob -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
 
 echo "============= combine rsm and orphan variants ==========="
-cat $outdir/realign.dforest.f75 $outdir/realign.detectsingle | sort -s -u -k1,1n > $outdir/realign_raw.detected
+cat $outdir/realign.dforest.ft $outdir/realign.detectsingle | sort -s -u -k1,1n > $outdir/realign_raw.detected
 
 if test "$exclude_loci_file" == "" ; then
 	cp $outdir/realign_raw.detected $outdir/realign.detected
