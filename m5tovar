@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 2 ] ; then
-        echo "m5tofa m5file varfile(0-based)"
+        echo "m5tovar m5file varfile(0-based)"
         exit 0
 fi
 

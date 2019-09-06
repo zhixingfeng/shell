@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+       echo "m5tovar_dir indir"
+        exit 0
+fi
+
+indir=$1
+for m5file in $(ls $indir/*.m5); do
+	varfile=${m5file%.*}.var
+	echo $m5file
+	m5tovar $m5file $varfile
+done
+
+
