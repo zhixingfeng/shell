@@ -1,0 +1,50 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "map_locus m5file mapfile"
+        exit 0
+fi
+
+m5file=$1
+mapfile=$2
+
+awk '{
+	qStart=$3
+	qName=$1
+	tName=$6
+	tStart=$8
+	tEnd=$9
+	
+	split($17, qSeq, "")
+	split($19, tSeq, "")
+
+	cur_qstart=qStart
+	cur_tstart=tStart
+	
+	if (length(qSeq) == length(tSeq)){
+		for (i=1; i<=length(qSeq); i++){
+			if (qSeq[i] != "-" && tSeq[i] != "-"){
+				printf("%s\t%s\t%s\t%s\n", qName, tName, cur_qstart, cur_tstart)
+			}
+
+			if (qSeq[i] != "-"){
+				cur_qstart++
+			}
+
+			if (tSeq[i] != "-"){
+				cur_tstart++
+			}
+		}
+	}else{
+		exit 1
+	}
+
+}' $m5file > $mapfile
+
+
+
+
+
+
+
+
+

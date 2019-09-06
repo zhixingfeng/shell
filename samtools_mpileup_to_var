@@ -1,0 +1,52 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "samtools_mpileup_to_var mpileup_file(1-based) var_file"
+        exit 0
+fi
+
+mpileup_file=$1
+var_file=$2
+
+awk '{
+	chr=$1
+	locus=$2
+	refbase=$3
+	cvg=$4
+	split($5, bases, "")
+	cvg_count=0
+	
+	i = 1
+	while (i <= length(bases)){
+		
+		switch (bases[i]){
+			case /[.|,]/:
+				printf("%s", bases[i])
+				if (i + 1 <= length(bases)){
+					if (bases[i+1] != "-" && bases[i+1] != "+"){
+						cvg_count++
+					}
+				}else{
+					cvg_count++
+				}
+				i++
+				break
+			case "$":
+				i++
+				break
+			case "^":
+				
+			default:
+				i++
+				
+		}
+		#printf("%s", bases[i])
+		#i++
+	}
+	printf("\n")
+
+
+}' $mpileup_file
+
+
+
+

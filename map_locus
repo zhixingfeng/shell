@@ -1,0 +1,25 @@
+#!/bin/bash
+if [ "$#" -ne 4 ]; then
+        echo "map_locus locifile(0-based) mapfile(0-based) refname outfile(0-based)"
+        exit 0
+fi
+
+locifile=$1
+mapfile=$2
+refname=$3
+outfile=$4
+
+if test -f "$outfile"; then
+	rm $outfile
+fi
+
+for locus in $(cat $locifile); do
+	grep -P "$refname\t.*\t$locus\t" $mapfile | awk '{print $4}' >> $outfile
+done
+
+
+
+
+
+
+

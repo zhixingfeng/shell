@@ -1,0 +1,74 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "m5tofa m5file varfile(0-based)"
+        exit 0
+fi
+
+m5file=$1
+varfile=$2
+
+awk '{
+	qName=$1
+	tName=$6
+	tStart=$8
+	tEnd=$9
+
+	split($17, qalign, "")
+	split($19, talign, "")
+	
+	if (length(qalign) != length(talign)){
+		print "length(qalign) != length(talign)"
+		exit 1
+	}
+	
+	cur_locus=tStart
+	i = 1
+	while(i <= length(qalign)){
+		if (qalign[i]=="-" && talign[i]=="-"){
+			print "qalign[i]==- && talign[i]==-"
+			exit 1
+		}
+		
+		# match
+		if (qalign[i] == talign[i]){
+			cur_locus++
+			i++
+		}else{
+			# mismatch
+			if (qalign[i] != "-" && talign[i] != "-"){
+				printf("%s\t%s\t%d\tM\t%s\t%s\n", qName, tName, cur_locus, talign[i], qalign[i])
+				cur_locus++
+				i++
+			}else{
+				# deletion
+				if (qalign[i] == "-"){
+					printf("%s\t%s\t%d\tD\t%s\t%s\n", qName, tName, cur_locus, talign[i], qalign[i])
+                                	cur_locus++
+                                	i++
+				}
+				
+				# insertion
+				if (talign[i] == "-"){
+					printf("%s\t%s\t%d\tI\t%s\t", qName, tName, cur_locus, talign[i])
+					while(talign[i] == "-"){
+						printf("%s", qalign[i])
+						i++
+					}
+					printf("\n")
+                                        #printf("%s\t%s\t%d\tI\t%s\t%s\n", qName, tName, cur_locus, talign[i], qalign[i])
+                                        #i++
+                                }
+			}
+		}
+	}
+
+	if (cur_locus != tEnd){
+		print "cur_locus != tEnd"
+		exit 1
+	}
+}' $m5file > $varfile
+
+
+
+
+

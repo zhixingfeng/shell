@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) != 3){
-	cat("motif_findloci motif_list_file ref_fa_file outdir\n")
+	cat("motif_findloci motif_list_file ref_fa_file outdir(0-based loci)\n")
 }else{
 	suppressMessages(library(seqinr))
 	suppressMessages(library(Biostrings))
