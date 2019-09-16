@@ -2,14 +2,16 @@
 exclude_loci_file=""
 min_condprob=0.7
 min_prob=0.4
-while getopts ":hc:p:x:" opt; do
+topn_cmpreads=20
+while getopts ":hc:p:x:q:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_detect_ont -c min_condprob -p min_prob -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
+                        echo "igda_pipe_detect_ont -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
                         echo "default:"
                         echo -e "\t-x (empty)"
 			echo -e "\t-c 0.7"
 			echo -e "\t-p 0.4"
+			echo -e "\t-p 20"
 			exit 0;;
 		c )
 			min_condprob=$OPTARG;;
@@ -17,6 +19,8 @@ while getopts ":hc:p:x:" opt; do
 			min_prob=$OPTARG;;
                 x )
                         exclude_loci_file=$OPTARG;;
+		q )
+			topn_cmpreads=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -26,11 +30,12 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
-	echo "igda_pipe_detect_ont -c min_condprob -p min_prob -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
+	echo "igda_pipe_detect_ont -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
         echo "default:"
         echo -e "\t-x (empty)"
         echo -e "\t-c 0.7"
         echo -e "\t-p 0.4"
+	echo -e "\t-p 20"
 	exit 0
 fi
 
@@ -45,6 +50,10 @@ echo "reffile = "$reffile
 echo "contextfile = "$contextfile
 echo "outdir = "$outdir
 echo "exclude_loci_file = "$exclude_loci_file
+echo "min_condprob = "$min_condprob
+echo "min_prob = "$min_prob
+echo "topn_cmpreads ="$topn_cmpreads
+
 
 echo "Start."
 mkdir -p $outdir
@@ -60,7 +69,7 @@ echo "============= encode ==========="
 igda encode -t $outdir/realign.m5 $outdir/realign.encode
 
 echo "============= cmpreads ==========="
-igda cmpreads -l 0.5 -p 20 $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads
+igda cmpreads -l 0.5 -p $topn_cmpreads $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads
 
 echo "============= rsm ==========="
 echo "dforest_r=$dforest_r"
