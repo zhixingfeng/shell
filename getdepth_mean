@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+        echo "getdepth_mean cvgfile"
+        exit 0
+fi
+
+cvgfile=$1
+
+samplename=$(basename $cvgfile)
+samplename=${samplename%.*}
+
+awk -v samplename=$samplename 'BEGIN{
+	total_cvg = 0
+	n_loci = 0 
+}
+{
+	total_cvg += $2
+	n_loci += 1
+}
+END{
+	mean_cvg = total_cvg / n_loci
+	print samplename"\t"mean_cvg"\t"total_cvg"\t"n_loci
+}' $cvgfile
+
+
+

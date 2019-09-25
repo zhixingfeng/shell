@@ -1,0 +1,54 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "getdepth_dir samfile(bamfile) outfile"
+        exit 0
+fi
+
+samfile=$1
+outfile=$2
+
+samtools view $samfile | awk '
+function parse_cigar(cigar_str, cigar_num, cigar_type){
+	delete cigar_num;
+        delete cigar_type;
+        split(cigar_str,cigar_num,"(M|I|D|N|S|H|P|=|X)");
+        cigar_str_len = length(cigar_str);              
+        k = 1;
+        for (i=1; i<=cigar_str_len; i++){
+		cur_char = substr(cigar_str,i,1);
+                if (cur_char ~ /(M|I|D|N|S|H|P|=|X)/){
+			cigar_type[k] = cur_char;
+                        k++;
+                }
+	}
+}       
+	
+{
+	tStart = $4
+	tEnd = tStart
+	parse_cigar($6, cigar_num, cigar_type);
+	if (length(cigar_num) != length(cigar_type) + 1){
+		print length(cigar_num)
+		print length(cigar_type)
+		print("length(cigar_num) != length(cigar_type) + 1")
+		exit 1
+	}
+	for (i=1; i<=length(cigar_type); i++){
+		if (cigar_type[i] == "M" || cigar_type[i] == "=" || cigar_type[i] == "X" || cigar_type[i] == "D" || cigar_type[i] == "N"){
+			tEnd = tEnd + cigar_num[i]
+		}
+        }      
+	tEnd = tEnd - 1
+
+	for (i=tStart; i<=tEnd; i++){
+		cvg[i]+=1
+	}
+}
+END{
+	for (i=1; i<=length(cvg); i++){
+		printf("%d\t%d\n", i, cvg[i])
+	} 
+}
+' > $outfile
+
+

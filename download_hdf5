@@ -4,16 +4,30 @@ if [ $# -ne 2 ] ; then
         exit 0
 fi
 
-mkdir -p $2
+outdir=$2
+mkdir -p $outdir
 
 run_ids=$(cat $1)
 for run_id in $run_ids; do
-	url=$(srapath $run_id -f names --raw -p typ=srapub_files -p accept-proto=https | grep srapub_files | grep hdf5 | cut -d '|' -f8)
-	wget --no-check-certificate $url -O $2/$run_id.tgz
+	mkdir -p $outdir/$run_id/Analysis_Results
+	url_metadata=$(srapath $run_id -f names --raw -p typ=srapub_files -p accept-proto=https | grep ".metadata.xml|" | cut -d "|" -f8)
+	url_metadata=${url_metadata//sra-download.ncbi.nlm.nih.gov\//""}
+	
+	wget --no-check-certificate -P $outdir/$run_id/ $url_metadata
+	
+	url_h5_files=$(srapath $run_id -f names --raw -p typ=srapub_files -p accept-proto=https | grep ".h5.1|" | cut -d "|" -f8)
+	for url_h5_file in $url_h5_files; do
+		url_h5_file=${url_h5_file//sra-download.ncbi.nlm.nih.gov\//""}
+		wget --no-check-certificate -P $outdir/$run_id/Analysis_Results $url_h5_file
+	done
+
+	for h5file in $(ls $outdir/$run_id/Analysis_Results/*.h5.1); do
+		outfile=${h5file%.h5.1}.h5
+		mv $h5file $outfile
+	done
 done
 
 
 
-#awk -v outdir=$2 '{cmd="wget --no-check-certificate http://sra-download.ncbi.nlm.nih.gov/srapub_files/"$1"_"$1"_hdf5.tgz -O "outdir"/"$1".tgz"; system(cmd);}' $1
 
 

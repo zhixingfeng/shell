@@ -1,9 +1,21 @@
 #!/bin/bash
-if [ "$#" -ne 1 ]; then
-        echo "getdepth_dir indir"
+if [ "$#" -ne 2 ]; then
+        echo "getdepth_dir indir logdir"
         exit 0
 fi
 
-ls $1 | egrep "*.bam$" | awk -v indir=$1 -v hpcopt="submitjob 2 -c 1 -m 8 -P acc_LymeMIND -q premium" '{cmd=hpcopt" bamtools coverage -in "indir"/"$0;gsub(".bam",".cvg");cmd=cmd" -out "indir"/"$0;print cmd; system(cmd)}'
+indir=$1
+logdir=$2
+
+for bamfile in $(ls $indir/*.bam);do
+	sample_name=$(basename $bamfile)
+	sample_name=${sample_name%.bam}
+	cvgfile=$indir/$sample_name.cvg
+	#cmd="submitjob -m 16 -w 8 -j $sample_name -o $logdir bamtools coverage -in $bamfile -out $cvgfile"
+	cmd="submitjob -m 16 -w 16 -j $sample_name -o $logdir getdepth $bamfile $cvgfile"
+	$cmd
+done
+
+
 
 
