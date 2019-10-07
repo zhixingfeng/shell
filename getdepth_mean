@@ -14,12 +14,18 @@ awk -v samplename=$samplename 'BEGIN{
 	n_loci = 0 
 }
 {
-	total_cvg += $2
-	n_loci += 1
+	total_cvg += $3
+	if ($3>0){
+		n_loci += 1
+	}
 }
 END{
-	mean_cvg = total_cvg / n_loci
-	print samplename"\t"mean_cvg"\t"total_cvg"\t"n_loci
+	if (n_loci <= 0){
+		print samplename"\t"0"\t"total_cvg"\t"n_loci
+	}else{
+		mean_cvg = total_cvg / n_loci
+		print samplename"\t"mean_cvg"\t"total_cvg"\t"n_loci
+	}
 }' $cvgfile
 
 

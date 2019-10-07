@@ -1,0 +1,29 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "igda_align_ont infile(bam or sam file) reffile outfile nthread"
+        exit 0
+fi
+
+infile=$1
+reffile=$2
+outfile=$3
+nthread=$4
+
+echo "infile="$infile
+echo "reffile="$reffile
+echo "outfile="$outfile
+echo "nthread="$nthread
+
+# get fastq from bam / sam file  
+echo "get forward sequences from sam/bam"
+sam2fq $infile $outfile.igda.tmp.fastq nthread
+
+echo "run minimap2"
+minimap2 -t $nthread --secondary=no -ax map-pb $reffile $outfile.igda.tmp.fastq > $outfile.realign.sam
+
+
+echo "filter realigned sam"
+samtools view --threads $nthread -h -F 4095 $outfile.realign.sam > $outfile
+rm $outfile.realign.sam
+rm $outfile.igda.tmp.fastq
+

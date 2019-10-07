@@ -10,11 +10,16 @@ mkdir -p $outdir
 run_ids=$(cat $1)
 for run_id in $run_ids; do
 	mkdir -p $outdir/$run_id/Analysis_Results
-	url_metadata=$(srapath $run_id -f names --raw -p typ=srapub_files -p accept-proto=https | grep ".metadata.xml|" | cut -d "|" -f8)
-	url_metadata=${url_metadata//sra-download.ncbi.nlm.nih.gov\//""}
+	url_metadata=$(srapath $run_id -f names --raw -p typ=srapub_files -p accept-proto=https | grep ".metadata.xml.1|" | cut -d "|" -f8)
+	#url_metadata=${url_metadata//sra-download.ncbi.nlm.nih.gov\//""}
 	
 	wget --no-check-certificate -P $outdir/$run_id/ $url_metadata
 	
+	for metafile in $(ls $outdir/$run_id/*.xml.1);do
+		outfile=${metafile%.xml.1}.xml
+		mv $metafile $outfile
+	done
+
 	url_h5_files=$(srapath $run_id -f names --raw -p typ=srapub_files -p accept-proto=https | grep ".h5.1|" | cut -d "|" -f8)
 	for url_h5_file in $url_h5_files; do
 		url_h5_file=${url_h5_file//sra-download.ncbi.nlm.nih.gov\//""}

@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ "$#" -ne 4 ]; then
-        echo "pbmm2_align_dir indir outdir reffile nthread"
+if [ "$#" -ne 5 ]; then
+        echo "pbmm2_align_dir indir outdir reffile nthread logdir"
         exit 0
 fi
 
@@ -8,11 +8,11 @@ indir=$1
 outdir=$2
 reffile=$3
 nthread=$4
+logdir=$5
 
 mkdir -p $outdir
 for bamfile in $(ls $indir | grep ".bam$" ); do
-	#submitjob 8 -c $nthread -m 8 -P acc_LymeMIND -q premium pbmm2 align $reffile $indir/$bamfile $outdir/$bamfile --sort -j $nthread
-	submitjob 8 -c $nthread -m 8 -P acc_LymeMIND -q premium pbmm2_align $indir/$bamfile $outdir/$bamfile $reffile $nthread
+	submitjob -w 8 -c $nthread -m 8 -o $logdir -j $bamfile pbmm2_align $indir/$bamfile $outdir/$bamfile $reffile $nthread
 done
 
 

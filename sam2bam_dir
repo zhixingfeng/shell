@@ -1,18 +1,22 @@
 #!/bin/bash
 walltime=4
 memory=16
-while getopts ":hw:m:" opt; do
+queue="premium"
+while getopts ":hw:m:q:" opt; do
         case ${opt} in
                 h )
-                        echo "USAGE: sam2bam_dir -w walltime -m memory indir nthread logdir"
+                        echo "USAGE: sam2bam_dir -q queue -w walltime -m memory indir nthread logdir"
 			echo "default:"
                         echo -e "\t-w 4"
 			echo -e "\t-m 16"
+			echo -e "\t-q premium"
 			exit 0;;
                 w )
                         walltime=$OPTARG;;
 		m )
 			memory=$OPTARG;;
+		q )
+			queue=$OPTARG;;
         	\? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -22,10 +26,11 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 3 ]; then
-	echo "USAGE: sam2bam_dir -w walltime -m memory indir nthread logdir"
+	echo "USAGE: sam2bam_dir -q queue -w walltime -m memory indir nthread logdir"
         echo "default:"
         echo -e "\t-w 4"
         echo -e "\t-m 16"
+	echo -e "\t-q premium"
 	exit 0
 fi
 
@@ -40,8 +45,7 @@ for samfile in $samfile_list
 do
 	jobname=$(basename $samfile)
 	jobname=${jobname%.*}
-	#echo "submitjob -w $walltime -c $nthread -m $memory -j $jobname -o $logdir sam2bam $samfile $nthread"
-	submitjob -w $walltime -c $nthread -m $memory -j $jobname -o $logdir sam2bam $samfile $nthread
+	submitjob -q $queue -w $walltime -c $nthread -m $memory -j $jobname -o $logdir sam2bam $samfile $nthread
 done
 
 

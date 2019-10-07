@@ -15,11 +15,8 @@ logdir=$5
 for infile in $(ls $indir | egrep ".fna$|.fasta$|.fa$"); do
 	outprefix=$outdir/${infile%.*}
 	jobname=${infile%.*}
-	submitjob -w 1 -c $nthread -m 4 -o $logdir cmpgenome $indir/$infile $reffile $outprefix
+	submitjob -w 1 -c $nthread -m 4 -o $logdir -j $jobname cmpgenome $indir/$infile $reffile $outprefix
 done
 
 
-#ls $1 | egrep ".fna$|.fasta$|.fa$" | awk -v indir=$1 -v reffile=$2 -v outdir=$3 '{cmd="cmpgenome "indir"/"$0" "reffile" "outdir;gsub(".fasta","",$0);cmd=cmd"/"$0;print cmd; system(cmd)}'
-
-#ls $1 | egrep ".fna$|.fasta$|.fa$" | awk -v indir=$1 -v reffile=$2 -v outdir=$3 -v hpcopt="submitjob 0.5 -c 1 -m 4 -P acc_LymeMIND -q premium" '{cmd=hpcopt" cmpgenome "indir"/"$0" "reffile" "outdir;gsub(".fasta","",$0);cmd=cmd"/"$0;print cmd; system(cmd)}'
 

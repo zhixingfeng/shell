@@ -1,0 +1,22 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "pb_bamtofastq_dir indir outdir logdir"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+logdir=$3
+
+mkdir -p $outdir
+
+for bamfile in $(ls $indir/*.bam); do
+	samplename=$(basename $bamfile)
+	samplename=${samplename%.bam}
+	outprefix=$outdir/$samplename
+	cmd="submitjob -w 1 -c 1 -m 4 -q express -j $samplename -o $logdir bam2fastq -o $outprefix $bamfile"
+	$cmd
+done
+
+
+

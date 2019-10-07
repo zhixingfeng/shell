@@ -1,18 +1,18 @@
 #!/bin/bash
 exclude_loci_file=""
-min_condprob=0.7
-min_prob=0.4
+min_condprob=0.75
+min_prob=0.2
 topn_cmpreads=100
 nthread=1
 dforest_r=25
 while getopts ":hc:p:x:q:r:n:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_detect_ont -n nthread -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
+                        echo "igda_pipe_detect_pb -n nthread -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
                         echo "default:"
                         echo -e "\t-x (empty)"
-			echo -e "\t-c 0.7"
-			echo -e "\t-p 0.4"
+			echo -e "\t-c 0.75"
+			echo -e "\t-p 0.2"
 			echo -e "\t-q 100"
 			echo -e "\t-r 25"
 			echo -e "\t-n 1"
@@ -38,11 +38,11 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
-	echo "igda_pipe_detect_ont -n nthread -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
+	echo "igda_pipe_detect_pb -n nthread -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextfile outdir"
         echo "default:"
         echo -e "\t-x (empty)"
-        echo -e "\t-c 0.7"
-        echo -e "\t-p 0.4"
+        echo -e "\t-c 0.75"
+        echo -e "\t-p 0.2"
 	echo -e "\t-q 100"
 	echo -e "\t-r 25"
 	echo -e "\t-n 1"

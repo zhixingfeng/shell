@@ -1,7 +1,54 @@
 #!/bin/bash
+
+walltime=2
+memory=4
+queue="premium"
+r_chr=""
+r_start=0;
+r_end=0;
+while getopts ":hw:m:q:r:s:e:" opt; do
+        case ${opt} in
+                h )
+                        echo "USAGE: getdepth_dir -q queue -w walltime -m memory -r chrname -s start -e end (1-based) indir logdir"
+                        echo "default:"
+                        echo -e "\t-w 2"
+                        echo -e "\t-m 4"
+                        echo -e "\t-q premium"
+			echo -e "\t-r [empty]"
+                        echo -e "\t-s 0"
+                        echo -e "\t-e INF"
+                        exit 0;;
+                w )
+                        walltime=$OPTARG;;
+                m )
+                        memory=$OPTARG;;
+                q )
+                        queue=$OPTARG;;
+		r )
+                        r_chr=$OPTARG;;
+                s )
+                        r_start=$OPTARG;;
+                e )
+                        r_end=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+
 if [ "$#" -ne 2 ]; then
-        echo "getdepth_dir indir logdir"
-        exit 0
+	echo "USAGE: getdepth_dir -q queue -w walltime -m memory -r chrname -s start -e end (1-based) indir logdir"
+        echo "default:"
+        echo -e "\t-w 2"
+        echo -e "\t-m 4"
+        echo -e "\t-q premium"
+        echo -e "\t-r [empty]"
+        echo -e "\t-s 0"
+        echo -e "\t-e INF"
+	exit 0
 fi
 
 indir=$1
@@ -11,8 +58,7 @@ for bamfile in $(ls $indir/*.bam);do
 	sample_name=$(basename $bamfile)
 	sample_name=${sample_name%.bam}
 	cvgfile=$indir/$sample_name.cvg
-	#cmd="submitjob -m 16 -w 8 -j $sample_name -o $logdir bamtools coverage -in $bamfile -out $cvgfile"
-	cmd="submitjob -m 16 -w 16 -j $sample_name -o $logdir getdepth $bamfile $cvgfile"
+	cmd="submitjob -q $queue -m $memory -w $walltime -j $sample_name -o $logdir getdepth -r $r_chr -s $r_start -e $r_end $bamfile $cvgfile"
 	$cmd
 done
 

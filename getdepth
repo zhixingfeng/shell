@@ -1,13 +1,44 @@
 #!/bin/bash
+r_chr=""
+r_start=0;
+r_end=0;
+while getopts ":hr:s:e:" opt; do
+        case ${opt} in
+                h )
+                        echo "getdepth_dir -r chrname -s start -e end (1-based) samfile(bamfile) outfile"
+			echo "default:"
+                        echo -e "\t-r [empty]"
+			echo -e "\t-s 0"
+			echo -e "\t-e INF"
+                        exit 0;;
+                r )
+                        r_chr=$OPTARG;;
+                s )
+                        r_start=$OPTARG;;
+                e )
+                        r_end=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+
 if [ "$#" -ne 2 ]; then
-        echo "getdepth_dir samfile(bamfile) outfile"
+	echo "getdepth_dir -r chrname -s start -e end (1-based) samfile(bamfile) outfile"
+	echo "default:"
+	echo -e "\t-r [empty]"
+        echo -e "\t-s 0"
+        echo -e "\t-e INF"
         exit 0
 fi
 
 samfile=$1
 outfile=$2
 
-samtools view $samfile | awk '
+samtools view $samfile | awk -v r_chr=$r_chr -v r_start=$r_start -v r_end=$r_end '
 function parse_cigar(cigar_str, cigar_num, cigar_type){
 	delete cigar_num;
         delete cigar_type;
@@ -24,6 +55,7 @@ function parse_cigar(cigar_str, cigar_num, cigar_type){
 }       
 	
 {
+	chr=$3
 	tStart = $4
 	tEnd = tStart
 	parse_cigar($6, cigar_num, cigar_type);
@@ -39,15 +71,25 @@ function parse_cigar(cigar_str, cigar_num, cigar_type){
 		}
         }      
 	tEnd = tEnd - 1
-
-	for (i=tStart; i<=tEnd; i++){
-		cvg[i]+=1
+	
+	if (chr == r_chr || r_chr == ""){
+		for (i=tStart; i<=tEnd; i++){
+			if (i >= r_start){
+				if (i <= r_end || r_end == 0){
+					cvg[chr][i]+=1
+				}
+			}
+		}
 	}
 }
 END{
-	for (i=1; i<=length(cvg); i++){
-		printf("%d\t%d\n", i, cvg[i])
-	} 
+	for (ref in cvg){
+		for (i = 1; i <= length(cvg[ref]); i++){
+			if (cvg[ref][i] >0 ){
+				printf("%s\t%d\t%d\n", ref, i, cvg[ref][i])
+			}
+		}
+	}
 }
 ' > $outfile
 
