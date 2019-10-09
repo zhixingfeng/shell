@@ -8,7 +8,7 @@ if (length(args) < 2 ){
 
 data.files <- args[-length(args)]
 pdf.file <- args[length(args)]
-col.panel <- c('red', 'green','blue')
+col.panel <- c('red', 'green', 'blue', 'orange')
 
 pdf(pdf.file)
 	for (i in 1:length(data.files)){

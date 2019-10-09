@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+        echo "getdepth_mean cvgfile"
+        exit 0
+fi
+
+cvgfile=$1
+
+samplename=$(basename $cvgfile)
+samplename=${samplename%.*}
+
+awk -v samplename=$samplename 'BEGIN{
+	min_cvg = 0
+}
+{
+	if (NR==1){
+		min_cvg = $3
+	}else{
+		if ($3 < min_cvg){
+			min_cvg = $3
+		}
+	}
+}
+END{
+	print samplename"\t"min_cvg
+
+}' $cvgfile
+
+
+

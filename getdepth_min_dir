@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+        echo "getdepth_min_dir indir(cvgfiles)"
+        exit 0
+fi
+
+indir=$1
+for cvgfile in $(ls $indir/*.cvg); do
+	getdepth_min $cvgfile
+done
+
+
+
+
