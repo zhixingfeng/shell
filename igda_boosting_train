@@ -1,0 +1,95 @@
+#!/bin/bash
+objective="reg:squarederror"
+nthread=1
+num_round=200
+max_depth=1
+eta=0.01
+gamma=0
+min_child_weight=1
+test_file=""
+while getopts ":ho:n:r:d:e:g:m:t:" opt; do
+        case ${opt} in
+                h )
+                        echo "igda_boosting_cv [parameters] train_file outdir"
+			echo "parameters:"
+			echo -e "\t-o objective. default = reg:squarederror"
+                        echo -e "\t-n number of threads. default = 1"
+			echo -e "\t-r number of trees(rounds). default = 200"
+			echo -e "\t-d maximal depth of trees. default = 1"
+			echo -e "\t-e eta (step size). default = 0.01"
+			echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
+			echo -e "\t-m min_child_weight. default = 1"
+			echo -e "\t-t test_file. default = [empty]"
+                        exit 0;;
+		o ) 
+			objective=$OPTARG;;
+                n )
+                        nthread=$OPTARG;;
+                r )
+                        num_round=$OPTARG;;
+                d )
+                        max_depth=$OPTARG;;
+		e )
+                        eta=$OPTARG;;
+		g )
+                        gamma=$OPTARG;;
+		m )
+                        min_child_weight=$OPTARG;;
+		t )
+			test_file=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ "$#" -ne 2 ]; then
+	echo "igda_boosting_cv [parameters] train_file outdir"
+        echo "parameters:"
+	echo -e "\t-o objective. default = reg:squarederror"
+        echo -e "\t-n number of threads. default = 1"
+        echo -e "\t-r number of trees(rounds). default = 200"
+        echo -e "\t-d maximal depth of trees. default = 1"
+        echo -e "\t-e eta (step size). default = 0.01"
+        echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
+        echo -e "\t-m min_child_weight. default = 1"
+	echo -e "\t-t test_file. default = [empty]"
+        exit 0
+fi
+
+train_file=$1
+outdir=$2
+
+mkdir -p $outdir
+
+# write parameters to the configuration file
+config_file="$outdir/boosting.conf"
+model_file="$outdir/boosting.model"
+
+echo -e "booster = gbtree\n" > $config_file
+echo -e "objective = $objective\n" >> $config_file
+echo -e "nthread = $nthread\n" >> $config_file
+echo -e "num_round = $num_round\n" >> $config_file
+echo -e "max_depth = $max_depth\n" >> $config_file
+echo -e "eta = $eta\n" >> $config_file
+echo -e "gamma = $gamma\n" >> $config_file
+echo -e "min_child_weight = $min_child_weight\n" >> $config_file
+
+echo -e "eval_train = 1\n" >> $config_file
+echo -e "save_period = 0\n" >> $config_file
+
+echo -e "data = $train_file\n" >> $config_file
+if [ $test_file != "" ];then
+	echo -e "eval[test] = $test_file\n" >> $config_file
+	echo -e "test:data = $test_file\n" >> $config_file
+fi
+
+echo -e "model_out = $model_file" >> $config_file
+
+xgboost $config_file
+
+
+
+

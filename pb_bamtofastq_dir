@@ -14,7 +14,7 @@ for bamfile in $(ls $indir/*.bam); do
 	samplename=$(basename $bamfile)
 	samplename=${samplename%.bam}
 	outprefix=$outdir/$samplename
-	cmd="submitjob -w 1 -c 1 -m 4 -q express -j $samplename -o $logdir bam2fastq -o $outprefix $bamfile"
+	cmd="submitjob -w 4 -c 1 -m 4 -q express -j $samplename -o $logdir bam2fastq -o $outprefix $bamfile"
 	$cmd
 done
 

@@ -1,0 +1,92 @@
+#!/bin/bash
+objective="reg:squarederror"
+nthread=1
+num_round=200
+max_depth=1
+eta=0.01
+gamma=0
+min_child_weight=1
+test_file=""
+seed=3652
+nfold=5
+while getopts ":ho:n:r:d:e:g:m:t:s:f:" opt; do
+        case ${opt} in
+                h )
+                        echo "igda_boosting_cv [parameters] train_file outdir"
+			echo "parameters:"
+			echo -e "\t-o objective. default = reg:squarederror"
+                        echo -e "\t-n number of threads. default = 1"
+			echo -e "\t-r number of trees(rounds). default = 200"
+			echo -e "\t-d maximal depth of trees. default = 1"
+			echo -e "\t-e eta (step size). default = 0.01"
+			echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
+			echo -e "\t-m min_child_weight. default = 1"
+			#echo -e "\t-t test_file. default = [empty]"
+			echo -e "\t-s seed. default = 3652"
+			echo -e "\t-f number of fold. default = 5"
+                        exit 0;;
+		o ) 
+			objective=$OPTARG;;
+                n )
+                        nthread=$OPTARG;;
+                r )
+                        num_round=$OPTARG;;
+                d )
+                        max_depth=$OPTARG;;
+		e )
+                        eta=$OPTARG;;
+		g )
+                        gamma=$OPTARG;;
+		m )
+                        min_child_weight=$OPTARG;;
+		t )
+			test_file=$OPTARG;;
+		s ) 
+			seed=$OPTARG;;
+		f )
+			nfold=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ "$#" -ne 2 ]; then
+	echo "igda_boosting_cv [parameters] train_file outdir"
+        echo "parameters:"
+	echo -e "\t-o objective. default = reg:squarederror"
+        echo -e "\t-n number of threads. default = 1"
+        echo -e "\t-r number of trees(rounds). default = 200"
+        echo -e "\t-d maximal depth of trees. default = 1"
+        echo -e "\t-e eta (step size). default = 0.01"
+        echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
+        echo -e "\t-m min_child_weight. default = 1"
+	#echo -e "\t-t test_file. default = [empty]"
+	echo -e "\t-s seed. default = 3652"
+	echo -e "\t-f number of fold. default = 5"
+        exit 0
+fi
+
+train_file=$1
+outdir=$2
+
+mkdir -p $outdir
+echo "seed is $seed"
+igda_shud -s $seed -o $outdir/$train_file.shuffle $train_file
+
+n_sample=$(wc -l $outdir/$train_file.shuffle | awk '{print $1}')
+awk -v n_sample=$n_sample -v nfold=$nfold -v outprefix=$outdir/$train_file.shuffle 'BEGIN{
+	group_size = int(n_sample / nfold)
+}{
+	file_id = int(NR/group_size) + 1
+	if (file_id > nfold){
+		file_id = nfold
+	}
+	outfile = outprefix".part"file_id
+	print $0 > outfile
+}' $outdir/$train_file.shuffle
+
+
+
