@@ -73,11 +73,25 @@ train_file=$1
 outdir=$2
 
 mkdir -p $outdir
-echo "seed is $seed"
-igda_shud -s $seed -o $outdir/$train_file.shuffle $train_file
 
-n_sample=$(wc -l $outdir/$train_file.shuffle | awk '{print $1}')
-awk -v n_sample=$n_sample -v nfold=$nfold -v outprefix=$outdir/$train_file.shuffle 'BEGIN{
+# record log
+echo "seed = $seed" > $outdir/log.txt
+echo "nfold = $nfold" >> $outdir/log.txt
+
+echo "objective = $objective" >> $outdir/log.txt
+echo "num_round = $num_round" >> $outdir/log.txt
+echo "max_depth = $max_depth" >> $outdir/log.txt
+echo "eta = $eta" >> $outdir/log.txt
+echo "gamma = $gamma" >> $outdir/log.txt
+echo "min_child_weight = $min_child_weight" >> $outdir/log.txt
+echo "train_file = $train_file" >> $outdir/log.txt
+echo "outdir = $outdir" >> $outdir/log.txt
+
+# split input file into testing and training file
+igda_shud -s $seed -o $outdir/$(basename $train_file).shuffle $train_file
+
+n_sample=$(wc -l $outdir/$(basename $train_file).shuffle | awk '{print $1}')
+awk -v n_sample=$n_sample -v nfold=$nfold -v outprefix=$outdir/$(basename $train_file).shuffle 'BEGIN{
 	group_size = int(n_sample / nfold)
 }{
 	file_id = int(NR/group_size) + 1
@@ -86,7 +100,67 @@ awk -v n_sample=$n_sample -v nfold=$nfold -v outprefix=$outdir/$train_file.shuff
 	}
 	outfile = outprefix".part"file_id
 	print $0 > outfile
-}' $outdir/$train_file.shuffle
+}' $outdir/$(basename $train_file).shuffle
+
+# cross validation
+part_files=$(ls $outdir/*.part*)
+for part_file in $part_files;do
+	echo $part_file
+	part_id=${part_file##*.}
+	mkdir -p $outdir/$part_id
+	cur_test_file=$outdir/$part_id/test_dat.txt
+	cur_train_file=$outdir/$part_id/train_dat.txt
+	cur_train_out=$outdir/$part_id/train
+	cp $part_file $cur_test_file
+	ls $outdir/*.part* | grep -v ".$part_id$" | xargs cat > $cur_train_file
+
+	# train
+	igda_boosting_train -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -t $cur_test_file $cur_train_file $cur_train_out
+
+	# test
+	cur_pred_file=$outdir/$part_id/pred_test_dat.txt
+	igda_boosting_pred $cur_train_out $cur_test_file $cur_pred_file
+done
+
+# evaluate
+cmd="cat"
+for fold_id in $(seq 1 $nfold); do
+	cmd=$cmd" $outdir/part$fold_id/pred_test_dat.txt"
+done
+$cmd > $outdir/prediction.txt
+
+is_binary=$(grep "objective = " $outdir/log.txt  | grep "binary:" | wc -l)
+
+pred_file=$outdir/prediction.txt
+if [ $is_binary -eq 1 ];then
+	awk '{if ($1 > 0.5) {print 1} else{print 0}}' $outdir/prediction.txt > $outdir/prediction_binary.txt
+	pred_file=$outdir/prediction_binary.txt
+fi
+
+
+n_pred=$(wc -l $pred_file | awk '{print $1}')
+n_dat=$(wc -l $outdir/$(basename $train_file).shuffle | awk '{print $1}')
+
+if [ $n_pred -ne $n_dat ];then
+	echo "$n_pred != $n_dat"
+	exit 1
+fi
+
+cp $outdir/log.txt $outdir/err_rate.txt
+
+label_avg=$(awk 'BEGIN{n_sample = 0; avg = 0}{if ($0 != ""){n_sample += 1; avg += $1} }END{print avg / n_sample}' $outdir/$(basename $train_file).shuffle)
+
+awk -v avg=$label_avg 'BEGIN{err = 0; err_null = 0; n_sample = 0}{
+	if ($0 != ""){
+		n_sample += 1
+		if (FNR == NR){
+			pred[FNR]=$1
+		}else{
+			err += ($1 - pred[FNR])^2
+			err_null += ($1 - avg)^2
+		}
+	}
+}END{print "error_r2 = "err / err_null; print "error_rate = "err / n_sample}' $pred_file $outdir/$(basename $train_file).shuffle >> $outdir/err_rate.txt
 
 
 
