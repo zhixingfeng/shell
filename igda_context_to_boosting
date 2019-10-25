@@ -1,0 +1,168 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+	echo "igda_context_to_boosting contexteffect_file xgboost_trainfile pred_base"
+        exit 0
+fi
+
+contexteffect_file=$1
+xgboost_trainfile=$2
+pred_base=$3
+
+awk -v pred_base=$pred_base '{
+	switch (pred_base){
+		case "A": 
+			printf("%lf ", $3 / $7)
+                	break
+                case "C": 
+			printf("%lf ", $4 / $7)
+                        break
+                case "G": 
+			printf("%lf ", $5 / $7)
+                        break
+                case "T":
+			printf("%lf ", $6 / $7)
+                        break
+                default:
+                        print "non A, C, G, T pred_base"
+                        exit 1
+                        break
+	}
+	
+	split($1, context_left, "")
+	split($2, context_right, "")
+
+	ref_base = context_left[length(context_left)]
+	
+	# encode left context
+	cur_pos = -1
+	prev_base = ""
+	for (i = 1; i <= length(context_left); i++){
+		cur_base = context_left[i]
+		
+		if (cur_base != prev_base){
+			if (prev_base != ""){
+				printf("%d:%d ", 4*cur_pos + cur_shift, cur_count)
+			}
+			prev_base = cur_base
+			cur_pos += 1
+			cur_count = 1
+		}else{
+			cur_count += 1
+		}
+	
+		switch (cur_base){
+                        case "A": 
+                                cur_shift = 0;
+                                break
+                        case "C": 
+                                cur_shift = 1;
+                                break
+                        case "G": 
+                                cur_shift = 2;
+                                break
+                        case "T": 
+                                cur_shift = 3;
+                                break
+                        default:
+                                print "non A, C, G, T base"
+                                exit 1
+                                break
+                }
+	
+		if (i == length(context_left)){
+			printf("%d:%d ", 4*cur_pos + cur_shift, cur_count)
+		}
+	}
+	
+	# encode reference base
+	switch (ref_base){
+        	case "A": 
+                	cur_shift = 0;
+                        break
+                case "C": 
+                        cur_shift = 1;
+                        break
+                case "G": 
+                        cur_shift = 2;
+                        break
+                case "T": 
+                        cur_shift = 3;
+                        break
+                default:
+                        print "non A, C, G, T base"
+                        exit 1
+                        break
+        }
+
+	cur_pos += 1
+	cur_count = 0
+	k = 1
+	is_first = 1
+	delete context_right_trim
+	for (i = 1; i <= length(context_right); i++){
+		if (context_right[i] == ref_base){
+			if (is_first){
+				cur_count += 1
+			}else{
+				context_right_trim[k] = context_right[i]
+                        	k += 1
+			}
+		}else{
+			is_first = 0
+			
+			context_right_trim[k] = context_right[i]
+			k += 1
+		}
+	}	
+	printf("%d:%d ", 4*cur_pos + cur_shift, cur_count)
+
+	# encode right context
+	prev_base = ""
+        for (i = 1; i <= length(context_right_trim); i++){
+                cur_base = context_right_trim[i]
+                
+                if (cur_base != prev_base){
+                        if (prev_base != ""){
+                                printf("%d:%d ", 4*cur_pos + cur_shift, cur_count)
+                        }
+                        prev_base = cur_base
+                        cur_pos += 1
+                        cur_count = 1
+                }else{
+                        cur_count += 1
+                }
+        
+                switch (cur_base){
+                        case "A": 
+                                cur_shift = 0;
+                                break
+                        case "C": 
+                                cur_shift = 1;
+                                break
+                        case "G": 
+                                cur_shift = 2;
+                                break
+                        case "T": 
+                                cur_shift = 3;
+                                break
+                        default:
+                                print "non A, C, G, T base"
+                                exit 1
+                                break
+                }
+        
+                if (i == length(context_right_trim)){
+                        printf("%d:%d ", 4*cur_pos + cur_shift, cur_count)
+                }
+        }
+	
+	printf("\n")
+	#for (i = 1; i <= length(context_right_trim); i++){
+	#	printf("%s", context_right_trim[i])
+	#}
+	#printf("\n")
+	
+}' $contexteffect_file | awk '{if ($1 >0 ) print $0 }' > $xgboost_trainfile
+
+
+
