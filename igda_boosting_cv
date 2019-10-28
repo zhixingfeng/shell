@@ -1,5 +1,5 @@
 #!/bin/bash
-objective="reg:squarederror"
+objective="reg:logistic"
 nthread=1
 num_round=200
 max_depth=1
@@ -14,7 +14,7 @@ while getopts ":ho:n:r:d:e:g:m:t:s:f:" opt; do
                 h )
                         echo "igda_boosting_cv [parameters] train_file outdir"
 			echo "parameters:"
-			echo -e "\t-o objective. default = reg:squarederror"
+			echo -e "\t-o objective. default = reg:logistic"
                         echo -e "\t-n number of threads. default = 1"
 			echo -e "\t-r number of trees(rounds). default = 200"
 			echo -e "\t-d maximal depth of trees. default = 1"
@@ -56,7 +56,7 @@ shift $((OPTIND - 1))
 if [ "$#" -ne 2 ]; then
 	echo "igda_boosting_cv [parameters] train_file outdir"
         echo "parameters:"
-	echo -e "\t-o objective. default = reg:squarederror"
+	echo -e "\t-o objective. default = reg:logistic"
         echo -e "\t-n number of threads. default = 1"
         echo -e "\t-r number of trees(rounds). default = 200"
         echo -e "\t-d maximal depth of trees. default = 1"

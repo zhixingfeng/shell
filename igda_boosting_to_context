@@ -1,0 +1,86 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+	echo "igda_boosting_to_context xgboost_trainfile pred_file out_file"
+        exit 0
+fi
+
+xgboost_trainfile=$1
+pred_file=$2
+out_file=$3
+
+awk -F " " '{
+	context_len = (NF - 1) / 2
+	if (context_len <=0 || context_len % 2 !=0 ){
+		print "context_len <=0 || context_len % 2 !=0"
+		exit 1
+	}
+	for (i = 1; i <= context_len; i ++){
+		k = 1 + i
+		split($k, buf, ":")
+		cur_base_code = buf[1]
+		cur_count = buf[2]
+		switch (cur_base_code % 4){
+			case 0:
+				cur_base = "A"
+				break
+			case 1:
+				cur_base = "C"
+				break
+			case 2:
+				cur_base = "G"
+				break
+			case 3 :
+				cur_base = "T"
+				break
+			default:
+				print "cur_base_code error"
+				exit 1
+				break
+		}
+		if (cur_count > 0){
+			for (j = 1; j <= cur_count; j++){
+				printf("%s",cur_base)
+			}
+		}
+	}
+	printf("\t")
+	
+	for (i = 1; i <= context_len; i ++){
+                k = 1 + context_len + i
+                split($k, buf, ":")
+                cur_base_code = buf[1]
+                cur_count = buf[2]
+                switch (cur_base_code % 4){
+                        case 0:
+                                cur_base = "A"
+                                break
+                        case 1:
+                                cur_base = "C"
+                                break
+                        case 2:
+                                cur_base = "G"
+                                break
+                        case 3 :
+                                cur_base = "T"
+                                break
+                        default:
+                                print "cur_base_code error"
+                                exit 1
+                                break
+                }
+                if (cur_count > 0){
+                        for (j = 1; j <= cur_count; j++){
+                                printf("%s",cur_base)
+                        }
+                }
+        }
+
+	printf ("\n")
+}' $xgboost_trainfile > ${out_file}.tmp
+
+paste ${out_file}.tmp $pred_file > $out_file
+
+rm ${out_file}.tmp
+
+
+

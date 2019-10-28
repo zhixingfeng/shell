@@ -1,0 +1,52 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+	echo "igda_boosting_pred igda_context_train_outdir contexteffect_file outdir"
+        exit 0
+fi
+
+model_dir=$1
+contexteffect_file=$2
+outdir=$3
+
+mkdir -p $outdir
+
+igda_context_to_boosting $contexteffect_file $outdir/dat_A.txt A
+igda_context_to_boosting $contexteffect_file $outdir/dat_C.txt C
+igda_context_to_boosting $contexteffect_file $outdir/dat_G.txt G
+igda_context_to_boosting $contexteffect_file $outdir/dat_T.txt T
+
+igda_boosting_pred $model_dir/train_A $outdir/dat_A.txt $outdir/predition_A.txt
+igda_boosting_pred $model_dir/train_C $outdir/dat_C.txt $outdir/predition_C.txt
+igda_boosting_pred $model_dir/train_G $outdir/dat_G.txt $outdir/predition_G.txt
+igda_boosting_pred $model_dir/train_T $outdir/dat_T.txt $outdir/predition_T.txt
+
+igda_boosting_to_context $outdir/dat_A.txt $outdir/predition_A.txt $outdir/predition_A_context.txt
+igda_boosting_to_context $outdir/dat_C.txt $outdir/predition_C.txt $outdir/predition_C_context.txt
+igda_boosting_to_context $outdir/dat_G.txt $outdir/predition_G.txt $outdir/predition_G_context.txt
+igda_boosting_to_context $outdir/dat_T.txt $outdir/predition_T.txt $outdir/predition_T_context.txt
+
+for pred_file in $(ls $outdir/predition*context.txt); do
+	cur_outfile=${pred_file}.tmp
+
+	awk -F "\t" '
+	{
+		if (NR == FNR){
+                	pred_model[$1][$2] = $3
+        	}else{
+	                pred_prop = pred_model[$1][$2]
+                	if (pred_prop == ""){
+        	                print "0"
+	                }else{
+                        	print int(pred_prop*$7+0.5)
+                	}
+        	}
+	}' $pred_file $contexteffect_file > $cur_outfile
+done
+
+awk '{print $1"\t"$2}' $contexteffect_file > $outdir/context.tmp
+awk '{print $7}' $contexteffect_file > $outdir/coverage.tmp
+
+paste $outdir/context.tmp $outdir/predition_A_context.txt.tmp $outdir/predition_C_context.txt.tmp $outdir/predition_G_context.txt.tmp $outdir/predition_T_context.txt.tmp $outdir/coverage.tmp > $outdir/predition.txt
+
+rm $outdir/*.tmp
+

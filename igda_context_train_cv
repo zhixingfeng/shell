@@ -7,10 +7,12 @@ eta=0.01
 gamma=0
 min_child_weight=1
 test_file=""
-while getopts ":ho:n:r:d:e:g:m:t:" opt; do
+seed=3652
+nfold=5
+while getopts ":ho:n:r:d:e:g:m:t:s:f:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_boosting_cv [parameters] train_file outdir"
+                        echo "igda_boosting_cv [parameters] contexteffect_file outdir"
 			echo "parameters:"
 			echo -e "\t-o objective. default = reg:logistic"
                         echo -e "\t-n number of threads. default = 1"
@@ -19,7 +21,9 @@ while getopts ":ho:n:r:d:e:g:m:t:" opt; do
 			echo -e "\t-e eta (step size). default = 0.01"
 			echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
 			echo -e "\t-m min_child_weight. default = 1"
-			echo -e "\t-t test_file. default = [empty]"
+			#echo -e "\t-t test_file. default = [empty]"
+			echo -e "\t-s seed. default = 3652"
+			echo -e "\t-f number of fold. default = 5"
                         exit 0;;
 		o ) 
 			objective=$OPTARG;;
@@ -37,6 +41,10 @@ while getopts ":ho:n:r:d:e:g:m:t:" opt; do
                         min_child_weight=$OPTARG;;
 		t )
 			test_file=$OPTARG;;
+		s ) 
+			seed=$OPTARG;;
+		f )
+			nfold=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -46,7 +54,7 @@ done
 shift $((OPTIND - 1))
 
 if [ "$#" -ne 2 ]; then
-	echo "igda_boosting_cv [parameters] train_file outdir"
+	echo "igda_boosting_cv [parameters] contexteffect_file outdir"
         echo "parameters:"
 	echo -e "\t-o objective. default = reg:logistic"
         echo -e "\t-n number of threads. default = 1"
@@ -55,41 +63,37 @@ if [ "$#" -ne 2 ]; then
         echo -e "\t-e eta (step size). default = 0.01"
         echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
         echo -e "\t-m min_child_weight. default = 1"
-	echo -e "\t-t test_file. default = [empty]"
+	#echo -e "\t-t test_file. default = [empty]"
+	echo -e "\t-s seed. default = 3652"
+	echo -e "\t-f number of fold. default = 5"
         exit 0
 fi
 
-train_file=$1
+contexteffect_file=$1
 outdir=$2
 
 mkdir -p $outdir
 
-# write parameters to the configuration file
-config_file="$outdir/boosting.conf"
-model_file="$outdir/boosting.model"
+# prepare training data
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_A.txt A
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_C.txt C
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_G.txt G
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_T.txt T
 
-echo -e "booster = gbtree\n" > $config_file
-echo -e "objective = $objective\n" >> $config_file
-echo -e "nthread = $nthread\n" >> $config_file
-echo -e "num_round = $num_round\n" >> $config_file
-echo -e "max_depth = $max_depth\n" >> $config_file
-echo -e "eta = $eta\n" >> $config_file
-echo -e "gamma = $gamma\n" >> $config_file
-echo -e "min_child_weight = $min_child_weight\n" >> $config_file
+# cross validation 
+igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_A.txt $outdir/train_cv_A
 
-echo -e "eval_train = 1\n" >> $config_file
-echo -e "save_period = 0\n" >> $config_file
+igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_C.txt $outdir/train_cv_C
 
-echo -e "data = $train_file\n" >> $config_file
-if [ $test_file != "" ];then
-	echo -e "eval[test] = $test_file\n" >> $config_file
-	echo -e "test:data = $test_file\n" >> $config_file
-fi
+igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_G.txt $outdir/train_cv_G
 
-echo -e "model_out = $model_file" >> $config_file
+igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_T.txt $outdir/train_cv_T
 
-xgboost $config_file
+ 
 
+
+
+ 
 
 
 

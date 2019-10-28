@@ -1,0 +1,105 @@
+#!/bin/bash
+objective="reg:logistic"
+nthread=1
+num_round=200
+max_depth=1
+eta=0.01
+gamma=0
+min_child_weight=1
+test_file=""
+seed=3652
+nfold=5
+while getopts ":ho:n:r:d:e:g:m:t:s:f:" opt; do
+        case ${opt} in
+                h )
+                        echo "igda_boosting_cv [parameters] contexteffect_file outdir"
+			echo "parameters:"
+			echo -e "\t-o objective. default = reg:logistic"
+                        echo -e "\t-n number of threads. default = 1"
+			echo -e "\t-r number of trees(rounds). default = 200"
+			echo -e "\t-d maximal depth of trees. default = 1"
+			echo -e "\t-e eta (step size). default = 0.01"
+			echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
+			echo -e "\t-m min_child_weight. default = 1"
+			#echo -e "\t-t test_file. default = [empty]"
+			echo -e "\t-s seed. default = 3652"
+			echo -e "\t-f number of fold. default = 5"
+                        exit 0;;
+		o ) 
+			objective=$OPTARG;;
+                n )
+                        nthread=$OPTARG;;
+                r )
+                        num_round=$OPTARG;;
+                d )
+                        max_depth=$OPTARG;;
+		e )
+                        eta=$OPTARG;;
+		g )
+                        gamma=$OPTARG;;
+		m )
+                        min_child_weight=$OPTARG;;
+		t )
+			test_file=$OPTARG;;
+		s ) 
+			seed=$OPTARG;;
+		f )
+			nfold=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ "$#" -ne 2 ]; then
+	echo "igda_boosting_cv [parameters] contexteffect_file outdir"
+        echo "parameters:"
+	echo -e "\t-o objective. default = reg:logistic"
+        echo -e "\t-n number of threads. default = 1"
+        echo -e "\t-r number of trees(rounds). default = 200"
+        echo -e "\t-d maximal depth of trees. default = 1"
+        echo -e "\t-e eta (step size). default = 0.01"
+        echo -e "\t-g gamma (minimum loss reduction required to make a further partition). default = 0"
+        echo -e "\t-m min_child_weight. default = 1"
+	#echo -e "\t-t test_file. default = [empty]"
+	echo -e "\t-s seed. default = 3652"
+	echo -e "\t-f number of fold. default = 5"
+        exit 0
+fi
+
+contexteffect_file=$1
+outdir=$2
+
+mkdir -p $outdir
+
+# prepare training data
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_A.txt A
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_C.txt C
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_G.txt G
+igda_context_to_boosting $contexteffect_file $outdir/train_dat_T.txt T
+
+# cross validation 
+igda_boosting_train -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight $outdir/train_dat_A.txt $outdir/train_A
+igda_boosting_train -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight $outdir/train_dat_C.txt $outdir/train_C
+igda_boosting_train -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight $outdir/train_dat_G.txt $outdir/train_G
+igda_boosting_train -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight $outdir/train_dat_T.txt $outdir/train_T
+
+
+#igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_A.txt $outdir/train_cv_A
+
+#igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_C.txt $outdir/train_cv_C
+
+#igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_G.txt $outdir/train_cv_G
+
+#igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_T.txt $outdir/train_cv_T
+
+ 
+
+
+
+ 
+
+
+
