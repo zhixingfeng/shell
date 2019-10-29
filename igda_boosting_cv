@@ -160,7 +160,7 @@ awk -v avg=$label_avg 'BEGIN{err = 0; err_null = 0; n_sample = 0}{
 			err_null += ($1 - avg)^2
 		}
 	}
-}END{print "error_r2 = "err / err_null; print "error_rate = "err / n_sample}' $pred_file $outdir/$(basename $train_file).shuffle >> $outdir/err_rate.txt
+}END{print "err = "err ; print "err_null = "err_null; print "error_r2 = "err / err_null; print "error_rate = "err / n_sample}' $pred_file $outdir/$(basename $train_file).shuffle >> $outdir/err_rate.txt
 
 
 

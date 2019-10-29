@@ -90,7 +90,7 @@ igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -
 igda_boosting_cv -o $objective -n $nthread -r $num_round -d $max_depth -e $eta -g $gamma -m $min_child_weight -s $seed $outdir/train_dat_T.txt $outdir/train_cv_T
 
  
-
+grep "error_r2 =" $outdir/train_cv_*/err_rate.txt | awk 'BEGIN{x=0; n=0}{x+=$3; n+=1}END{print x/n}' > $outdir/error_r2_mean.txt
 
 
  
