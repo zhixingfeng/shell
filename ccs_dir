@@ -12,7 +12,9 @@ mkdir -p $outdir
 for bamfile in $(ls $indir | grep ".bam$" ); do
 	ccsfile=${bamfile%.*}_ccs.bam
 	reportfile=${bamfile%.*}_report.txt
-	submitjob 6 -c $nthread -m 16 -P acc_LymeMIND -q premium ccs --richQVs --force --reportFile $outdir/$reportfile $indir/$bamfile $outdir/$ccsfile
+	cmd="ccs --richQVs --force --reportFile $outdir/$reportfile $indir/$bamfile $outdir/$ccsfile"
+	echo $cmd
+	#submitjob 6 -c $nthread -m 16 -P acc_LymeMIND -q premium ccs --richQVs --force --reportFile $outdir/$reportfile $indir/$bamfile $outdir/$ccsfile
 done
 
 

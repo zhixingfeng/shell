@@ -1,0 +1,27 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "download_hdf5_metadata accession_list outdir"
+        exit 0
+fi
+
+outdir=$2
+mkdir -p $outdir
+
+run_ids=$(cat $1)
+for run_id in $run_ids; do
+	mkdir -p $outdir/$run_id/Analysis_Results
+	url_metadata=$(srapath $run_id -f names --raw -p typ=srapub_files -p accept-proto=https | grep ".metadata.xml.1|" | cut -d "|" -f8)
+	
+	wget --no-check-certificate -P $outdir/$run_id/ $url_metadata
+	
+	for metafile in $(ls $outdir/$run_id/*.xml.1);do
+		outfile=${metafile%.xml.1}.xml
+		mv $metafile $outfile
+	done
+
+done
+
+
+
+
+
