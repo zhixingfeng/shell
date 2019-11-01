@@ -1,13 +1,88 @@
 #!/bin/bash
-# require bioawk
-if [ "$#" -ne 3 ]; then
-        echo "igda_var2vcf ann_file detect_cvf_file vcf_file"
+if [ "$#" -ne 4 ]; then
+        echo "igda_var2vcf ann_file detect_cvf_file vcf_file haplotype_prefix"
         exit 0
 fi
 
 ann_file=$1
-detect_cvf_file=$2
+detect_vcf_file=$2
 vcf_file=$3
+haplotype_prefix=$4
+
+n_sample=$(awk 'BEGIN{n_sample = 0}{if ($1!="-1"){n_sample += 1} } END{print n_sample}' $ann_file)
+
+awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_prefix '{
+	if (NR == FNR){
+		if (substr($1, 1, 2) == "##"){
+			print $0 > vcf_file".tmp.meta"
+		}else{
+			if (substr($1, 1, 1) == "#"){
+				printf("%s\tFORMAT", $0) > vcf_file".tmp.head"
+				for (i = 1; i <= n_sample; i++){
+					printf("\t%s_%d", haplotype_prefix, i) > vcf_file".tmp.head"
+				}
+				printf("\n") > vcf_file".tmp.head"
+			}else{
+				var_dat[$2] = $4
+				print $0 > vcf_file".tmp.data"
+			}
+		}
+	}else{
+		close(vcf_file".tmp.data")
+		close(vcf_file".tmp.head")
+
+		cur_outfile = vcf_file".tmp.sample."FNR
+		delete cur_var_dat
+		if ($1 != "-1"){
+			split($1, cur_code, ",")
+			for (i = 1; i <= length(cur_code); i++){
+				cur_var_dat[int(cur_code[i] / 4) + 1] = cur_code[i] % 4
+			}
+			for (key in var_dat){
+				if (cur_var_dat[key] == ""){
+					print 0 > cur_outfile
+				}else{
+					switch(var_dat[key]){
+						case "A":
+							ref_code = 0
+							break
+						case "C":
+							ref_code = 1
+                                                        break
+						case "G":
+							ref_code = 2
+                                                        break
+						case "T":
+							ref_code = 3
+                                                        break
+						default:
+							print "igda_phase2vcf: non A,C,G,T refbase"
+							exit 1
+							break
+					}
+					if (cur_var_dat[key] == ref_code){
+						print "igda_phase2vcf: altbase == refbase"
+						exit 1
+					}else{
+						if (cur_var_dat[key] > ref_code){
+							print cur_var_dat[key] - 1 + 1 > cur_outfile
+						}else{
+							print cur_var_dat[key] + 1 > cur_outfile
+						}
+					}
+					#print 1 > cur_outfile
+				}
+			}
+		}
+	}
+
+}' $detect_vcf_file $ann_file
+
+awk '{print "GT"}' ${vcf_file}.tmp.data > ${vcf_file}.tmp.format
+
+paste -d "\t" ${vcf_file}.tmp.data ${vcf_file}.tmp.format ${vcf_file}.tmp.sample.* > ${vcf_file}.tmp.sample
+
+cat ${vcf_file}.tmp.meta ${vcf_file}.tmp.head ${vcf_file}.tmp.sample > $vcf_file
 
 
-
+rm ${vcf_file}.tmp.meta ${vcf_file}.tmp.head ${vcf_file}.tmp.sample ${vcf_file}.tmp.data ${vcf_file}.tmp.format ${vcf_file}.tmp.sample.*

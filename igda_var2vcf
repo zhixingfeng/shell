@@ -60,6 +60,6 @@ awk -F "\t" '{
 	
 }' ${vcf_file}.tmp.fasta ${vcf_file}.tmp.var >> $vcf_file
 
-
+rm ${vcf_file}.tmp.fasta ${vcf_file}.tmp.var
 
 
