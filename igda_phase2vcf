@@ -55,8 +55,11 @@ awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_p
 						case "T":
 							ref_code = 3
                                                         break
+						case "N":
+							ref_code = -1
+							break
 						default:
-							print "igda_phase2vcf: non A,C,G,T refbase"
+							print "igda_phase2vcf: non A,C,G,T,N refbase"
 							exit 1
 							break
 					}
@@ -74,6 +77,7 @@ awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_p
 				}
 			}
 		}
+		close(cur_outfile)
 	}
 
 }' $detect_vcf_file $ann_file
