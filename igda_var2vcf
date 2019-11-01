@@ -1,0 +1,65 @@
+#!/bin/bash
+# require bioawk
+if [ "$#" -ne 3 ]; then
+        echo "igda_var2vcf var_file ref_file vcf_file"
+        exit 0
+fi
+
+var_file=$1
+ref_file=$2
+vcf_file=$3
+
+bioawk -c fastx '{if (NR>1){print "number of refseq > 1"; exit 1}else{print $name"\t"$seq}}' $ref_file > ${vcf_file}.tmp.fasta
+
+sort -nu -k1,1 $var_file > ${vcf_file}.tmp.var
+
+# vcf metainfo
+echo -e "##fileformat=VCFv4.2" > $vcf_file
+echo -e "##fileDate=$(date)" >> $vcf_file
+echo -e "##source=igda" >> $vcf_file
+echo -e "##reference=$ref_file" >> $vcf_file
+echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" >> $vcf_file
+
+# fill in data to vcf 
+awk -F "\t" '{
+	if (NR == FNR){
+		refname = $1
+		split($2, refseq, "")
+	}else{
+		pos = $1 + 1
+		refbase = refseq[pos]
+		altbase = $2
+		if (refbase == altbase){
+			print "refbase == altbase"
+			exit 1
+		}
+		
+		switch(refbase){
+			case "A":
+				altbase="C,G,T,N"
+				break
+			case "C":
+				altbase="A,G,T,N"
+                                break
+			case "G":
+				altbase="A,C,T,N"
+                                break
+			case "T":
+				altbase="A,C,G,N"
+                                break
+			case "N":
+				altbase="A,C,G,T"
+                                break
+			default:
+				print "unknown refbase in igda_var2vcf"
+				exit 1
+				break
+		}
+		print refname"\t"pos"\t.\t"refbase"\t"altbase"\t"100"\tPASS\t""."
+	}
+	
+}' ${vcf_file}.tmp.fasta ${vcf_file}.tmp.var >> $vcf_file
+
+
+
+

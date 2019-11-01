@@ -1,0 +1,13 @@
+#!/bin/bash
+# require bioawk
+if [ "$#" -ne 3 ]; then
+        echo "igda_var2vcf ann_file detect_cvf_file vcf_file"
+        exit 0
+fi
+
+ann_file=$1
+detect_cvf_file=$2
+vcf_file=$3
+
+
+
