@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-#!/usr/bin/bash
 jobcore=1
 jobmem=2
 jobwalltime=02:00

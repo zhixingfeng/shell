@@ -1,13 +1,50 @@
 #!/bin/bash
+
+outdir=""
+desp=""
+
+while getopts ":ho:" opt; do
+        case ${opt} in
+                h )
+			echo "backup_retrieve -o outdir directory(end with /) description"
+                        echo -e "\t-o output directory";;
+                o )
+                        outdir=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+
 if [ $# -eq 0 ] ; then
-        echo "backup_retrieve directory (end with /) description"
+        echo "backup_retrieve -o outdir directory(end with /) description"
+	echo -e "\t-o output directory"
         exit 0
 fi
 
-echo $1 " " $2
-
+indir=$1
+desp=$2
 if [ $# -eq 1 ]; then
-	dsmc retrieve -se=fengz03 $1 -sub=yes
-fi 
+	cmd="dsmc retrieve -se=fengz03 $indir $outdir -sub=yes"
+	echo $cmd
+	$cmd
+fi
+
+if [ $# -eq 2 ]; then
+        cmd="dsmc retrieve -se=fengz03 -description=$desp $indir $outdir -sub=yes"
+        echo $cmd
+	$cmd
+fi
+
+
+
+#echo  " " $2
+
+#if [ $# -eq 1 ]; then
+#	dsmc retrieve -se=fengz03 $1 -sub=yes
+#fi 
 
 
