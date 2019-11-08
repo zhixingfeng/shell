@@ -89,6 +89,8 @@ igda assemble $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.
 echo "============= recalculate abundance ==========="
 igda abundance $outdir/realign.ann.tested.ft.count.ft.assembled $outdir/realign.recode $indir/realign.m5
 
+igda_phase2vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count $indir/realign.vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.vcf igda
+
 echo "Done."
 
 

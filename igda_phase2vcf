@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ "$#" -ne 4 ]; then
-        echo "igda_var2vcf ann_file detect_cvf_file vcf_file haplotype_prefix"
+        echo "igda_phase2vcf ann_file detect_cvf_file vcf_file haplotype_prefix"
         exit 0
 fi
 
@@ -88,5 +88,6 @@ paste -d "\t" ${vcf_file}.tmp.data ${vcf_file}.tmp.format ${vcf_file}.tmp.sample
 
 cat ${vcf_file}.tmp.meta ${vcf_file}.tmp.head ${vcf_file}.tmp.sample > $vcf_file
 
-
 rm ${vcf_file}.tmp.meta ${vcf_file}.tmp.head ${vcf_file}.tmp.sample ${vcf_file}.tmp.data ${vcf_file}.tmp.format ${vcf_file}.tmp.sample.*
+
+
