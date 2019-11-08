@@ -11,7 +11,7 @@ haplotype_prefix=$4
 
 n_sample=$(awk 'BEGIN{n_sample = 0}{if ($1!="-1"){n_sample += 1} } END{print n_sample}' $ann_file)
 
-awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_prefix -F "\t" 'BEGIN{loci_n = 0}{
+awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_prefix '{
 	if (NR == FNR){
 		if (substr($1, 1, 2) == "##"){
 			print $0 > vcf_file".tmp.meta"
@@ -23,10 +23,7 @@ awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_p
 				}
 				printf("\n") > vcf_file".tmp.head"
 			}else{
-				vcf_refbase[$2] = $4
-				vcf_altbase[$2] = $5
-				loci_n++;
-				loci[loci_n] = $2
+				var_dat[$2] = $4
 				print $0 > vcf_file".tmp.data"
 			}
 		}
@@ -41,41 +38,42 @@ awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_p
 			for (i = 1; i <= length(cur_code); i++){
 				cur_var_dat[int(cur_code[i] / 4) + 1] = cur_code[i] % 4
 			}
-			#for (key in vcf_refbase){
-			for (k = 1; k <= length(loci); k++){
-				key = loci[k]
+			for (key in var_dat){
 				if (cur_var_dat[key] == ""){
 					print 0 > cur_outfile
 				}else{
-					switch(cur_var_dat[key]){
-						case 0:
-							cut_altbase = "A"
+					switch(var_dat[key]){
+						case "A":
+							ref_code = 0
 							break
-						case 1:
-							cut_altbase = "C"
+						case "C":
+							ref_code = 1
                                                         break
-						case 2:
-							cut_altbase = "G"
+						case "G":
+							ref_code = 2
                                                         break
-						case 3:
-							cut_altbase = "T"
+						case "T":
+							ref_code = 3
                                                         break
+						case "N":
+							ref_code = -1
+							break
 						default:
-							print "igda_phase2vcf: invalid altbase"
+							print "igda_phase2vcf: non A,C,G,T,N refbase"
 							exit 1
 							break
 					}
-					if (vcf_refbase[key] == cut_altbase){
+					if (cur_var_dat[key] == ref_code){
 						print "igda_phase2vcf: altbase == refbase"
 						exit 1
 					}else{
-						split(vcf_altbase[key], buf, ",")
-						delete cut_altbase_map
-						for (i = 1; i <= length(buf); i++){
-							cut_altbase_map[buf[i]] = i
+						if (cur_var_dat[key] > ref_code){
+							print cur_var_dat[key] - 1 + 1 > cur_outfile
+						}else{
+							print cur_var_dat[key] + 1 > cur_outfile
 						}
-						print cut_altbase_map[cut_altbase] > cur_outfile
 					}
+					#print 1 > cur_outfile
 				}
 			}
 		}
@@ -86,15 +84,10 @@ awk -v vcf_file=$vcf_file -v n_sample=$n_sample -v haplotype_prefix=$haplotype_p
 
 awk '{print "GT"}' ${vcf_file}.tmp.data > ${vcf_file}.tmp.format
 
-tmp_sample_files=""
-for i in $(seq 1 $n_sample); do
-	tmp_sample_files="$tmp_sample_files ${vcf_file}.tmp.sample.$i"
-done
-paste -d "\t" ${vcf_file}.tmp.data ${vcf_file}.tmp.format $tmp_sample_files  > ${vcf_file}.tmp.sample
-
+paste -d "\t" ${vcf_file}.tmp.data ${vcf_file}.tmp.format ${vcf_file}.tmp.sample.* > ${vcf_file}.tmp.sample
 
 cat ${vcf_file}.tmp.meta ${vcf_file}.tmp.head ${vcf_file}.tmp.sample > $vcf_file
 
-rm ${vcf_file}.tmp.meta ${vcf_file}.tmp.head ${vcf_file}.tmp.sample ${vcf_file}.tmp.data ${vcf_file}.tmp.format ${vcf_file}.tmp.sample.*
+#rm ${vcf_file}.tmp.meta ${vcf_file}.tmp.head ${vcf_file}.tmp.sample ${vcf_file}.tmp.data ${vcf_file}.tmp.format ${vcf_file}.tmp.sample.*
 
 
