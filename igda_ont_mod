@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "igda_ont_mod m5file reffile outdir"
+        exit 0
+fi
+
+m5file=$1
+reffile=$2
+outdir=$3
+
+mkdir -p $outdir
+
+# pileup and context
+igda_mcontexteffect $m5file $outdir/contexteffect_split 1 1
+
+ls $outdir/contexteffect_split/*.context | igda merge > $outdir/contexteffect_merge.txt
+
+# detect 
+for pu_file in $(ls $outdir/contexteffect_split/*.pileup); do
+	echo $pu_file
+	igda detectsingle -v 0 -c 100 -f 0.15 -b 0 $pu_file $outdir/contexteffect_merge.txt ${pu_file%.*}.detectsingle
+	refname=$(basename ${pu_file%.*})
+	#echo $refname
+	convert_detectsingle_to_gff ${pu_file%.*}.detectsingle $reffile $refname ${pu_file%.*}.gff
+done
+
+cat $outdir/contexteffect_split/*.gff > $outdir/detect.gff
+
+pbmotifmaker $outdir/detect.gff $reffile $outdir/detect_motif > $outdir/detect_motif_raw.txt
+
