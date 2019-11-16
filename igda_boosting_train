@@ -10,7 +10,7 @@ test_file=""
 while getopts ":ho:n:r:d:e:g:m:t:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_boosting_cv [parameters] train_file outdir"
+                        echo "igda_boosting_train [parameters] train_file outdir"
 			echo "parameters:"
 			echo -e "\t-o objective. default = reg:logistic"
                         echo -e "\t-n number of threads. default = 1"
@@ -46,7 +46,7 @@ done
 shift $((OPTIND - 1))
 
 if [ "$#" -ne 2 ]; then
-	echo "igda_boosting_cv [parameters] train_file outdir"
+	echo "igda_boosting_train [parameters] train_file outdir"
         echo "parameters:"
 	echo -e "\t-o objective. default = reg:logistic"
         echo -e "\t-n number of threads. default = 1"
@@ -81,7 +81,8 @@ echo -e "eval_train = 1\n" >> $config_file
 echo -e "save_period = 0\n" >> $config_file
 
 echo -e "data = $train_file\n" >> $config_file
-if [ $test_file != "" ];then
+#if [ $test_file != "" ];then
+if test "$test_file" != ""; then
 	echo -e "eval[test] = $test_file\n" >> $config_file
 	echo -e "test:data = $test_file\n" >> $config_file
 fi
