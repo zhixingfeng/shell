@@ -1,0 +1,65 @@
+#!/bin/bash
+# require bioawk
+if [ "$#" -ne 3 ]; then
+        echo "igda_ann2sam ann_file ref_file sam_file"
+        exit 0
+fi
+
+ann_file=$1
+ref_file=$2
+sam_file=$3
+
+bioawk -c fastx '{if (NR>1){print "number of refseq > 1"; exit 1}else{print $name"\t"$seq}}' $ref_file > ${sam_file}.tmp.fasta
+
+awk -F "\t" '{
+	if (NR == FNR){
+                refname = $1
+                split($2, refseq, "")
+        }else{
+		if (FNR == 1){
+			print "@HD\tVN:1.6\tSO:coordinate"
+			printf("@SQ\tSN:%s\tLN:%d\n", refname, length(refseq))
+		}
+		if ($1 != -1){
+			split($1, cur_code, ",")
+			printf("%s\t%d\t%s\t%s\t%d\t%sM\t*\t0\t%d\t", "contig_"FNR, 0, refname, $2+1, 0, $3-$2+1, 0)
+			
+			for (i = $2+1; i <= $3+1; i++){
+				cur_readseq[i] = refseq[i]
+			}
+			for (i = 1; i <= length(cur_code); i++){
+				cur_locus = int(cur_code[i]/4)
+				switch(cur_code[i] % 4){
+					case 0:
+						cur_base = "A"
+						break
+					case 1:
+						cur_base = "C"
+						break
+					case 2:
+						cur_base = "G"
+						break
+					case 3:
+						cur_base = "T"
+						break
+					default:
+						print "igda_ann2sam: invalida base in FILENAME"
+						exit 1	
+						break
+				}
+				cur_readseq[cur_locus + 1] = cur_base
+			}
+			for (i = $2+1; i <= $3+1; i++){
+				if (cur_readseq[i] == ""){
+					print "igda_ann2sam: cur_readseq[i] is empty"
+					exit 1
+				}
+                        	printf("%s",cur_readseq[i])
+			}
+			printf("\t*\n")
+		}
+	}
+}' ${sam_file}.tmp.fasta $ann_file > $sam_file
+
+
+
