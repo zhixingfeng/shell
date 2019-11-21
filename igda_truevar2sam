@@ -1,0 +1,65 @@
+#!/bin/bash
+# require bioawk
+if [ "$#" -ne 5 ]; then
+        echo "igda_truevar2sam truevar_file ref_file sam_file tstart tend (0-based)"
+        exit 0
+fi
+
+truevar_file=$1
+ref_file=$2
+sam_file=$3
+tstart=$4
+tend=$5
+
+bioawk -c fastx '{if (NR>1){print "number of refseq > 1"; exit 1}else{print $name"\t"$seq}}' $ref_file > ${sam_file}.tmp.fasta
+
+awk -F "\t" -v tstart=$tstart -v tend=$tend '{
+	if (NR == FNR){
+                refname = $1
+                split($2, refseq, "")
+        }else{
+		if (FNR == 1){
+                        print "@HD\tVN:1.6\tSO:coordinate"
+                        printf("@SQ\tSN:%s\tLN:%d\n", refname, length(refseq))
+                }
+		printf("%s\t%d\t%s\t%s\t%d\t%sM\t*\t0\t%d\t", $1, 0, refname, tstart + 1, 0, tend - tstart + 1, 0)
+		for (i = tstart + 1; i <= tend + 1; i++){
+                	cur_readseq[i] = refseq[i]
+                }
+		if ($2 != -1){
+			split($2, cur_code, ",")
+			for (i = 1; i <= length(cur_code); i++){
+                                cur_locus = int(cur_code[i]/4)
+                                switch(cur_code[i] % 4){
+                                        case 0:
+                                                cur_base = "A"
+                                                break
+                                        case 1:
+                                                cur_base = "C"
+                                                break
+                                        case 2:
+                                                cur_base = "G"
+                                                break
+                                        case 3:
+                                                cur_base = "T"
+                                                break
+                                        default:
+                                                print "igda_ann2sam: invalida base in FILENAME"
+                                                exit 1  
+                                                break
+                                }
+                                cur_readseq[cur_locus + 1] = cur_base
+                        }
+		}
+		for (i = tstart + 1; i <= tend + 1; i++){
+                	if (cur_readseq[i] == ""){
+                                print "igda_ann2sam: cur_readseq[i] is empty"
+                        	exit 1
+                	}
+                	printf("%s",cur_readseq[i])
+                }
+		printf("\t*\tGP:Z:%s\n", $1)
+	}
+}' ${sam_file}.tmp.fasta $truevar_file > $sam_file
+
+
