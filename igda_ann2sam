@@ -11,7 +11,7 @@ sam_file=$3
 
 bioawk -c fastx '{if (NR>1){print "number of refseq > 1"; exit 1}else{print $name"\t"$seq}}' $ref_file > ${sam_file}.tmp.fasta
 
-awk -F "\t" '{
+gawk -F "\t" '{
 	if (NR == FNR){
                 refname = $1
                 split($2, refseq, "")

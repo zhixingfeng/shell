@@ -1,0 +1,51 @@
+#!/bin/bash
+min_condprob=0.7
+nthread=1
+while getopts ":hc:n:" opt; do
+        case ${opt} in
+                h )
+                        echo "igda_rsm -n nthread -c min_condprob encode_file m5_file cmpreads_file ref_file out_file tmpdir"
+                        echo "default:"
+			echo -e "\t-n 1"
+			echo -e "\t-c 0.7"
+			exit 0;;
+		c )
+			min_condprob=$OPTARG;;
+		n )
+			nthread=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 6 ] ; then
+	echo "igda_rsm -n nthread -c min_condprob encode_file m5_file cmpreads_file ref_file out_file tmpdir"
+        echo "default:"
+	echo -e "\t-n 1"
+        echo -e "\t-c 0.7"
+	exit 0
+fi
+
+encode_file=$1
+m5_file=$2
+cmpreads_file=$3
+ref_file=$4
+out_file=$5
+tmpdir=$6
+
+echo "encode_file = $encode_file"
+echo "m5_file = $m5_file"
+echo "cmpreads_file = $cmpreads_file"
+echo "ref_file = $ref_file"
+echo "out_file = $out_file"
+echo "tmpdir = $tmpdir"
+echo "min_condprob = $min_condprob"
+echo "nthread = $nthread"
+
+
+
+
+
