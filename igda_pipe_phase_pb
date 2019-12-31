@@ -91,6 +91,8 @@ igda abundance $outdir/realign.ann.tested.ft.count.ft.assembled $outdir/realign.
 
 igda_phase2vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count $indir/realign.vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.vcf igda
 
+igda_ann2sam $outdir/realign.ann.tested.ft.count.ft.assembled.count $reffile $outdir/realign.ann.tested.ft.count.ft.assembled.count.sam
+
 echo "Done."
 
 

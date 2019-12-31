@@ -56,7 +56,7 @@ awk -F "\t" '{
 				}
                         	printf("%s",cur_readseq[i])
 			}
-			printf("\t*\n")
+			printf("\t*\tTP:Z:contig\n")
 		}
 	}
 }' ${sam_file}.tmp.fasta $ann_file > $sam_file

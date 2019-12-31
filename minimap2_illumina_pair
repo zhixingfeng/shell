@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "minimap2_illumina_pair ref fafile_1 fafile_2 outfile nthread"
+        exit 0
+fi
+
+minimap2  --secondary=no -ax sr -t $5 $1 $2 $3 > "$4.tmp"
+
+samtools view -h --threads $5 -F 3852 "$4.tmp" > $4
+#rm "$4.tmp"
+
+

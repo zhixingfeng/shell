@@ -22,7 +22,7 @@ awk -F "\t" -v tstart=$tstart -v tend=$tend '{
                         print "@HD\tVN:1.6\tSO:coordinate"
                         printf("@SQ\tSN:%s\tLN:%d\n", refname, length(refseq))
                 }
-		printf("%s\t%d\t%s\t%s\t%d\t%sM\t*\t0\t%d\t", $1, 0, refname, tstart + 1, 0, tend - tstart + 1, 0)
+		printf("%s\t%d\t%s\t%s\t%d\t%sM\t*\t0\t%d\t", $1, 0, refname, tstart + 1, 60, tend - tstart + 1, 0)
 		for (i = tstart + 1; i <= tend + 1; i++){
                 	cur_readseq[i] = refseq[i]
                 }
@@ -58,7 +58,7 @@ awk -F "\t" -v tstart=$tstart -v tend=$tend '{
                 	}
                 	printf("%s",cur_readseq[i])
                 }
-		printf("\t*\tGP:Z:%s\n", $1)
+		printf("\t*\tTP:Z:true\tGP:Z:%s\n", $1)
 	}
 }' ${sam_file}.tmp.fasta $truevar_file > $sam_file
 

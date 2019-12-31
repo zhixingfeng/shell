@@ -20,9 +20,6 @@ awk -F "\t" '{
 			}
 		}
 		printf("\n")
-		#if (methyl_loci[int($1/4)]!=1){
-		#	print
-		#}
 	}
 	
 }' $loci_list $encode_file > $out_file
