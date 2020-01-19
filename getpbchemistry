@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 1 ] ; then
-        echo "get_pacbio_metadata_dir pacbio_metadata_file "
+        echo "getpbchemistry pacbio_metadata_file "
         exit 0
 fi
 

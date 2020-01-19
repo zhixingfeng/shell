@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# -ne 2 ]; then
+        echo "USAGE: getreadsbyname namefile bamfile(samfile)"
+        exit 0
+fi
+
+namefile=$1
+bamfile=$2
+samtools view -H $bamfile
+while IFS= read -r line
+do
+	if [ "$line"!="" ]; then
+		samtools view $bamfile | grep "$line" 
+	fi
+
+done <"$namefile"
+
