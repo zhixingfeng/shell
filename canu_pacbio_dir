@@ -14,7 +14,7 @@ for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta|fastq.gz|fasta.gz)$'); d
 	jname=${infile%.*}
 	cur_outdir=$outdir/$jname
 	mkdir -p $cur_outdir
-	hpc="submitjob -w 6 -c 8 -m 32 -j $jname -o $hpcdir"
+	hpc="submitjob -w 6 -c 16 -m 32 -j $jname -o $hpcdir"
 	cmd=$hpc" canu stopOnReadQuality=false useGrid=false gnuplotTested=true -p $jname -d $cur_outdir genomeSize=$gsize -pacbio-raw $indir/$infile"
 	$cmd
 done
