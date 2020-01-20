@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 4 ] ; then
-        echo "canu_pacbio_dir inputdir outputdir genomesize hpcdir"
+        echo "flye_pacbio_dir inputdir outputdir genomesize hpcdir"
         exit 0
 fi
 indir=$1
@@ -15,9 +15,13 @@ for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta|fastq.gz|fasta.gz)$'); d
 	cur_outdir=$outdir/$jname
 	mkdir -p $cur_outdir
 	hpc="submitjob -w 6 -c 8 -m 32 -j $jname -o $hpcdir"
-	cmd=$hpc" canu stopOnReadQuality=false useGrid=false gnuplotTested=true -p $jname -d $cur_outdir genomeSize=$gsize -pacbio-raw $indir/$infile"
+	#cmd=$hpc" canu stopOnReadQuality=false useGrid=false gnuplotTested=true -p $jname -d $cur_outdir genomeSize=$gsize -pacbio-raw $indir/$infile"
+	cmd=$hpc" flye -t 8  --pacbio-raw $indir/$infile -g 8k -o $cur_outdir"
 	$cmd
 done
+
+#flye -t 16  --pacbio-raw ../data/rpoBC/ERS1123933.fasta -g 8k -o ../results/rpoBC/ERS1123933
+
 
 #ls $1 | egrep '*.(fa|fq|fastq|fasta|fastq.gz|fasta.gz)$' | awk -v gsize=$3 -v indir=$1 -v outdir=$2 -v hpcopt="submitjob 12 -c 4 -m 32 -P acc_LymeMIND -q premium" '{outprefix=$0; gsub(".(fa|fq|fastq|fasta|fastq.gz|fasta.gz)","",outprefix);cmd=hpcopt" canu stopOnReadQuality=false useGrid=false -d "outdir"/"outprefix" -p "outprefix" genomeSize="gsize" -pacbio-raw "indir"/"$0; print cmd; system(cmd)}'
 
