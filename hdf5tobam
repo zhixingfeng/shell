@@ -1,17 +1,17 @@
 #!/bin/bash
 if [ $# -ne 2 ] ; then
         echo "hdf5tobam indir(unzipped folder output by unziphdf5) outdir"
-        exit 0
+        exit 1
 fi
 
 if [ "$(ls ./$1 | egrep Analysis_Results | wc -l)" == 0 ] ; then
         echo "fail to find Analysis_Results in $1"
-        exit 0
+        exit 1
 fi
 
 if [ "$(ls ./$1/Analysis_Results/ | egrep .bax.h5 | wc -l)" != 3 ] ; then
 	echo "fail to find enough .bax.h5 files in ./$1/Analysis_Results/"
-	exit 0
+	exit 1
 fi
 
 mkdir -p $2
