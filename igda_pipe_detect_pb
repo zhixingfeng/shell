@@ -5,10 +5,11 @@ min_prob=0.2
 topn_cmpreads=100
 nthread=1
 dforest_r=25
-while getopts ":hc:p:x:q:r:n:" opt; do
+min_read_len=1000
+while getopts ":hc:p:x:q:r:n:l:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_detect_pb -n nthread -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+                        echo "igda_pipe_detect_pb -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
                         echo "default:"
                         echo -e "\t-x (empty)"
 			echo -e "\t-c 0.75"
@@ -16,6 +17,7 @@ while getopts ":hc:p:x:q:r:n:" opt; do
 			echo -e "\t-q 100"
 			echo -e "\t-r 25"
 			echo -e "\t-n 1"
+			echo -e "\t-l 1000"
 			exit 0;;
 		c )
 			min_condprob=$OPTARG;;
@@ -29,6 +31,8 @@ while getopts ":hc:p:x:q:r:n:" opt; do
 			dforest_r=$OPTARG;;
 		n )
 			nthread=$OPTARG;;
+		l )
+                        min_read_len=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -38,7 +42,7 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
-	echo "igda_pipe_detect_pb -n nthread -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+	echo "igda_pipe_detect_pb -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
         echo "default:"
         echo -e "\t-x (empty)"
         echo -e "\t-c 0.75"
@@ -46,6 +50,7 @@ if [ $# -ne 4 ] ; then
 	echo -e "\t-q 100"
 	echo -e "\t-r 25"
 	echo -e "\t-n 1"
+	echo -e "\t-l 1000"
 	exit 0
 fi
 
@@ -65,12 +70,12 @@ echo "min_prob = "$min_prob
 echo "topn_cmpreads = "$topn_cmpreads
 echo "dforest_r = "$dforest_r
 echo "nthread = "$nthread
-
+echo "min_read_len = "$min_read_len
 echo "Start."
 mkdir -p $outdir
 
 echo "============= samtom5 ==========="
-igda samtom5 $infile $reffile $outdir/realign.m5
+igda samtom5 -l $min_read_len $infile $reffile $outdir/realign.m5
 
 echo "============= pileup ==========="
 igda contexteffect $outdir/realign.m5 $outdir/realign
