@@ -1,7 +1,7 @@
 #!/bin/bash
 exclude_loci_file=""
 min_condprob=0.75
-min_prob=0.2
+min_prob=0.1
 topn_cmpreads=100
 nthread=1
 dforest_r=25
@@ -13,7 +13,7 @@ while getopts ":hc:p:x:q:r:n:l:" opt; do
                         echo "default:"
                         echo -e "\t-x (empty)"
 			echo -e "\t-c 0.75"
-			echo -e "\t-p 0.2"
+			echo -e "\t-p 0.1"
 			echo -e "\t-q 100"
 			echo -e "\t-r 25"
 			echo -e "\t-n 1"
@@ -46,7 +46,7 @@ if [ $# -ne 4 ] ; then
         echo "default:"
         echo -e "\t-x (empty)"
         echo -e "\t-c 0.75"
-        echo -e "\t-p 0.2"
+        echo -e "\t-p 0.1"
 	echo -e "\t-q 100"
 	echo -e "\t-r 25"
 	echo -e "\t-n 1"

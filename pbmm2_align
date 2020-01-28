@@ -16,7 +16,7 @@ echo "reffile=$reffile"
 echo "nthread=$nthread"
 
 
-pbmm2 align $reffile $inbamfile $outbamfile".pbmm5.tmp.bam" -j $nthread -l 1000
+pbmm2 align $reffile $inbamfile $outbamfile".pbmm5.tmp.bam" -j $nthread -l 200
 
 samtools view --threads $nthread -b -F 4079 $outbamfile".pbmm5.tmp.bam" > $outbamfile".unsorted.bam"
 rm $outbamfile".pbmm5.tmp.bam"

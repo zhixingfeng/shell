@@ -12,7 +12,7 @@ end_locus=$5
 
 sam_region=$chr":"$start_locus"-"$end_locus
 
-samtools view -H $bamfile > $outfile
+samtools view -H $bamfile | egrep "@PG|SN:$chr" > $outfile
 samtools view $bamfile $sam_region | awk -F "\t" -v chr=$chr -v start_locus=$start_locus -v end_locus=$end_locus '
 	function parse_cigar(cigar_str, cigar_num, cigar_type){
 		delete cigar_num;
