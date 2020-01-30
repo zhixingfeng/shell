@@ -1,15 +1,17 @@
 #!/bin/bash
 exclude_loci_file=""
-min_condprob=0.75
+min_condprob=0.65
 min_prob=0.1
 topn_cmpreads=100
 nthread=1
 dforest_r=25
 min_read_len=1000
+seed=18473
+
 while getopts ":hc:p:x:q:r:n:l:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_detect_pb -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+                        echo "igda_pipe_detect_pb -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
                         echo "default:"
                         echo -e "\t-x (empty)"
 			echo -e "\t-c 0.75"
@@ -18,6 +20,7 @@ while getopts ":hc:p:x:q:r:n:l:" opt; do
 			echo -e "\t-r 25"
 			echo -e "\t-n 1"
 			echo -e "\t-l 1000"
+			echo -e "\t-s 18473"
 			exit 0;;
 		c )
 			min_condprob=$OPTARG;;
@@ -42,7 +45,7 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
-	echo "igda_pipe_detect_pb -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+	echo "igda_pipe_detect_pb -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
         echo "default:"
         echo -e "\t-x (empty)"
         echo -e "\t-c 0.75"
@@ -51,6 +54,7 @@ if [ $# -ne 4 ] ; then
 	echo -e "\t-r 25"
 	echo -e "\t-n 1"
 	echo -e "\t-l 1000"
+	echo -e "\t-s 18473"
 	exit 0
 fi
 
@@ -71,6 +75,7 @@ echo "topn_cmpreads = "$topn_cmpreads
 echo "dforest_r = "$dforest_r
 echo "nthread = "$nthread
 echo "min_read_len = "$min_read_len
+echo "seed = "$seed
 echo "Start."
 mkdir -p $outdir
 
@@ -94,7 +99,23 @@ igda cmpreads -n $nthread -l 0.5 -p $topn_cmpreads $outdir/realign.encode $outdi
 echo "============= rsm ==========="
 echo "dforest_r=$dforest_r"
 igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
-igda filter -f $min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
+
+echo "=========== permutation ============="
+igda permute -s $seed $outdir/realign.m5 $outdir/realign.pileup $outdir/realign.encode.permuted
+igda cmpreads -n $nthread -l 0.5 -p $topn_cmpreads $outdir/realign.encode.permuted $outdir/realign.m5 $outdir/realign.cmpreads.permuted
+igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode.permuted $outdir/realign.m5 $outdir/realign.cmpreads.permuted $reffile $outdir/realign.dforest.permuted $outdir/tmp_permuted
+
+cur_min_condprob=$(igda get_condprob_threshold $outdir/realign.dforest.permuted $outdir/realign.pileup)
+is_use=$(awk -v cur_min_condprob=$cur_min_condprob -v min_condprob=$min_condprob 'BEGIN{if (cur_min_condprob >=min_condprob){print 1}else{print 0}}')
+
+echo "cur_min_condprob = $cur_min_condprob"
+
+if [ is_use -eq 1 ]; then
+	igda filter -f $cur_min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
+else
+	igda filter -f $min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
+fi
+
 
 echo "============= detect orphan variants ==========="
 igda detectsingle -c 1000 -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
