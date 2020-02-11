@@ -10,6 +10,9 @@ nucmer -c 100 -g 500 -l 12 --maxmatch -p $3 $2 $1
 
 show-coords -l -T -H $3.delta > $3.coords
 
-show-snps -l -T -H $3.delta > $3.snp
+show-snps -l -T -H $3.delta > $3.snp.tmp
+sort -u $3.snp.tmp | sort -k1,1n > $3.snp
+#show-snps -l -T -H $3.delta | sort -u | sort -k1,1n > $3.snp
+
 
 

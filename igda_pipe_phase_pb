@@ -2,14 +2,16 @@
 min_cvg=10
 min_nn=25
 max_nn=50
-while getopts ":hc:t:m:" opt; do
+max_iter=1
+while getopts ":hc:t:m:b:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_phase_ont -c min_cvg -t min_nn -m max_nn indir reffile outdir"
+                        echo "igda_pipe_phase_ont -b -c min_cvg -t min_nn -m max_nn indir reffile outdir"
                         echo "default:"
                         echo -e "\t-c 10, minimal coverage of each contig"
                         echo -e "\t-t 25, minimal number of nearest neighbors"
                         echo -e "\t-m 50, maximal number of nearest neighbors"
+			echo -e "\t-b maximal number of iteration in ANN, default = 1"
                         exit 0;;
                 c )
                         min_cvg=$OPTARG;;
@@ -17,6 +19,8 @@ while getopts ":hc:t:m:" opt; do
                         min_nn=$OPTARG;;
                 m )
                         max_nn=$OPTARG;;
+		b )
+			max_iter=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -26,11 +30,12 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 3 ] ; then
-	echo "igda_pipe_phase_ont -c mincvg -t min_nn -m max_nn indir reffile outdir"
+	echo "igda_pipe_phase_ont -b 1 -c mincvg -t min_nn -m max_nn indir reffile outdir"
         echo "default:"
-        echo -e "\t-c minimal coverage of each contig"
-        echo -e "\t-t minimal number of nearest neighbors"
-        echo -e "\t-m maximal number of nearest neighbors"
+        echo -e "\t-c 10, minimal coverage of each contig"
+        echo -e "\t-t 25, minimal number of nearest neighbors"
+        echo -e "\t-m 50, maximal number of nearest neighbors "
+	echo -e "\t-b maximal number of iteration in ANN, default = 1"
 	exit 0
 fi
 
@@ -46,7 +51,7 @@ echo "outdir = "$outdir
 echo "min_cvg = "$min_cvg
 echo "min_nn = "$min_nn
 echo "max_nn = "$max_nn
-
+echo "max_iter = "$max_iter
 echo "Start."
 
 echo "============= dimension reduction ==========="
@@ -64,7 +69,7 @@ ann_c=$min_cvg
 ann_t=$min_nn
 ann_m=$max_nn
 echo "ann_t=$ann_t, ann_m=$ann_m, ann_c=$ann_c"
-igda ann -j 0.5 -c $ann_c -t $ann_t -m $ann_m  $outdir/realign.recode $outdir/realign.encode.rdim $indir/realign.m5 $indir/realign.var $reffile $outdir/realign.ann
+igda ann -b $max_iter -j 0.5 -c $ann_c -t $ann_t -m $ann_m  $outdir/realign.recode $outdir/realign.encode.rdim $indir/realign.m5 $indir/realign.var $reffile $outdir/realign.ann
 
 echo "============= test contigs ==========="
 igda test_contigs -a 1.332824 -t 89.04769 $outdir/realign.ann $outdir/realign.recode $indir/realign.m5 $reffile
@@ -79,6 +84,12 @@ echo "============= correct contigs ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.raw
 igda correct_contigs $outdir/realign.ann.tested.ft.count.ft.raw $outdir/realign.ann.tested.ft.count.ft.ct
 sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.ct > $outdir/realign.ann.tested.ft.count.ft
+
+echo "============= polish ==========="
+mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.unpolished
+igda polish $outdir/realign.ann.tested.ft.count.ft.unpolished $outdir/realign.encode.rdim $indir/realign.m5 $reffile $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/tmp_polish
+sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.tmp > $outdir/realign.ann.tested.ft.count.ft
+rm $outdir/realign.ann.tested.ft.count.ft.tmp
 
 echo "============= transitive reduction ==========="
 igda tred $outdir/realign.ann.tested.ft.count.ft

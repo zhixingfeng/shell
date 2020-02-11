@@ -109,8 +109,9 @@ cur_min_condprob=$(igda get_condprob_threshold $outdir/realign.dforest.permuted 
 is_use=$(awk -v cur_min_condprob=$cur_min_condprob -v min_condprob=$min_condprob 'BEGIN{if (cur_min_condprob >=min_condprob){print 1}else{print 0}}')
 
 echo "cur_min_condprob = $cur_min_condprob"
+echo "cur_min_condprob = $cur_min_condprob" > $outdir/permuted_min_condprob.txt
 
-if [ is_use -eq 1 ]; then
+if [ $is_use -eq 1 ]; then
 	igda filter -f $cur_min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
 else
 	igda filter -f $min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
