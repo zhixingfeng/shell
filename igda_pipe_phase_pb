@@ -82,14 +82,14 @@ igda test_contigs_pairwise -a 1.332824 -t 89.04769 $outdir/realign.ann.tested.ft
 
 echo "============= correct contigs ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.raw
-igda correct_contigs $outdir/realign.ann.tested.ft.count.ft.raw $outdir/realign.ann.tested.ft.count.ft.ct
+igda correct_contigs -l 0.75 $outdir/realign.ann.tested.ft.count.ft.raw $outdir/realign.ann.tested.ft.count.ft.ct
 sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.ct > $outdir/realign.ann.tested.ft.count.ft
 
 echo "============= polish ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.unpolished
-igda polish $outdir/realign.ann.tested.ft.count.ft.unpolished $outdir/realign.encode.rdim $indir/realign.m5 $reffile $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/tmp_polish
+igda polish -f 0.2 $outdir/realign.ann.tested.ft.count.ft.unpolished $outdir/realign.encode.rdim $indir/realign.m5 $reffile $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/tmp_polish
 sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.tmp > $outdir/realign.ann.tested.ft.count.ft
-rm $outdir/realign.ann.tested.ft.count.ft.tmp
+#rm $outdir/realign.ann.tested.ft.count.ft.tmp
 
 echo "============= transitive reduction ==========="
 igda tred $outdir/realign.ann.tested.ft.count.ft

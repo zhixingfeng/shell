@@ -1,0 +1,78 @@
+#!/usr/bin/bash
+jobcore=1
+jobmem=2
+jobwalltime=02:00
+jobname=""
+jobproject=acc_LymeMIND
+jobqueue=premium
+joboutdir=/tmp/lsf-output
+
+while getopts ":h:c:m:w:j:p:q:o:" opt; do
+        case ${opt} in
+		h )
+			echo "submitjob -c ncore -m memory(Gb) -w walltime(hour) -j jobname -p project_account -q queue -o logdir command"
+        		echo "default:"
+		        echo -e "\t-c 1"
+		        echo -e "\t-m 2"
+		        echo -e "\t-w 2"
+		        echo -e "\t-j job id"
+		        echo -e "\t-p LymeMind"
+		        echo -e "\t-q premium"
+		        echo -e "\t-o /tmp/lsf-output";;
+                c )
+                        jobcore=$OPTARG;;
+                m )
+                        jobmem=$OPTARG;;
+		w )
+			jobwalltime=$OPTARG;;
+		j )
+                        jobname=$OPTARG;;
+		p )
+                        jobproject=$OPTARG;;
+                q )
+                        jobqueue=$OPTARG;;
+		o )
+			joboutdir=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+#echo jobcore=$jobcore
+#echo jobmem=$jobmem
+#echo jobwalltime=$jobwalltime
+#echo jobname=$jobname
+#echo jobproject=$jobproject
+#echo jobqueue=$jobqueue
+#echo joboutdir=$joboutdir
+
+jobmem=$jobmem"000"
+jobwalltime=$jobwalltime":00"
+jobcmd=$@
+mkdir -p $joboutdir
+
+if test "$jobcmd" == "" ; then
+	echo "submitjob -c ncore -m memory(Gb) -w walltime(hour) -j jobname -p project_account -q queue -o logdir command"
+	echo "default:"
+	echo -e "\t-c 1"
+	echo -e "\t-m 2"
+	echo -e "\t-w 2"
+	echo -e "\t-j job id"
+	echo -e "\t-p LymeMind"
+	echo -e "\t-q premium"
+	echo -e "\t-o /tmp/lsf-output"
+else
+	echo $jobcmd
+	if test "$jobname" == "" ; then
+		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R himem -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/%J.out $jobcmd
+	else
+		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R himem -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/$jobname.out -J "$jobname" $jobcmd
+	fi
+fi
+
+
+
+

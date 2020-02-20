@@ -4,15 +4,20 @@ if [ $# -ne 3 ] ; then
         exit 0
 fi
 
-
-#nucmer -c 200 -l 12 --maxmatch -p $3 $2 $1
+# align
 nucmer -c 100 -g 500 -l 12 --maxmatch -p $3 $2 $1 
 
+# get coordinates
 show-coords -l -T -H $3.delta > $3.coords
 
+# get snps
 show-snps -l -T -H $3.delta > $3.snp.tmp
 sort -u $3.snp.tmp | sort -k1,1n > $3.snp
-#show-snps -l -T -H $3.delta | sort -u | sort -k1,1n > $3.snp
 
+# plot alignment
+mummerplot $3.delta --filter --layout -postscript -p $3
+
+# get coord file for filtered alignment
+show-coords -l -T -H $3.filter > $3.filter.coords
 
 
