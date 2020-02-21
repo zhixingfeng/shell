@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "ngmlr_dir indir outdir nthread logdir"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+nthread=$3
+logdir=$4
+
+mkdir -p $outdir
+mkdir -p $logdir
+
+for infile in $(ls $indir | egrep '*.(bam)$'); do
+	sample_name=${infile%.*}
+	cmd="submitjob -w 4 -c $nthread -m 8 -j $sample_name -o $logdir"
+	cmd=$cmd" sniffles -m $indir/$infile -v $outdir/$sample_name.vcf"
+	#echo $cmd
+	$cmd
+done
+
+
+
+
+
