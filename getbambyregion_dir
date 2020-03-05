@@ -21,6 +21,8 @@ filelist=$(ls $indir/*.bam)
 for bamfile in $(ls $indir | grep .bam$)
 do
 	jobname=${bamfile%/*}
-	submitjob -w 1 -c $nthread -m 8 -j $jobname -o $logdir getbambyregion $indir/$bamfile $outdir/$bamfile $chr $start_locus $end_locus $nthread
+	echo $jobname
+	getbambyregion $indir/$bamfile $outdir/$bamfile $chr $start_locus $end_locus $nthread
+	#submitjob -w 1 -c $nthread -m 8 -j $jobname -o $logdir getbambyregion $indir/$bamfile $outdir/$bamfile $chr $start_locus $end_locus $nthread
 done
 

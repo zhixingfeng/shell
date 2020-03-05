@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "fastaclean fastafile outdir"
+        exit 0
+fi
+
+fastafile=$1
+outdir=$2
+
+bioawk -c fastx -v outdir=$outdir '{
+	outfile = outdir"/"$name".fasta"
+	gsub("\\|", "_", outfile)
+	print ">"$name > outfile
+	print $seq >> outfile
+	close(outfile)
+}' $fastafile
+
+
+

@@ -67,9 +67,9 @@ if test "$jobcmd" == "" ; then
 else
 	echo $jobcmd
 	if test "$jobname" == "" ; then
-		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/%J.out $jobcmd
+		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/%J.out "$jobcmd"
 	else
-		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/$jobname.out -J "$jobname" $jobcmd
+		bsub -P $jobproject -q $jobqueue -W $jobwalltime -n 1 -R "span[hosts=1]" -R "affinity[core($jobcore)]" -R "rusage[mem=$jobmem]" -oo $joboutdir/$jobname.out -J "$jobname" "$jobcmd"
 	fi
 fi
 

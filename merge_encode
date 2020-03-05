@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "merge_runs indir(encodefile) outfile"
+        exit 0
+fi
+
+indir=$1
+outfile=$2
+
+for encode_file in $(ls $indir/*.encode); do
+	sample_name=$(basename ${encode_file%.*})
+	encode_data=$(head -1 $encode_file | awk '{gsub("\t",",",$0); print $0 }')
+	echo -e $sample_name"\t"$encode_data	
+done > $outfile.withmame
+
+cat $indir/*.encode > $outfile
+
+
+

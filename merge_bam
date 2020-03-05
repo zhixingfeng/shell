@@ -1,0 +1,18 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "merge_bam indir(bamfiles) outdir nthreads"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+nthreads=$3
+
+mkdir -p $outdir
+ls $indir/*.bam > $outdir/input.fofn
+samtools merge -@ $nthreads -f $outdir/merged.bam -b $outdir/input.fofn
+samtools sort $outdir/merged.bam -o $outdir/merged_sorted.bam
+samtools index $outdir/merged_sorted.bam
+
+
+
