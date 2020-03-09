@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "map_filename_to_movie indir(samfiles) outfile"
+        exit 0
+fi
+
+indir=$1
+outfile=$2
+
+for samfile in $(ls $indir/*.sam); do
+	filename=$(basename ${samfile%.*sam})
+	moviename=$(samtools view $samfile | head -1 | awk '{print $1}')
+	echo -e $filename"\t"${moviename%/*/*}
+done > $outfile
+
+
+
+
+
+
+
