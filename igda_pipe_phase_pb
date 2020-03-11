@@ -3,15 +3,17 @@ min_cvg=10
 min_nn=25
 max_nn=50
 max_iter=1
-while getopts ":hc:t:m:b:" opt; do
+nthread=1
+while getopts ":hc:t:m:b:n:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_phase_ont -b -c min_cvg -t min_nn -m max_nn indir reffile outdir"
+                        echo "igda_pipe_phase_ont -n nthread -b niter -c min_cvg -t min_nn -m max_nn indir reffile outdir"
                         echo "default:"
                         echo -e "\t-c 10, minimal coverage of each contig"
                         echo -e "\t-t 25, minimal number of nearest neighbors"
                         echo -e "\t-m 50, maximal number of nearest neighbors"
 			echo -e "\t-b maximal number of iteration in ANN, default = 1"
+			echo -e "\t-n number of threads, default = 1"
                         exit 0;;
                 c )
                         min_cvg=$OPTARG;;
@@ -21,6 +23,8 @@ while getopts ":hc:t:m:b:" opt; do
                         max_nn=$OPTARG;;
 		b )
 			max_iter=$OPTARG;;
+		n )
+                        nthread=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -30,12 +34,13 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 3 ] ; then
-	echo "igda_pipe_phase_ont -b 1 -c mincvg -t min_nn -m max_nn indir reffile outdir"
+	echo "igda_pipe_phase_ont -n nthread -b niter -c mincvg -t min_nn -m max_nn indir reffile outdir"
         echo "default:"
         echo -e "\t-c 10, minimal coverage of each contig"
         echo -e "\t-t 25, minimal number of nearest neighbors"
         echo -e "\t-m 50, maximal number of nearest neighbors "
 	echo -e "\t-b maximal number of iteration in ANN, default = 1"
+	echo -e "\t-n number of threads, default = 1"
 	exit 0
 fi
 
@@ -52,13 +57,14 @@ echo "min_cvg = "$min_cvg
 echo "min_nn = "$min_nn
 echo "max_nn = "$max_nn
 echo "max_iter = "$max_iter
+echo "nthread = "$nthread
 echo "Start."
 
 echo "============= dimension reduction ==========="
 igda rdim $indir/realign.encode $indir/realign.var $outdir/realign.encode.rdim
 
 echo "============= recode ==========="
-igda recode $indir/realign.m5 $indir/realign.var $outdir/realign.recode
+igda recode -t $nthread $indir/realign.m5 $indir/realign.var $outdir/realign.recode
 
 echo "============= ann ==========="
 #dforest_r=25
@@ -69,7 +75,7 @@ ann_c=$min_cvg
 ann_t=$min_nn
 ann_m=$max_nn
 echo "ann_t=$ann_t, ann_m=$ann_m, ann_c=$ann_c"
-igda ann -b $max_iter -j 0.5 -c $ann_c -t $ann_t -m $ann_m  $outdir/realign.recode $outdir/realign.encode.rdim $indir/realign.m5 $indir/realign.var $reffile $outdir/realign.ann
+igda ann -n $nthread -b $max_iter -j 0.5 -c $ann_c -t $ann_t -m $ann_m  $outdir/realign.recode $outdir/realign.encode.rdim $indir/realign.m5 $indir/realign.var $reffile $outdir/realign.ann
 
 echo "============= test contigs ==========="
 igda test_contigs -a 1.332824 -t 89.04769 $outdir/realign.ann $outdir/realign.recode $indir/realign.m5 $reffile

@@ -8,26 +8,28 @@ snpfile=$1
 encodefile=$2
 offset=$3
 
-awk -v offset=$offset '{
+sort -u -k1,1n -k2,2 -k3,3 $snpfile | awk -v offset=$offset '{
 	locus=offset + $1-1;
-	if ($3=="A"){
-		code=4*locus
-	}
+	if ($2 != "."){
+		if ($3=="A"){
+			code=4*locus
+		}
 
-	if ($3=="C"){
-		code=4*locus + 1
-	}
+		if ($3=="C"){
+			code=4*locus + 1
+		}
 
-	if ($3=="G"){
-                code=4*locus + 2
-        }
+		if ($3=="G"){
+                	code=4*locus + 2
+	        }
 
-	if ($3=="T"){
-                code=4*locus + 3
-        }
-	if ($3=="A" || $3=="C" || $3=="G" || $3=="T"){
-		printf "%s\t", code
+		if ($3=="T"){
+                	code=4*locus + 3
+	        }
+		if ($3=="A" || $3=="C" || $3=="G" || $3=="T"){
+			printf "%s\t", code
+		}
 	}
-}END{ printf "\n"}'  $snpfile > $encodefile
+}END{ printf "\n"}' > $encodefile
 
 
