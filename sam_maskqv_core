@@ -1,0 +1,45 @@
+#!/bin/bash
+if [ $# -ne 3 ]; then
+	echo "USAGE: sam_maskqv infile outfile min_qv"
+	exit 0
+fi
+
+infile=$1
+outfile=$2
+minqv=$3
+
+#samtools view --threads $nthread -H $samfile > $outfile
+#samtools view --threads $nthread $samfile | 
+
+awk -F "\t" -v minqv=$minqv 'BEGIN{for(n=0;n<256;n++)ord[sprintf("%c",n)]=n} {
+	split($10, qseq, "")
+	split($11, qv, "")
+	
+	for (i = 1; i <= NF; i++){
+		if($i != ""){
+			if (i == NF){
+				printf("%s", $i)
+			}else{
+				if (i == 10){
+					for (j = 1; j <= length(qseq); j++){
+						cur_qv = ord[qv[j]] - 33
+						if (cur_qv >= minqv){
+							printf("%s",qseq[j])
+						}else{
+							printf("N")
+						}
+					}
+					printf("\t")
+				}else{
+					printf("%s\t", $i)
+				}
+			}
+		}
+	}
+	printf("\n")
+
+}' $infile > $outfile
+
+
+
+

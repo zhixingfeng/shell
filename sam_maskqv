@@ -1,45 +1,55 @@
 #!/bin/bash
-if [ $# -ne 4 ]; then
-	echo "USAGE: sam_maskqv samfile out_samfile min_qv nthread"
-	exit 0
+nthread=1
+
+while getopts ":hn:" opt; do
+        case ${opt} in
+                h )
+                        echo "sam_maskqv -n nthread samfile out_samfile minqv"
+                        echo "default:"
+			echo -e "\t-n 1"
+			exit 0;;
+		n )
+			nthread=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 3 ] ; then
+	echo "sam_maskqv -n nthread samfile out_samfile minqv"
+        echo "default:"
+       	echo -e "\t-n 1"
+        exit 0
 fi
 
+
 samfile=$1
-outfile=$2
+out_samfile=$2
 minqv=$3
-nthread=$4
 
-samtools view --threads $nthread -H $samfile > $outfile
+echo "samfile = "$samfile
+echo "out_samfile = "$out_samfile
+echo "minqv = "$minqv
+echo "nthread = "$nthread
 
-samtools view --threads $nthread $samfile | awk -F "\t" -v minqv=$minqv 'BEGIN{for(n=0;n<256;n++)ord[sprintf("%c",n)]=n} {
-	split($10, qseq, "")
-	split($11, qv, "")
-	
-	for (i = 1; i <= NF; i++){
-		if($i != ""){
-			if (i == NF){
-				printf("%s", $i)
-			}else{
-				if (i == 10){
-					for (j = 1; j <= length(qseq); j++){
-						cur_qv = ord[qv[j]] - 33
-						if (cur_qv >= minqv){
-							printf("%s",qseq[j])
-						}else{
-							printf("N")
-						}
-					}
-					printf("\t")
-				}else{
-					printf("%s\t", $i)
-				}
-			}
-		}
-	}
-	printf("\n")
+samtools view --threads $nthread -H $samfile > ${out_samfile}.head
+samtools view --threads $nthread $samfile > ${out_samfile}.body
 
-}' >> $outfile
+igda split_file -n $nthread ${out_samfile}.body ${out_samfile}.body.split
 
+cmd_merge="cat ${out_samfile}.head"
+for ((i=0;i<$nthread;i++)); do
+	cur_infile=${out_samfile}.body.split.part.$i
+	echo $cur_infile
+	cmd_merge=$cmd_merge" "${cur_infile}.qv
+	sam_maskqv_core $cur_infile ${cur_infile}.qv $minqv &
+done
+wait 
 
+$cmd_merge > $out_samfile
+rm ${out_samfile}.head ${out_samfile}.body*
 
 

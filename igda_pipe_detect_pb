@@ -8,7 +8,7 @@ dforest_r=25
 min_read_len=1000
 seed=18473
 
-while getopts ":hc:p:x:q:r:n:l:" opt; do
+while getopts ":hc:p:x:q:r:n:l:s:" opt; do
         case ${opt} in
                 h )
                         echo "igda_pipe_detect_pb -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
@@ -36,6 +36,8 @@ while getopts ":hc:p:x:q:r:n:l:" opt; do
 			nthread=$OPTARG;;
 		l )
                         min_read_len=$OPTARG;;
+		s )
+                        seed=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
