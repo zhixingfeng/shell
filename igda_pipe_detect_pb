@@ -101,16 +101,19 @@ echo "dforest_r=$dforest_r"
 igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
 
 echo "=========== permutation ============="
-igda permute -s $seed $outdir/realign.m5 $outdir/realign.pileup $outdir/realign.encode.permuted
-igda cmpreads -n $nthread -l 0.5 -p $topn_cmpreads $outdir/realign.encode.permuted $outdir/realign.m5 $outdir/realign.cmpreads.permuted
-igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode.permuted $outdir/realign.m5 $outdir/realign.cmpreads.permuted $reffile $outdir/realign.dforest.permuted $outdir/tmp_permuted
+if [ $seed -ne 0 ]; then
+	igda permute -s $seed $outdir/realign.m5 $outdir/realign.pileup $outdir/realign.encode.permuted
+	igda cmpreads -n $nthread -l 0.5 -p $topn_cmpreads $outdir/realign.encode.permuted $outdir/realign.m5 $outdir/realign.cmpreads.permuted
+	igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode.permuted $outdir/realign.m5 $outdir/realign.cmpreads.permuted $reffile $outdir/realign.dforest.permuted $outdir/tmp_permuted
 
-cur_min_condprob=$(igda get_condprob_threshold $outdir/realign.dforest.permuted $outdir/realign.pileup)
-is_use=$(awk -v cur_min_condprob=$cur_min_condprob -v min_condprob=$min_condprob 'BEGIN{if (cur_min_condprob >=min_condprob){print 1}else{print 0}}')
+	cur_min_condprob=$(igda get_condprob_threshold $outdir/realign.dforest.permuted $outdir/realign.pileup)
+	is_use=$(awk -v cur_min_condprob=$cur_min_condprob -v min_condprob=$min_condprob 'BEGIN{if (cur_min_condprob >=min_condprob){print 1}else{print 0}}')
 
-echo "cur_min_condprob = $cur_min_condprob"
-echo "cur_min_condprob = $cur_min_condprob" > $outdir/permuted_min_condprob.txt
-
+	echo "cur_min_condprob = $cur_min_condprob"
+	echo "cur_min_condprob = $cur_min_condprob" > $outdir/permuted_min_condprob.txt
+else
+	is_use=0;
+fi
 if [ $is_use -eq 1 ]; then
 	igda filter -f $cur_min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
 else
