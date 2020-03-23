@@ -7,7 +7,7 @@ nthread=1
 while getopts ":hc:t:m:b:n:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_phase_ont -n nthread -b niter -c min_cvg -t min_nn -m max_nn indir reffile outdir"
+                        echo "igda_pipe_phase_pb -n nthread -b niter -c min_cvg -t min_nn -m max_nn indir reffile outdir"
                         echo "default:"
                         echo -e "\t-c 10, minimal coverage of each contig"
                         echo -e "\t-t 25, minimal number of nearest neighbors"
@@ -34,7 +34,7 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 3 ] ; then
-	echo "igda_pipe_phase_ont -n nthread -b niter -c mincvg -t min_nn -m max_nn indir reffile outdir"
+	echo "igda_pipe_phase_pb -n nthread -b niter -c mincvg -t min_nn -m max_nn indir reffile outdir"
         echo "default:"
         echo -e "\t-c 10, minimal coverage of each contig"
         echo -e "\t-t 25, minimal number of nearest neighbors"
