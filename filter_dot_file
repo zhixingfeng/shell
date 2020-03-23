@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ $# -ne 3 ] ; then
+        echo "filter_dot_file dot_file node_list out_file"
+        exit 0
+fi
+
+dot_file=$1
+node_list=$2
+out_file=$3
+
+echo "digraph G {" > $out_file
+
+grep -w -f $node_list $dot_file >> $out_file
+
+echo "}" >> $out_file
+
