@@ -1,0 +1,27 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "encode_to_dot encode_file dot_file"
+        exit 0
+fi
+
+encode_file=$1
+dot_file=$2
+
+echo "digraph G {" > $dot_file
+
+awk -F "\t" '{
+	if (NF >= 1){
+		for (i = 1; i <= NF; i++){
+			if ($i != ""){
+				if ($(i+1) =="" ){
+					print "\t"$i";";
+				}else{
+					print "\t"$i" -> "$(i+1)";";
+				}
+			}
+		}
+	}
+}' $encode_file | sort -u -k1,1n >> $dot_file
+
+echo "}" >> $dot_file
+
