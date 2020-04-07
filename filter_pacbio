@@ -10,8 +10,19 @@ if [ "$(ls $1 | wc -l)" == 0 ] ; then
 	exit 0
 fi
 
+indir=$1
+outfile=$2
 
-samtools view $1/raw.subreads.bam | awk '
+nfile=$(ls $indir/*.subreads.bam | wc -l)
+if [ $nfile -ne 1 ];then
+	echo "there are multiple subreads.bam files"
+	exit 1
+fi
+
+bam_file=$(ls $indir/*.subreads.bam)
+
+
+samtools view $bam_file | awk '
 { 	
 	for(i=1;i<=NF;i++){
 		if (substr($i,1,5) == "rq:f:"){
@@ -25,10 +36,11 @@ samtools view $1/raw.subreads.bam | awk '
 		print zm;
 	} 
 }
-' > $1/raw.subreads.bam.filt_idx
+' > $outfile.filt_idx
+
+bamsieve --whitelist $outfile.filt_idx $bam_file $outfile
 
 
-bamSieve --whitelist $1/raw.subreads.bam.filt_idx $1/raw.subreads.bam $2
 
 
 

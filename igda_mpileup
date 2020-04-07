@@ -9,25 +9,7 @@ outdir=$2
 
 mkdir -p $outdir
 
-## count number of reads mapped to each reference
-#echo "count number of reads mapped to each reference"
-#awk '{print $6}' $m5file | sort | uniq -c > $outdir/ref_count.txt
-
-# split m5file
-#echo "split m5file"
-#sample_id=$(basename $m5file)
-#sample_id=${sample_id%.*}
-
-#for ref in $(awk '{print $2}' $outdir/ref_count.txt);do
-#	outfile=$outdir/"tmp_"$sample_id"_"$ref".m5"
-#	grep -w $ref $m5file > $outfile
-#done
-
-
-
 split_m5_by_ref $m5file $outdir/m5_split
-
-
 
 # pileup
 mkdir -p $outdir

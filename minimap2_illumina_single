@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "minimap2_illumina_single ref fafile outfile nthread"
+        exit 0
+fi
+
+minimap2  --secondary=no -ax sr -t $4 $1 $2 > "$3.tmp"
+
+samtools view -h --threads $4 -F 3852 "$3.tmp" > $3
+
+rm $3.tmp

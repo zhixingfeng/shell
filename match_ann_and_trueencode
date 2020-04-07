@@ -1,0 +1,47 @@
+#!/usr/bin/env Rscript
+library(rGDA)
+args <- commandArgs(trailingOnly=TRUE)
+
+if (length(args) != 6 ){
+	stop("match_ann_and_trueencode ann_file true_encode_file true_encode_withname_file ann_sam_file true_sam_file out_sam_file")
+}
+
+ann_file <- args[1]
+true_encode_file <- args[2]
+true_encode_withname_file <- args[3]
+ann_sam_file <- args[4]
+true_sam_file <- args[5]
+out_sam_file <- args[6]
+
+ann.data.raw <- load.annfile(ann_file)
+ann.data <- ann.data.raw[sapply(ann.data.raw$cons_seq,length) > 0,]
+
+true.encode <- load.encodefile(true_encode_file)
+true.encode.withname <- read.table(true_encode_withname_file, sep = "\t", header = FALSE, as.is = TRUE)
+rl <- eval.ann(ann.data, true.encode, is.trim = FALSE)
+
+cmd <- paste("samtools view -H", ann_sam_file, ">", out_sam_file)
+print(cmd); system(cmd)
+cmd <- paste("samtools view ", ann_sam_file, " > ", out_sam_file, ".nohead", sep = "")
+print(cmd);system(cmd)
+
+contig.sam <- read.table(paste(out_sam_file, ".nohead", sep = ""), sep = "\t", as.is = TRUE)
+if (nrow(contig.sam) != length(rl$group.id)){
+        stop ("nrow(contig.sam) != length(rl$group.id)")
+}
+
+for (i in 1:length(rl$group.id)){
+        cur.name <- true.encode.withname[rl$group.id[[i]],1]
+        for (j in 1:length(cur.name)){
+                cur.line <- paste(contig.sam[i,], collapse = "\t")
+                cur.line <- paste(cur.line, "\tGP:Z:", cur.name[j], sep = "")
+                cat(cur.line, "\n", sep = "", file = out_sam_file, append = TRUE)
+        }
+}
+
+cmd <- paste("samtools view", true_sam_file, ">>", out_sam_file)
+print(cmd); system(cmd)
+
+cmd <- paste("sam2bam", out_sam_file, 1)
+print(cmd); system(cmd)
+

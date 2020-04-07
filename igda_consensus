@@ -1,0 +1,72 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "igda_consensus m5file reffile outdir"
+        exit 0
+fi
+
+m5file=$1
+reffile=$2
+outdir=$3
+
+mkdir -p ${outdir}/pileup
+rm -f ${outdir}/consensus.fa
+# pileup
+#igda_mpileup $m5file ${outdir}/pileup
+
+# getconsensus
+bioawk -c fastx '{print $name"\t"$seq}' $reffile > ${outdir}/ref.table
+
+for pufile in $(ls ${outdir}/pileup/*.pileup); do
+	refname=$(basename ${pufile%.*})
+	echo $refname
+	awk -F "\t" -v refname=$refname '{
+		if (NR == FNR){
+			if ($1 == refname){
+				split($2, refseq, "")
+			}
+		}else{
+			locus = $1 + 1
+			refbase = $4
+			if (refbase != refseq[locus]){
+				print "refbase != refseq[locus]"
+				exit 1
+			}
+		
+			maxcount = -1
+			maxid = -1;
+			for (i=5; i<=8; i++){
+				if ($i > maxcount){
+					max_id = i
+					maxcount = $i
+				}
+			}
+			
+			maxfreq = maxcount / $9
+			if (maxfreq >= 0.25){
+				if (maxcount == -1){
+					print "maxcount == -1"
+					exit 1
+				}
+				switch (max_id) {
+					case 5:
+						refseq[locus] = "A"
+						break
+					case 6:
+						refseq[locus] = "C"
+                                                break
+					case 7:
+						refseq[locus] = "G"
+                                                break
+					case 8:
+						refseq[locus] = "T"
+                                                break
+					default:
+						break
+				}
+			}
+		}
+	}END{print ">"refname; for (i=1;i<=length(refseq);i++) printf("%s",refseq[i]); printf("\n")}' ${outdir}/ref.table $pufile >> ${outdir}/consensus.fa
+done
+
+
+

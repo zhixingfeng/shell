@@ -92,8 +92,8 @@ igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode $outdir/r
 igda filter -f $min_condprob $outdir/realign.dforest $outdir/realign.dforest.ft
 
 echo "============= detect orphan variants ==========="
-igda detectsingle -c 1000 -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
-igda detectsingle -c 1000 -f $min_prob -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
+igda detectsingle -c 100 -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
+igda detectsingle -c 100 -f $min_prob -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
 
 echo "============= combine rsm and orphan variants ==========="
 cat $outdir/realign.dforest.ft $outdir/realign.detectsingle | sort -s -u -k1,1n > $outdir/realign_raw.detected
