@@ -56,7 +56,7 @@ gawk -F "\t" '{
 				}
                         	printf("%s",cur_readseq[i])
 			}
-			printf("\t*\tTP:Z:contig\n")
+			printf("\t*\tTP:Z:contig\tCT:i:%d\tCV:f:%.2f\n", $4, $5)
 		}
 	}
 }' ${sam_file}.tmp.fasta $ann_file > $sam_file
