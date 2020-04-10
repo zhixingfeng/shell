@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ "$#" -ne 4 ]; then
+        echo "fastq_sample fastqfile outfile prop seed"
+        exit 0
+fi
+
+fastqfile=$1
+outfile=$2
+prop=$3
+seed=$4
+
+bioawk -c fastx -v seed=$seed -v prop=$prop 'BEGIN{srand(seed)}{
+	rnum = rand()
+	if (rnum <= prop){
+		print "@"$name
+		print $seq
+		print "+"$name
+		print $qual
+	}
+}' $fastqfile > $outfile
+
+
+
+
+
+

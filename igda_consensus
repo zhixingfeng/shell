@@ -11,7 +11,7 @@ outdir=$3
 mkdir -p ${outdir}/pileup
 rm -f ${outdir}/consensus.fa
 # pileup
-#igda_mpileup $m5file ${outdir}/pileup
+igda_mpileup $m5file ${outdir}/pileup
 
 # getconsensus
 bioawk -c fastx '{print $name"\t"$seq}' $reffile > ${outdir}/ref.table
@@ -42,7 +42,7 @@ for pufile in $(ls ${outdir}/pileup/*.pileup); do
 			}
 			
 			maxfreq = maxcount / $9
-			if (maxfreq >= 0.25){
+			if (maxfreq >= 0.5){
 				if (maxcount == -1){
 					print "maxcount == -1"
 					exit 1
