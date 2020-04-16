@@ -11,7 +11,7 @@ for encode_file in $(ls $indir/*.encode); do
 	sample_name=$(basename ${encode_file%.*})
 	encode_data=$(head -1 $encode_file | awk '{gsub("\t",",",$0); print $0 }')
 	echo -e $sample_name"\t"$encode_data	
-done > $outfile.withmame
+done > $outfile.withname
 
 cat $indir/*.encode > $outfile
 

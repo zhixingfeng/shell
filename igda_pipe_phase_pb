@@ -107,7 +107,7 @@ echo "============= recalculate abundance ==========="
 igda abundance $outdir/realign.ann.tested.ft.count.ft.assembled $outdir/realign.recode $indir/realign.m5
 
 echo "============= filter assembled contigs ============"
-igda find_ncconigs $outdir/realign.ann.tested.ft.count.ft.assembled.count $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc
+igda find_nccontigs $outdir/realign.ann.tested.ft.count.ft.assembled.count $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc
 igda test_contigs_pairwise $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc  $outdir/realign.recode $reffile
 
 igda_phase2vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $indir/realign.vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.vcf igda
