@@ -86,6 +86,9 @@ igda samtom5 -l $min_read_len $infile $reffile $outdir/realign.m5
 
 echo "============= pileup ==========="
 igda contexteffect $outdir/realign.m5 $outdir/realign
+mv $outdir/realign.context  $outdir/realign.context.withN
+grep -v [NRYSWKMBDHV] $outdir/realign.context.withN > $outdir/realign.context
+
 
 echo "============= predict context effect ==========="
 igda_context_pred $contextmodel $outdir/realign.context $outdir/contexteffect
