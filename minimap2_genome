@@ -4,7 +4,7 @@ if [ $# -ne 4 ] ; then
         exit 0
 fi
 
-minimap2 --secondary=no -ax map-ont -t $4 $1 $2 > $3
-
+#minimap2 --secondary=no -ax asm10 -t $4 $1 $2 > $3
+minimap2 -ax asm10 -t $4 $1 $2 > $3
 
 
