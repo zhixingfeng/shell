@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "split_m5_by_ref_dir "
+        exit 0
+fi
+
+
+
