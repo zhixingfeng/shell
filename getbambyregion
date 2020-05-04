@@ -1,11 +1,11 @@
 #!/bin/bash
 if [ "$#" -ne 6 ]; then
-        echo "getbambyregion inbamfile outbamfile chr start end(1-based) nthread"
+        echo "getbambyregion inbamfile outsamfile chr start end(1-based) nthread"
         exit 0
 fi
 
 inbamfile=$1
-outbamfile=$2
+outsamfile=$2
 chr=$3
 start_locus=$4
 end_locus=$5
@@ -13,5 +13,6 @@ nthread=$6
 
 sam_region=$chr":"$start_locus"-"$end_locus
 
-samtools view --threads $nthread -h -b -o $outbamfile $inbamfile $sam_region
+samtools view -H $inbamfile | egrep -w "@PG|SN:$chr" > $outsamfile
+samtools view --threads $nthread $inbamfile $sam_region >> $outsamfile
 

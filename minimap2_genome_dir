@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "minimap2_genome_dir reffile indir outdir nthread"
+        exit 0
+fi
+
+reffile=$1
+indir=$2
+outdir=$3
+nthread=$4
+
+mkdir -p $outdir
+
+for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta|fa.gz|fq.gz|fastq.gz|fasta.gz)$'); do
+	sample_name=${infile%.*}
+	cmd="minimap2_genome $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
+	echo $cmd
+	$cmd
+done
+
+
+
+
+

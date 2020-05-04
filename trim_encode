@@ -1,0 +1,25 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "trim_encode encodefile outfile start end(1-based)"
+        exit 0
+fi
+
+encodefile=$1
+outfile=$2
+start_locus=$3
+end_locus=$4
+
+awk -v start_locus=$start_locus -v end_locus=$end_locus 'BEGIN{start_locus--; end_locus--;}{
+	for (i = 1; i <= NF; i++){
+		if ($i!=""){
+			if ($i >= 4*start_locus && $i <= 4*end_locus + 3){
+				printf("%d\t", $i)
+			}
+		}
+	}
+	printf("\n")
+}' $encodefile > $outfile
+
+
+
+

@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 2 ] ; then
-        echo "bamtofasta bamfile fastqfile"
+        echo "bamtofasta bamfile fastafile"
         exit 0
 fi
 

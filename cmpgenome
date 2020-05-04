@@ -20,4 +20,8 @@ mummerplot $3.delta --filter --layout -postscript -p $3
 # get coord file for filtered alignment
 show-coords -l -T -H $3.filter > $3.filter.coords
 
+# get snp for the filtered alignment
+show-snps -l -T -H $3.filter > $3.snp.filter.tmp
+sort -u $3.snp.filter.tmp | sort -k1,1n > $3.snp.filter
+
 

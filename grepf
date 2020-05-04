@@ -1,0 +1,36 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+	echo "grepf infile patternfile column delimiter(0=space,1=tab)"
+	exit 0
+fi
+
+infile=$1
+patternfile=$2
+column=$3
+if [ $4 -eq 0 ]; then
+	awk -v c=$column '{
+                if (FNR == NR){
+                        pattern[$1] = 1
+                }else{
+                        if (pattern[$c] == 1){
+                                print $0
+                        }
+                }
+        }' $patternfile $infile
+
+elif [ $4 -eq 1 ]; then
+	awk -F "\t" -v c=$column '{
+		if (FNR == NR){
+			pattern[$1] = 1
+		}else{
+			if (pattern[$c] == 1){
+				print $0
+			}
+		}
+	}' $patternfile $infile 
+else
+	echo "wrong delimiter"
+	exit 1
+fi
+
+

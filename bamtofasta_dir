@@ -1,13 +1,26 @@
 #!/bin/bash
-if [ $# -ne 2 ] ; then
-        echo "bamtofasta_dir indir outdir"
+if [ $# -ne 3 ] ; then
+        echo "bamtofasta_dir indir outdir logdir"
         exit 0
 fi
 
-mkdir -p $2
+indir=$1
+outdir=$2
+logdir=$3
 
-ls $1/*.bam | awk -v indir=$1 -v outdir=$2 -v hpcopt="submitjob 1 -c 1 -m 4 -P acc_LymeMIND -q premium" '{cmd=hpcopt" bamtofasta "$0" "outdir"/";gsub(indir"/","",$0); gsub("/","",$0);gsub(".bam",".fasta",$0); cmd=cmd$0;print cmd; system(cmd)}'
+mkdir -p $outdir
 
+for bamfile in $(ls $indir/*.bam); do
+	sname=$(basename ${bamfile%.*})
+	fqfile=$outdir/$sname.fasta
+	hpc="submitjob -w 1 -c 1 -m 4 -o $logdir -j $sname"
+	cmd=$hpc" bamtofasta $bamfile $fqfile"
+	$cmd
+done
+
+#ls $1/*.bam | awk -v indir=$1 -v outdir=$2 -v hpcopt="submitjob -w 1 -c 1 -m 4 -P acc_LymeMIND -q premium" '{cmd=hpcopt" bamtofastq "$0" "outdir"/";gsub(indir"/","",$0); gsub("/","",$0);gsub(".bam",".fastq",$0); cmd=cmd$0;print cmd; system(cmd)}'
+
+#ls -d $1/*/ | awk -v indir=$1 -v outdir=$2 -v hpcopt="submitjob 4 -c 1 -m 6 -P acc_LymeMIND -q premium" '{cmd=hpcopt" filter_pacbio "$0" "outdir"/";gsub(indir"/","",$0); gsub("/","",$0); cmd=cmd$0".bam";  print cmd; system(cmd)}'
 
 
 

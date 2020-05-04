@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "trim_encode_dir indir outdir start end(1-based)"
+        exit 0
+fi
+
+indir=$1
+outdir=$2
+start_locus=$3
+end_locus=$4
+
+mkdir -p $outdir
+for encodefile in $(ls $indir/*.encode); do
+	outfile=$outdir/$(basename $encodefile)
+	cmd="trim_encode $encodefile $outfile $start_locus $end_locus"
+	echo $cmd
+	$cmd
+done
+
+
