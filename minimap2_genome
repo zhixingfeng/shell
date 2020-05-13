@@ -5,6 +5,7 @@ if [ $# -ne 4 ] ; then
 fi
 
 #minimap2 --secondary=no -ax asm10 -t $4 $1 $2 > $3
-minimap2 -ax asm10 -t $4 $1 $2 > $3
+#minimap2 -ax asm10 -t $4 $1 $2 > $3
+minimap2 -ax asm20 -t $4 $1 $2 > $3
 
 

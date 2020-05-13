@@ -11,7 +11,7 @@ nthread=$4
 
 mkdir -p $outdir
 
-for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta|fa.gz|fq.gz|fastq.gz|fasta.gz)$'); do
+for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta|fna|fa.gz|fq.gz|fastq.gz|fasta.gz|fna.gz)$'); do
 	sample_name=${infile%.*}
 	cmd="minimap2_genome $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
 	echo $cmd

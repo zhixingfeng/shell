@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ $# -eq 0 ] ; then
+	echo "getchrlen fastafile"
+	exit 0
+fi
+bioawk -c fastx 'BEGIN{x=0}{x += length($seq)}END{print x/NR}' $1
+

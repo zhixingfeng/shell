@@ -6,6 +6,7 @@ fi
 
 # align
 nucmer -c 100 -g 500 -l 12 --maxmatch -p $3 $2 $1 
+nucmer -c 100 -g 500 -l 12 --maxmatch --sam-long $3.sam $2 $1
 
 # get coordinates
 show-coords -l -T -H $3.delta > $3.coords

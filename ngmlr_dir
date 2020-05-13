@@ -15,7 +15,7 @@ mkdir -p $logdir
 
 for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta|fa.gz|fq.gz|fastq.gz|fasta.gz)$'); do
 	sample_name=${infile%.*}
-	cmd="submitjob -w 4 -c $nthread -m 8 -j $sample_name -o $logdir"
+	cmd="submitjob -w 4 -c $nthread -m 32 -j $sample_name -o $logdir"
 	cmd=$cmd" ngmlr -t $nthread -r $reffile -q $indir/$infile -o $outdir/$sample_name.sam"
 	#echo $cmd
 	$cmd
