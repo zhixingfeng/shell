@@ -6,10 +6,13 @@ fi
 
 # align
 nucmer -c 100 -g 500 -l 12 --maxmatch -p $3 $2 $1 
-nucmer -c 100 -g 500 -l 12 --maxmatch --sam-long $3.sam $2 $1
+#nucmer -c 100 -g 500 -l 12 --maxmatch --sam-long $3.sam $2 $1
 
 # get coordinates
 show-coords -l -T -H $3.delta > $3.coords
+
+# coords to bed 
+awk -F "\t" '{if($3<$4){strand = "+"}else{strand = "-"}; print $10"\t"$1"\t"$2"\t"$11":"$3"-"$4"\t"$7"\t"strand}' $3.coords > $3.bed
 
 # get snps
 show-snps -l -T -H $3.delta > $3.snp.tmp
@@ -20,6 +23,7 @@ mummerplot $3.delta --filter --layout -postscript -p $3
 
 # get coord file for filtered alignment
 show-coords -l -T -H $3.filter > $3.filter.coords
+awk -F "\t" '{if($3<$4){strand = "+"}else{strand = "-"}; print $10"\t"$1"\t"$2"\t"$11":"$3"-"$4"\t"$7"\t"strand}' $3.filter.coords > $3.filter.bed
 
 # get snp for the filtered alignment
 show-snps -l -T -H $3.filter > $3.snp.filter.tmp
