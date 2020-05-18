@@ -7,6 +7,8 @@ fi
 fastafile=$1
 outdir=$2
 
+mkdir -p $outdir
+
 bioawk -c fastx -v outdir=$outdir '{
 	outfile = outdir"/"$name".fasta"
 	gsub("\\|", "_", outfile)

@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "cmpgenome_select_region coords_file out_coords_file chr rstart rend"
+        exit 0
+fi
+
+coords_file=$1
+out_coords_file=$2
+chr=$3
+rstart=$4
+rend=$5
+
+grep -w $chr $coords_file | awk -F "\t" -v rstart=$rstart -v rend=$rend '{
+	if ($1 < rend && $2 > rstart){
+		print $0
+	}
+}' > $out_coords_file
+
+
