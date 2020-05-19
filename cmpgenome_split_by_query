@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "cmpgenome_split_by_query coords_file outdir"
+        exit 0
+fi
+
+coords_file=$1
+outdir=$2
+
+mkdir -p $outdir
+
+awk -v outdir=$outdir '{
+	print $0 > outdir"/"$11".coords"
+}' $coords_file
+
+
+

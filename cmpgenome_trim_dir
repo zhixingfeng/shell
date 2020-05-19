@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "cmpgenome_trim_dir indir"
+        exit 0
+fi
+
+indir=$1
+
+for coords_file in $(ls $indir/*.coords); do
+	out_file=${coords_file%.*}.trim.coords
+	cmd="cmpgenome_trim $coords_file $out_file"
+	echo $cmd;$cmd
+done
+
+

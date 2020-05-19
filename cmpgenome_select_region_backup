@@ -1,13 +1,22 @@
 #!/bin/bash
-if [ $# -ne 2 ] ; then
-        echo "cmpgenome_trim out_coords_file out_coords_trim_file"
+if [ $# -ne 5 ] ; then
+        echo "cmpgenome_select_region coords_file out_coords_file chr rstart rend"
         exit 0
 fi
 
-out_coords_file=$1
-out_coords_trim_file=$2
+coords_file=$1
+out_coords_file=$2
+chr=$3
+rstart=$4
+rend=$5
 
-#out_coords_trim_file=${out_coords_file%.*}.trim.coords
+grep -w $chr $coords_file | awk -F "\t" -v rstart=$rstart -v rend=$rend '{
+	if ($1 < rend && $2 > rstart){
+		print $0
+	}
+}' > $out_coords_file
+
+out_coords_trim_file=${out_coords_file%.*}.trim.coords
 awk -F "\t" '{
 	if (FNR == 1){
 		rstart = ($1 < $2 ? $1 : $2)
@@ -32,12 +41,14 @@ rend=$(grep -w rend $out_coords_trim_file.range | awk '{print $2}')
 qstart=$(grep -w qstart $out_coords_trim_file.range | awk '{print $2}')
 qend=$(grep -w qend $out_coords_trim_file.range | awk '{print $2}')
 
-out_coords_trim_ref_file=${out_coords_trim_file%.*}.ref.coords
-awk -F "\t" -v rstart=$rstart -v rend=$rend -v qstart=$qstart -v qend=$qend -v out_coords_trim_file=$out_coords_trim_file -v out_coords_trim_ref_file=$out_coords_trim_ref_file '{
-	print $1-rstart+1 "\t" $2-rstart+1 "\t" $3-qstart+1 "\t" $4-qstart+1 "\t" $5"\t"$6"\t"$7"\t"rend-rstart+1"\t"qend-qstart+1"\t"$10"\t"$11 > out_coords_trim_file
-	print $1-rstart+1 "\t" $2-rstart+1 "\t" $3 "\t" $4 "\t" $5"\t"$6"\t"$7"\t"rend-rstart+1"\t"$9"\t"$10"\t"$11 > out_coords_trim_ref_file
+#echo $rstart
+#echo $rend
+#echo $qstart
+#echo $qend
 
-}' $out_coords_file 
+awk -F "\t" -v rstart=$rstart -v rend=$rend -v qstart=$qstart -v qend=$qend '{
+	print $1-rstart+1 "\t" $2-rstart+1 "\t" $3-qstart+1 "\t" $4-qstart+1 "\t" $5"\t"$6"\t"$7"\t"rend-rstart+1"\t"qend-qstart+1"\t"$10"\t"$11
+}' $out_coords_file > $out_coords_trim_file
 
 
 
