@@ -1,0 +1,55 @@
+#!/usr/bin/bash
+min_span=2000
+max_overhang=1000
+min_unitig_cvg=4
+min_cvg=3
+while getopts ":s:h:e:c:" opt; do
+        case ${opt} in
+                s )
+                        min_span=$OPTARG;;
+                h )
+                        max_overhang=$OPTARG;;
+		e )
+			min_unitig_cvg=$OPTARG;;
+		c )
+                        min_cvg=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 3 ]; then
+	echo "miniasm_recursive -s min_span -h max_overhang -e min_unitig_cvg -c min_cvg read_file paf_file out_prefix"
+        echo "default:"
+        echo -e "\t-s 2000"
+        echo -e "\t-h 1000"
+        echo -e "\t-e 4"
+        echo -e "\t-c 3"
+	exit 0
+fi
+
+read_file=$1
+paf_file=$2
+out_prefix=$3
+
+echo "min_span = "$min_span
+echo "max_overhang = "$max_overhang
+echo "min_unitig_cvg = "$min_unitig_cvg
+echo "min_cvg = "$min_cvg
+
+for e in {20..1}; do
+	miniasm -1 -2 -e $e -c $min_cvg -s $min_span -h $max_overhang -f $read_file $paf_file > $out_prefix.gfa
+	awk '$1 ~/S/ {print ">"$2"\n"$3}' $out_prefix.gfa > $out_prefix.fasta
+	nr=$(wc -l $out_prefix.gfa | awk '{print $1}')
+	if [ $nr -gt 0 ];then
+		nchr=$(getchrlen ../test/miniasm/contig_14.fasta | wc -l)
+		if [ $nchr -ge 1 ];then
+			break
+		fi 
+	fi
+done
+
+

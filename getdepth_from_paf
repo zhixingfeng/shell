@@ -1,0 +1,28 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "getdepth_from_paf paf_file cvg_file"
+        exit 0
+fi
+
+paf_file=$1
+cvg_file=$2
+
+awk -F "\t" '{
+	chr = $6
+	tstart = $8 + 1
+	tend = $9
+	contig_len[chr] = $7
+	for (i = tstart; i <= tend; i++){
+		if (cvg[chr","i] == ""){
+			cvg[chr","i] = 1
+		}else{
+			cvg[chr","i]++
+		}
+	}
+}END{
+	for (key in cvg){
+		split(key, buf, ",")
+		printf("%s\t%d\t%d\t%d\n", buf[1], contig_len[buf[1]], buf[2], cvg[key])
+	}
+}' $paf_file | sort -k1,1 -k3,3n > $cvg_file
+
