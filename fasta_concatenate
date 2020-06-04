@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "fasta_subseq in_fasta_file out_fasta_file"
+        exit 0
+fi
+
+in_fasta_file=$1
+out_fasta_file=$2
+
+bioawk -c fastx 'BEGIN{print ">merged"}{
+	printf("%s",$seq)
+}' $in_fasta_file > $out_fasta_file
+
+
+
+
