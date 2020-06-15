@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "racon_wrapper read_file align_file ref_file out_file(fasta) nthread"
+        exit 0
+fi
+
+read_file=$1
+align_file=$2
+ref_file=$3
+out_file=$4
+nthread=$5
+
+racon -t $nthread $read_file $align_file $ref_file > $out_file
+
+
