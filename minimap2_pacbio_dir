@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -ne 5 ] ; then
-        echo "minimap2_nanopore_dir reffile indir outdir nthread logdir"
+        echo "minimap2_pacbio_dir reffile indir outdir nthread logdir"
         exit 0
 fi
 
