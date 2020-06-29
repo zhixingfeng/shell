@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ $# -ne 4 ] ; then
+        echo "cmpgenome_combine_snp coords_file snp_file query_file ref_file outdir"
+        exit 0
+fi
+
+
+
+

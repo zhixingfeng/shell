@@ -1,8 +1,33 @@
 #!/bin/bash
+is_combine=0
+while getopts ":h:c" opt; do
+        case ${opt} in
+                h )
+                	echo "cmpgenome -c queryfastfile reffastafile outprefix"
+		        echo "-c = combine snp and coords"
+			exit 0;;
+		c )
+                        is_combine=1;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+
+shift $((OPTIND - 1))
+
 if [ $# -ne 3 ] ; then
-        echo "cmpgenome queryfastfile reffastafile outprefix"
+        echo "cmpgenome -c queryfastfile reffastafile outprefix"
+	echo "-c = combine snp and coords"
         exit 0
 fi
+
+echo "is_combine="$is_combine
+
+queryfastfile=$1
+reffastafile=$2
+outprefix=$3
 
 # align
 nucmer --maxmatch -p $3 $2 $1 
@@ -25,7 +50,6 @@ mv $3.ps $3.filter.ps
 
 mummerplot $3.delta --layout -postscript -p $3
 
-
 # get coord file for filtered alignment
 show-coords -l -T -H $3.filter > $3.filter.coords
 awk -F "\t" '{if($3<$4){strand = "+"}else{strand = "-"}; print $10"\t"$1"\t"$2"\t"$11":"$3"-"$4"\t"$7"\t"strand}' $3.filter.coords > $3.filter.bed
@@ -33,5 +57,24 @@ awk -F "\t" '{if($3<$4){strand = "+"}else{strand = "-"}; print $10"\t"$1"\t"$2"\
 # get snp for the filtered alignment
 show-snps -l -T -H $3.filter > $3.snp.filter.tmp
 sort -u $3.snp.filter.tmp | sort -k1,1n > $3.snp.filter
+
+#--------------- get snp for each alignment block --------------#
+if [ $is_combine -eq 0 ];then
+	exit 0
+fi
+
+mkdir -p ${outprefix}_snp
+while IFS=$'\t' read -r rstart rend qstart qend rmatch qmatch sim rlen qlen rname qname;do
+	cur_query_file=${outprefix}_snp/${qname}_${qstart}_${qend}.fasta
+	cur_prefix=${outprefix}_snp/${qname}_${qstart}_${qend}_vs_${rname}_${rstart}_${rend}
+	echo $cur_prefix
+	fasta_subseq $queryfastfile $qname $qstart $qend > $cur_query_file
+	cmpgenome $cur_query_file $reffastafile $cur_prefix
+done < "$outprefix.filter.coords" 
+
+
+
+
+
 
 

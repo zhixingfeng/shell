@@ -11,8 +11,11 @@ rend=$4
 
 bioawk -c fastx -v chr=$chr -v rstart=$rstart -v rend=$rend '{
 	if ($name == chr){
-		print ">"chr"_"rstart"_"rend
-		print substr($seq, rstart, rend - rstart + 1)
+		#print ">"chr"_"rstart"_"rend
+		cur_start = (rstart < rend ? rstart : rend)
+		cur_end = (rstart >= rend ? rstart : rend)
+		print ">"chr"_"cur_start"_"cur_end
+		print substr($seq, cur_start, cur_end - cur_start + 1)
 	}
 }' $fasta_file 
 

@@ -1,4 +1,22 @@
 #!/bin/bash
+is_combine=0
+while getopts ":h:c" opt; do
+        case ${opt} in
+                h )
+                        echo "cmpgenome -c cmpgenome_dir indir reffile outdir nthread logdir"
+                        echo "-c = combine snp and coords"
+                        exit 0;;
+                c )
+                        is_combine=1;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+
+shift $((OPTIND - 1))
+
 if [ $# -ne 5 ] ; then
         echo "cmpgenome_dir indir reffile outdir nthread logdir"
         exit 0
@@ -12,10 +30,16 @@ outdir=$3
 nthread=$4
 logdir=$5
 
-for infile in $(ls $indir | egrep ".fna$|.fasta$|.fa$"); do
+echo "is_combine="$is_combine
+
+for infile in $(ls $indir | egrep ".fna$|.fasta$|.fa$|.fas$"); do
 	outprefix=$outdir/${infile%.*}
 	jobname=${infile%.*}
-	submitjob -w 1 -c $nthread -m 4 -o $logdir -j $jobname cmpgenome $indir/$infile $reffile $outprefix
+	if [ $is_combine -eq 0 ];then
+		submitjob -w 1 -c $nthread -m 4 -o $logdir -j $jobname cmpgenome $indir/$infile $reffile $outprefix
+	else
+		submitjob -w 1 -c $nthread -m 4 -o $logdir -j $jobname cmpgenome -c $indir/$infile $reffile $outprefix
+	fi
 done
 
 

@@ -19,6 +19,8 @@ ann.data <- ann.data.raw[sapply(ann.data.raw$cons_seq,length) > 0,]
 true.encode <- load.encodefile(true_encode_file)
 true.encode.withname <- read.table(true_encode_withname_file, sep = "\t", header = FALSE, as.is = TRUE)
 rl <- eval.ann(ann.data, true.encode, is.trim = FALSE)
+print(quantile(rl$acc))
+save(ann.data, rl, true.encode, true.encode.withname, file = paste(out_sam_file, ".Rdata", sep=""))
 
 cmd <- paste("samtools view -H", ann_sam_file, ">", out_sam_file)
 print(cmd); system(cmd)
