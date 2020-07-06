@@ -1,0 +1,74 @@
+#!/bin/bash
+niter=1
+min_jaccard=2
+while getopts ":hi:j:" opt; do
+        case ${opt} in
+                h )
+                        echo "igda_assemble_iter -i niter -j min_jaccard ann_file recode_file m5_file ref_file outdir"
+                        echo "default:"
+                        echo -e "\t-i 1"
+			echo -e "\t-j 2"
+                        exit 0;;
+                i )
+                        niter=$OPTARG;;
+		j )
+			min_jaccard=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 5 ] ; then
+	echo "igda_assemble_iter -i niter -j min_jaccard ann_file recode_file m5_file ref_file outdir"
+	echo "default:"
+	echo -e "\t-i 1"
+	echo -e "\t-j 2"
+	exit 0
+fi
+
+echo "niter = "$niter
+echo "min_jaccard = "$min_jaccard
+
+ann_file=$1
+recode_file=$2
+m5_file=$3
+ref_file=$4
+outdir=$5
+
+mkdir -p $outdir
+# get raw ann file
+cp $ann_file $outdir/iter_0.ann
+
+# iterateive assembly
+for b in $(seq 1 $niter);do
+	echo "iterate $b"
+	b_prev=$(($b-1))
+
+	# transitive reduction
+	igda tred -r -j $min_jaccard $outdir/iter_${b_prev}.ann
+
+	# assemble
+	igda assemble $outdir/iter_${b_prev}.ann $outdir/iter_${b_prev}.ann.tred.dot
+	
+	# get abundance
+	igda abundance $outdir/iter_${b_prev}.ann.assembled $recode_file $m5_file
+
+	# get nc contigs
+	igda find_nccontigs -j $min_jaccard $outdir/iter_${b_prev}.ann.assembled.count $outdir/iter_${b_prev}.ann.assembled.count.nc
+
+	# filter contigs pairwise
+	igda test_contigs_pairwise $outdir/iter_${b_prev}.ann.assembled.count.nc $recode_file $ref_file
+	
+	# rename
+	cp $outdir/iter_${b_prev}.ann.assembled.count.nc.ft $outdir/iter_${b}.ann
+done
+
+cp $outdir/iter_${niter}.ann $outdir/final.ann
+
+
+
+
+
