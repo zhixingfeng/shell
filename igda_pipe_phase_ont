@@ -95,10 +95,12 @@ echo "============= polish ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.unpolished
 igda polish -f 0.3 $outdir/realign.ann.tested.ft.count.ft.unpolished $outdir/realign.encode.rdim $indir/realign.m5 $reffile $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/tmp_polish
 sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.tmp > $outdir/realign.ann.tested.ft.count.ft
-#rm $outdir/realign.ann.tested.ft.count.ft.tmp
+rm $outdir/realign.ann.tested.ft.count.ft.tmp
 
 echo "============= transitive reduction ==========="
-igda tred $outdir/realign.ann.tested.ft.count.ft
+mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tmp
+igda find_nccontigs $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/realign.ann.tested.ft.count.ft
+igda tred -r $outdir/realign.ann.tested.ft.count.ft
 
 echo "============= assemble ==========="
 igda assemble $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tred.dot
