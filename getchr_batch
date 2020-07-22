@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ $# -ne 3 ]; then
+        echo "USAGE: getchr_batch namefile fafile outfile"
+        exit 0
+fi
+
+namefile=$1
+fafile=$2
+outfile=$3
+
+tmpfile=$namefile.tmp
+awk '{print ">"$1; print "N"}' $namefile > $tmpfile
+
+bioawk -c fastx '{
+	if (NR == FNR){
+		name_list[$1] = 1
+	}else{
+		if (name_list[$1] == 1){
+			print ">"$name
+			print $seq
+		}
+	}
+}' $tmpfile $fafile > $outfile
+
+rm $tmpfile
+

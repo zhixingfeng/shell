@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "split_paf_by_ref paf_file outdir"
+        exit 0
+fi
+
+paf_file=$1
+outdir=$2
+
+mkdir -p $outdir
+
+awk -F "\t" -v outdir=$outdir '{
+	outfile=$6
+	gsub("\\|", "_", outfile);
+	gsub("/", "-", outfile);
+	outpath=outdir"/"outfile".paf"
+	print $0 > outpath
+}' $paf_file
+
+
+

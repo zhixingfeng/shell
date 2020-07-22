@@ -8,18 +8,21 @@ mkdir -p $2
 samtools view $1 | awk -F "\t" -v outdir=$2 '{
 	outfile=$3
 	gsub("\\|", "_", outfile);
+	gsub("/", "-", outfile);
 	outpath=outdir"/"outfile".sam.tmp"
+	#print outpath
 	print $0 > outpath;
 }'
 
 
 for samtmpfile in $(ls $2/*.sam.tmp);do
 	samfile=${samtmpfile%.tmp}
-	samplename=$(basename $samfile)
-	samplename=${samplename%.sam}
-	samtools view -H $1 | grep @SQ | grep $samplename > $samfile
+	samplename_raw=$(basename $samfile)
+	samplename_raw=${samplename_raw%.sam}
+	samplename=$(echo $samplename_raw | awk '{gsub("-","\\/", $1); print $1}')
+	samtools view -H $1 | grep @SQ | grep "$samplename" > $samfile
 	samtools view -H $1 | grep @PG >> $samfile
 	cat $samtmpfile >> $samfile
-	rm $samtmpfile
+	#rm $samtmpfile
 done
 
