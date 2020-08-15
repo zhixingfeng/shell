@@ -1,5 +1,5 @@
 #!/bin/bash
-min_cvg=3
+min_cvg=5
 min_nn=25
 max_nn=50
 max_iter=1
@@ -9,7 +9,7 @@ while getopts ":hc:t:m:b:n:" opt; do
                 h )
                         echo "igda_pipe_phase_ont -n nthread -b niter -c min_cvg -t min_nn -m max_nn indir reffile outdir"
                         echo "default:"
-                        echo -e "\t-c 10, minimal coverage of each contig"
+                        echo -e "\t-c 5, minimal coverage of each contig"
                         echo -e "\t-t 25, minimal number of nearest neighbors"
                         echo -e "\t-m 50, maximal number of nearest neighbors"
 			echo -e "\t-b maximal number of iteration in ANN, default = 1"
@@ -34,9 +34,9 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 3 ] ; then
-	echo "igda_pipe_phase_pb -n nthread -b niter -c mincvg -t min_nn -m max_nn indir reffile outdir"
+	echo "igda_pipe_phase_ont -n nthread -b niter -c mincvg -t min_nn -m max_nn indir reffile outdir"
         echo "default:"
-        echo -e "\t-c 10, minimal coverage of each contig"
+        echo -e "\t-c 5, minimal coverage of each contig"
         echo -e "\t-t 25, minimal number of nearest neighbors"
         echo -e "\t-m 50, maximal number of nearest neighbors "
 	echo -e "\t-b maximal number of iteration in ANN, default = 1"

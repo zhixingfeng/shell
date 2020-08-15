@@ -11,11 +11,11 @@ seed=18473
 while getopts ":hc:p:x:q:r:n:l:s:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_detect_pb -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+                        echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
                         echo "default:"
                         echo -e "\t-x (empty)"
-			echo -e "\t-c 0.6"
-			echo -e "\t-p 0.1"
+			echo -e "\t-c 0.65"
+			echo -e "\t-p 0.2"
 			echo -e "\t-q 100"
 			echo -e "\t-r 25"
 			echo -e "\t-n 1"
@@ -47,11 +47,11 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
-	echo "igda_pipe_detect_pb -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+	echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
         echo "default:"
         echo -e "\t-x (empty)"
-        echo -e "\t-c 0.6"
-        echo -e "\t-p 0.1"
+        echo -e "\t-c 0.65"
+        echo -e "\t-p 0.2"
 	echo -e "\t-q 100"
 	echo -e "\t-r 25"
 	echo -e "\t-n 1"
