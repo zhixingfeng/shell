@@ -7,7 +7,12 @@ fi
 samfile=$1
 fafile=$2
 nthread=$3
-samtools view --threads $nthread $samfile | awk -F "\t" '{print ">"$1; print $10}' > $fafile
+samtools view -F 2304 --threads $nthread $samfile | awk -F "\t" '{
+	if (length($10) > 1 && $10 != "*"){
+		print ">"$1; print $10
+	}
+	
+}' > $fafile
 
 
 

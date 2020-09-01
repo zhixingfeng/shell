@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ $# -ne 3 ]; then
+        echo "USAGE: getreadsbyref_bam bamfile ref outfile"
+        exit 0
+fi
+
+bamfile=$1
+ref=$2
+outfile=$3
+
+ref_mod=$(echo $ref | awk '{gsub(/\|/, "\\|", $1); print $1}')
+samtools view -H $bamfile | egrep -w "@PG|SN:$ref_mod" > $outfile
+samtools view $bamfile $ref >>$outfile
+#samtools view $bamfile $ref | awk -v ref=$ref '{if ($3==ref) print $0}' >>$outfile
+
+

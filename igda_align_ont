@@ -27,5 +27,5 @@ minimap2 -t $nthread --secondary=no -ax map-ont $reffile $outfile.igda.tmp.fastq
 echo "filter realigned sam"
 samtools view --threads $nthread -h -F 4095 $outfile.realign.sam > $outfile
 rm $outfile.realign.sam
-rm $outfile.igda.tmp.fastq
+#rm $outfile.igda.tmp.fastq
 

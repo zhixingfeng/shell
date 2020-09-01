@@ -12,6 +12,8 @@ mkdir -p $outdir
 
 for fqfile in $(ls $indir | grep "[.fastq$|.fq$]");do
 	echo $fqfile
+	fafile=${fqfile%.*}.fasta
+	fastq2fasta $indir/$fqfile $outdir/$fafile
 done
 
 
