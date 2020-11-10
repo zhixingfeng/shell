@@ -1,0 +1,44 @@
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+        echo "split_range start end segsize"
+        exit 0
+fi
+
+rStart=$1
+rEnd=$2
+segsize=$3
+
+if [ $rEnd -le $rStart ]; then
+	echo "Error in split_range: start is less than end"
+	exit 1
+fi
+
+if [ $segsize -le 10000 ]; then
+	echo "Error in split_range: segsize is smaller than 10000"
+	exit 1
+fi
+
+ls | awk -v rStart=$rStart -v rEnd=$rEnd -v segsize=$segsize '
+BEGIN{
+	n_seg = int((rEnd - rStart) / segsize + 0.5)
+	if (n_seg == 0){
+		print rStart"\t"rEnd
+	}else{ 
+		new_segsize = int((rEnd - rStart) / n_seg)
+		new_n_seg = int((rEnd - rStart) / new_segsize)
+		if (new_n_seg > 1){
+			for (i = 0; i < new_n_seg; i++){
+				cur_start = rStart + i*new_segsize
+				if (i == (new_n_seg - 1) ){
+					cur_end = rEnd
+				}else{
+					cur_end = rStart + (i+1)*new_segsize - 1
+				}
+				print cur_start"\t"cur_end
+			}
+		}else{
+			print rStart"\t"rEnd
+		}
+	}
+}'
+

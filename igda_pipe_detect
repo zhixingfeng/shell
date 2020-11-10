@@ -1,0 +1,172 @@
+#!/bin/bash
+exclude_loci_file=""
+min_condprob=0.65
+min_prob=0.1
+topn_cmpreads=100
+nthread=1
+dforest_r=25
+min_read_len=1000
+seed=0
+method="pb"
+isfast=1
+segsize=20000
+
+#while getopts ":hc:p:x:q:r:n:l:s:" opt; do
+while getopts ":hn:m:f:g:l:r:c:p:q:x:s:" opt; do
+        case ${opt} in
+                h )
+			echo "Usage: igda_pipe_detect [options] infile(bam file) reffile contextmodel outdir"
+			
+			echo "Input:"
+			echo -e "\tinfile should be sorted aligned bam file. This file should be obtained by igda_align_pb(igda_align_ont) and sam2bam."
+			echo -e "\treffile is the reference fasta file."
+			echo -e "\tcontextmodel is the pretrained model for context effect and can be obtained at https://github.com/zhixingfeng/igda_contextmodel."
+
+			echo "Options:"
+			echo -e "\t-n\tNumber of threads. [default = 1]"
+			echo -e "\t-m\tMethod. \"pb\" for PacBio and \"ont\" for Oxford Nanopore. [default = \"pb\"]"
+			echo -e "\t-f\tIs using the fast calculation algorithm. 1 = yes and 0 = no. [default = 1]"
+			echo -e "\t-g\tSegment size(bp) to split each genome. [default = 20000]"
+			echo -e "\t-l\tMinimal read length (shorter reads will be excluded). [default = 1000]"
+			echo -e "\t-r\tMinimal depth for each SNV. [default = 25]"
+			echo -e "\t-c\tMinimal maximal conditional substitution rate. [default = 0.65]"
+			echo -e "\t-p\tMinimal substitution rate for orphan SNVs. [default = 0.1]"
+			echo -e "\t-q\tNumber of most similar reads to construct subspaces. [default = 100]"
+			echo -e "\t-x\tThe file that list the loci to be excluded."
+			echo -e "\t-s\tSeed for permutation test (experimental). [default = 0, i.e. no permutation]"
+			
+			exit 0;;
+		n )
+			nthread=$OPTARG;;
+		m )
+			method=$OPTARG
+			case $method in
+				"pb" )
+					echo "method = pb"
+					min_prob=0.1
+					igda_cmd="igda_pipe_detect_pb"
+					;;
+				"ont" )
+					echo "method = ont"
+					min_prob=0.2
+					igda_cmd="igda_pipe_detect_ont"
+					;;
+				* )
+					echo "method should be pb or ont."
+					exit 1;;
+			esac
+			;;
+		f )
+			isfast=$OPTARG;;
+		g )
+                        segsize=$OPTARG;;
+		l )
+			min_read_len=$OPTARG;;
+		r )
+			dforest_r=$OPTARG;;
+		c ) 
+			min_condprob=$OPTARG;;
+		p )
+			min_prob=$OPTARG;;
+		q ) 
+			topn_cmpreads=$OPTARG;;
+		x )
+			exclude_loci_file=$OPTARG;;
+		s ) 
+			seed=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 4 ] ; then
+	echo "Usage: igda_pipe_detect [options] infile(bam file) reffile contextmodel outdir"
+
+	echo "Input:"
+        echo -e "\tinfile should be sorted aligned bam file. This file should be obtained by igda_align_pb(igda_align_ont) and sam2bam."
+        echo -e "\treffile is the reference fasta file."
+        echo -e "\tcontextmodel is the pretrained model for context effect and can be obtained at https://github.com/zhixingfeng/igda_contextmodel."
+
+        echo "Options:"
+        echo -e "\t-n\tNumber of threads. [default = 1]"
+        echo -e "\t-m\tMethod. \"pb\" for PacBio and \"ont\" for Oxford Nanopore. [default = \"pb\"]"
+        echo -e "\t-f\tIs using the fast calculation algorithm. 1 = yes and 0 = no. [default = 1]"
+        echo -e "\t-g\tSegment size(bp) to split each genome. [default = 20000]"
+	echo -e "\t-l\tMinimal read length (shorter reads will be excluded). [default = 1000]"
+        echo -e "\t-r\tMinimal depth for each SNV. [default = 25]"
+        echo -e "\t-c\tMinimal maximal conditional substitution rate. [default = 0.65]"
+        echo -e "\t-p\tMinimal substitution rate for orphan SNVs. [default = 0.1]"
+        echo -e "\t-q\tNumber of most similar reads to construct subspaces. [default = 100]"
+        echo -e "\t-x\tThe file that list the loci to be excluded."
+        echo -e "\t-s\tSeed for permutation test (experimental). [default = 0, i.e. no permutation]"
+
+	exit 0
+fi
+
+
+infile=$1
+reffile=$2
+contextmodel=$3
+outdir=$4
+
+echo "infile = "$infile
+echo "reffile = "$reffile
+echo "contextmodel = "$contextmodel
+echo "outdir = "$outdir
+
+echo "nthread = "$nthread
+echo "method = "$method
+echo "isfast = "$isfast
+echo "segsize = "$segsize
+echo "min_read_len = "$min_read_len
+echo "dforest_r = "$dforest_r
+echo "min_condprob = "$min_condprob
+echo "min_prob = "$min_prob
+echo "topn_cmpreads = "$topn_cmpreads
+echo "exclude_loci_file = "$exclude_loci_file
+echo "seed = "$seed
+
+echo "Start."
+mkdir -p $outdir
+
+#------------- split data by chromosome and segments ------------#
+# get range of each chromosome with aligned reads
+#igda getbamchrrange $infile $reffile $outdir/chrrange.txt
+
+# split data
+#echo "split bam file"
+#while IFS=$'\t' read -r chr rStart rEnd; do
+#	mkdir -p $outdir/dat_split/$chr
+	
+#	split_range $rStart $rEnd $segsize | 
+#	while IFS=$'\t' read -r cur_start cur_end; do
+#		cur_samfile=$outdir/dat_split/$chr/${chr}_$(($cur_start+1))_$(($cur_end+1)).sam
+#		cur_region=${chr}":"$(($cur_start+1))"-"$(($cur_end+1))
+#		echo -e "$cur_region (1-based)"
+#		samtools view -h -o $cur_samfile -@ $nthread $infile $cur_region
+#	done 	
+#done < $outdir/chrrange.txt
+
+# detect SNVs
+for cur_dir in $(ls -d $outdir/dat_split/*/);do
+	cur_dir_name=$(basename $cur_dir)
+	mkdir -p $outdir/detect_split/$cur_dir_name
+
+	for cur_sam_file in $(ls $cur_dir/*.sam);do
+		cur_out_dir=$outdir/detect_split/$cur_dir_name/$(basename ${cur_sam_file%.*})
+		if [[ $exclude_loci_file == "" ]]; then
+			cur_cmd="$igda_cmd -n $nthread -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -s $seed"
+		else
+			cur_cmd="$igda_cmd -n $nthread -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -x $exclude_loci_file -s $seed"
+		fi
+		cur_cmd=$cur_cmd" $cur_sam_file $reffile $contextmodel $cur_out_dir"
+		echo $cur_cmd
+	done
+done
+
+
+
+
