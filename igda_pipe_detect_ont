@@ -7,11 +7,12 @@ nthread=1
 dforest_r=25
 min_read_len=1000
 seed=18473
+isfast=1
 
-while getopts ":hc:p:x:q:r:n:l:s:" opt; do
+while getopts ":hc:p:x:q:r:n:l:s:f:" opt; do
         case ${opt} in
                 h )
-                        echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+                        echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file -f isfast infile(bam or sam file) reffile contextmodel outdir"
                         echo "default:"
                         echo -e "\t-x (empty)"
 			echo -e "\t-c 0.65"
@@ -21,6 +22,7 @@ while getopts ":hc:p:x:q:r:n:l:s:" opt; do
 			echo -e "\t-n 1"
 			echo -e "\t-l 1000"
 			echo -e "\t-s 18473"
+			echo -e "\t-f 1"
 			exit 0;;
 		c )
 			min_condprob=$OPTARG;;
@@ -38,6 +40,8 @@ while getopts ":hc:p:x:q:r:n:l:s:" opt; do
                         min_read_len=$OPTARG;;
 		s )
                         seed=$OPTARG;;
+		f )
+                        isfast=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -47,7 +51,7 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
-	echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file infile(bam or sam file) reffile contextmodel outdir"
+	echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file -f isfast infile(bam or sam file) reffile contextmodel outdir"
         echo "default:"
         echo -e "\t-x (empty)"
         echo -e "\t-c 0.65"
@@ -57,6 +61,7 @@ if [ $# -ne 4 ] ; then
 	echo -e "\t-n 1"
 	echo -e "\t-l 1000"
 	echo -e "\t-s 18473"
+	echo -e "\t-f 1"
 	exit 0
 fi
 
@@ -78,6 +83,7 @@ echo "dforest_r = "$dforest_r
 echo "nthread = "$nthread
 echo "min_read_len = "$min_read_len
 echo "seed = "$seed
+echo "isfast = "$isfast
 echo "Start."
 mkdir -p $outdir
 
@@ -103,8 +109,11 @@ igda cmpreads -n $nthread -l 0.5 -p $topn_cmpreads $outdir/realign.encode $outdi
 
 echo "============= rsm ==========="
 echo "dforest_r=$dforest_r"
-igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
-
+if [ $isfast -eq 0 ]; then
+	igda dforest -n $nthread -d 10000 -r $dforest_r $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
+else
+	igda dforest -n $nthread -d 10000 -r $dforest_r -q $min_condprob $outdir/realign.encode $outdir/realign.m5 $outdir/realign.cmpreads $reffile $outdir/realign.dforest $outdir/tmp
+fi
 echo "=========== permutation ============="
 if [ $seed -ne 0 ]; then
 	igda permute -s $seed $outdir/realign.m5 $outdir/realign.pileup $outdir/realign.encode.permuted

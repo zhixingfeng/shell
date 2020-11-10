@@ -158,9 +158,9 @@ for cur_dir in $(ls -d $outdir/dat_split/*/);do
 	for cur_sam_file in $(ls $cur_dir/*.sam);do
 		cur_out_dir=$outdir/detect_split/$cur_dir_name/$(basename ${cur_sam_file%.*})
 		if [[ $exclude_loci_file == "" ]]; then
-			cur_cmd="$igda_cmd -n $nthread -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -s $seed"
+			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -s $seed"
 		else
-			cur_cmd="$igda_cmd -n $nthread -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -x $exclude_loci_file -s $seed"
+			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -x $exclude_loci_file -s $seed"
 		fi
 		cur_cmd=$cur_cmd" $cur_sam_file $reffile $contextmodel $cur_out_dir"
 		echo $cur_cmd
