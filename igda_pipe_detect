@@ -132,41 +132,64 @@ echo "seed = "$seed
 echo "Start."
 mkdir -p $outdir
 
-#------------- split data by chromosome and segments ------------#
 # get range of each chromosome with aligned reads
-#igda getbamchrrange $infile $reffile $outdir/chrrange.txt
+echo "getbamchrrange"
+igda getbamchrrange $infile $reffile $outdir/chrrange.txt
 
-# split data
-#echo "split bam file"
-#while IFS=$'\t' read -r chr rStart rEnd; do
-#	mkdir -p $outdir/dat_split/$chr
-	
-#	split_range $rStart $rEnd $segsize | 
-#	while IFS=$'\t' read -r cur_start cur_end; do
-#		cur_samfile=$outdir/dat_split/$chr/${chr}_$(($cur_start+1))_$(($cur_end+1)).sam
-#		cur_region=${chr}":"$(($cur_start+1))"-"$(($cur_end+1))
-#		echo -e "$cur_region (1-based)"
-#		samtools view -h -o $cur_samfile -@ $nthread $infile $cur_region
-#	done 	
-#done < $outdir/chrrange.txt
+# initialize the final vcf file
+echo "##fileformat=VCFv4.2" > $outdir/detected_snv.vcf
+echo "##fileDate=$(date)" >> $outdir/detected_snv.vcf
+echo "##source=igda" >> $outdir/detected_snv.vcf
+echo "##reference=$reffile" >> $outdir/detected_snv.vcf
+echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" >> $outdir/detected_snv.vcf
 
-# detect SNVs
-for cur_dir in $(ls -d $outdir/dat_split/*/);do
-	cur_dir_name=$(basename $cur_dir)
-	mkdir -p $outdir/detect_split/$cur_dir_name
+# split data and detect SNVs
+rm -rf $outdir/detected_snv.var
+echo "split bam file and detect SNVs"
+while IFS=$'\t' read -r chr rStart rEnd; do
+	mkdir -p $outdir/dat_split/$chr
+	mkdir -p $outdir/detect_split/$chr
+	mkdir -p $outdir/detected_snv/$chr
+	mkdir -p $outdir/ref
+	cur_reffile=$outdir/ref/$chr.fasta
+	getchr $reffile $chr > $cur_reffile
 
-	for cur_sam_file in $(ls $cur_dir/*.sam);do
-		cur_out_dir=$outdir/detect_split/$cur_dir_name/$(basename ${cur_sam_file%.*})
+	# split and detect	
+	split_range $rStart $rEnd $segsize | 
+	while IFS=$'\t' read -r cur_start cur_end; do
+		# get range (1-based for sam file)
+		cur_samfile=$outdir/dat_split/$chr/${chr}_$(($cur_start+1))_$(($cur_end+1)).sam
+		cur_region=${chr}":"$(($cur_start+1))"-"$(($cur_end+1))
+		echo -e "$cur_region (1-based)"
+		
+		# split data
+		samtools view -h -o $cur_samfile -@ $nthread $infile $cur_region
+		
+		# detect SNVs
+		cur_out_dir=$outdir/detect_split/$chr/${chr}_${cur_start}_${cur_end}
 		if [[ $exclude_loci_file == "" ]]; then
 			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -s $seed"
 		else
 			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -x $exclude_loci_file -s $seed"
 		fi
-		cur_cmd=$cur_cmd" $cur_sam_file $reffile $contextmodel $cur_out_dir"
-		echo $cur_cmd
+		cur_cmd=$cur_cmd" $cur_samfile $cur_reffile $contextmodel $cur_out_dir"
+		echo $cur_cmd;$cur_cmd
+		echo -e ${chr}"\t"${cur_start}"\t"${cur_end} > $cur_out_dir/chrrange.txt
+
+		# filter detected SNVs by excluding SNVs out of range
+		awk -v cur_start=$cur_start -v cur_end=$cur_end '{
+			if ($1>=cur_start && $1<=cur_end){
+				print $0
+			}
+		}' $cur_out_dir/realign.var > $cur_out_dir/realign.var.inrange
+		cat $cur_out_dir/realign.var.inrange >> $outdir/detected_snv/$chr/detected_snv.var
 	done
-done
 
+	# get vcf file for each chromosome
+	igda_var2vcf $outdir/detected_snv/$chr/detected_snv.var $cur_reffile $outdir/detected_snv/$chr/detected_snv.vcf
 
+	# add the current vcf file to the final chromosome
+	grep -v '^#' $outdir/detected_snv/$chr/detected_snv.vcf >> $outdir/detected_snv.vcf
+done < $outdir/chrrange.txt
 
 
