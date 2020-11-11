@@ -8,6 +8,7 @@ dforest_r=25
 min_read_len=1000
 seed=0
 method="pb"
+igda_cmd="igda_pipe_detect_pb"
 isfast=1
 segsize=20000
 
