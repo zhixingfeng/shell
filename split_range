@@ -13,8 +13,8 @@ if [ $rEnd -le $rStart ]; then
 	exit 1
 fi
 
-if [ $segsize -le 10000 ]; then
-	echo "Error in split_range: segsize is smaller than 10000"
+if [ $segsize -le 2000 ]; then
+	echo "Error in split_range: segsize is smaller than 2000"
 	exit 1
 fi
 
