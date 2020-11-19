@@ -95,7 +95,7 @@ sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.ct > $outdir/
 
 echo "============= polish ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.unpolished
-igda polish -f 0.2 $outdir/realign.ann.tested.ft.count.ft.unpolished $outdir/realign.encode.rdim $indir/realign.m5 $reffile $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/tmp_polish
+igda polish -v $indir/realign.var -f 0.2 $outdir/realign.ann.tested.ft.count.ft.unpolished $outdir/realign.encode.rdim $indir/realign.m5 $reffile $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/tmp_polish
 sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.tmp > $outdir/realign.ann.tested.ft.count.ft
 rm $outdir/realign.ann.tested.ft.count.ft.tmp
 
