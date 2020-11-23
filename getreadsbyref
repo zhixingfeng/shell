@@ -10,7 +10,7 @@ outfile=$3
 
 #samtools view -H $samfile | egrep -w "@PG|SN:$ref" > $outfile
 ref_mod=$(echo $ref | awk '{gsub(/\|/, "\\|", $1); print $1}')
-samtools view -H $bamfile | egrep -w "@PG|SN:$ref_mod" > $outfile
+samtools view -H $samfile | egrep -w "@PG|SN:$ref_mod" > $outfile
 samtools view $samfile | awk -v ref=$ref '{if ($3==ref) print $0}' >>$outfile
 
 
