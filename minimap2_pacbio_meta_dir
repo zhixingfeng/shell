@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ $# -ne 5 ] ; then
+        echo "minimap2_pacbio_dir reffile indir outdir nthread logdir"
+        exit 0
+fi
+
+reffile=$(realpath $1)
+indir=$2
+outdir=$3
+nthread=$4
+logdir=$5
+
+mkdir -p $outdir
+mkdir -p $logdir
+
+for infile in $(ls $indir | egrep '*.(fa|fq|fastq|fasta|fa.gz|fq.gz|fastq.gz|fasta.gz)$'); do
+	sample_name=${infile%.*}
+	# create link of reference in $outdir
+	ln -s $reffile $outdir/$sample_name.ref
+	# align 
+	#cmd="submitjob -w 4 -c $nthread -m 48 -j $sample_name -o $logdir  minimap2_pacbio_meta $reffile $indir/$infile $outdir/$sample_name.sam $nthread"
+	cmd="submitjob -w 4 -c $nthread -m 48 -j $sample_name -o $logdir  minimap2_pacbio_meta $outdir/$sample_name.ref $indir/$infile $outdir/$sample_name.sam $nthread"
+	#echo $cmd
+	$cmd
+done
+
+
+
+
+
