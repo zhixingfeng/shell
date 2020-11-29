@@ -17,11 +17,13 @@ while getopts ":hn:m:f:g:l:r:c:p:q:x:s:" opt; do
         case ${opt} in
                 h )
 			echo "Usage: igda_pipe_detect [options] infile(bam file) reffile contextmodel outdir"
+			echo ""
 			
 			echo "Input:"
 			echo -e "\tinfile should be sorted aligned bam file. This file should be obtained by igda_align_pb(igda_align_ont) and sam2bam."
 			echo -e "\treffile is the reference fasta file."
 			echo -e "\tcontextmodel is the pretrained model for context effect and can be obtained at https://github.com/zhixingfeng/igda_contextmodel."
+			echo ""
 
 			echo "Options:"
 			echo -e "\t-n\tNumber of threads. [default = 1]"
@@ -85,11 +87,13 @@ shift $((OPTIND - 1))
 
 if [ $# -ne 4 ] ; then
 	echo "Usage: igda_pipe_detect [options] infile(bam file) reffile contextmodel outdir"
+	echo ""
 
 	echo "Input:"
         echo -e "\tinfile should be sorted aligned bam file. This file should be obtained by igda_align_pb(igda_align_ont) and sam2bam."
         echo -e "\treffile is the reference fasta file."
         echo -e "\tcontextmodel is the pretrained model for context effect and can be obtained at https://github.com/zhixingfeng/igda_contextmodel."
+	echo ""
 
         echo "Options:"
         echo -e "\t-n\tNumber of threads. [default = 1]"
@@ -155,6 +159,18 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 	cur_reffile=$outdir/ref/$chr.fasta
 	getchr $reffile $chr > $cur_reffile
 
+	# get m5 for each chromosome
+	samtools view -h -o $outdir/detected_snv/$chr/original.sam -@ $nthread $infile $chr
+	igda samtom5 -l $min_read_len $outdir/detected_snv/$chr/original.sam $cur_reffile $outdir/detected_snv/$chr/original.m5
+	igda encode -t $outdir/detected_snv/$chr/original.m5 $outdir/detected_snv/$chr/original.encode
+	
+	rm $outdir/detected_snv/$chr/original.sam
+	pushd $outdir/detected_snv/$chr/
+		ln -s original.m5 realign.m5
+		ln -s original.encode realign.encode
+		ln -s detected_snv.var realign.var
+		ln -s detected_snv.vcf realign.vcf
+	popd
 	# split and detect	
 	split_range $rStart $rEnd $segsize | 
 	while IFS=$'\t' read -r cur_start cur_end; do
