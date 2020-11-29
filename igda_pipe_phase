@@ -6,6 +6,7 @@ min_jaccard=2.0
 max_iter=1
 nthread=1
 method="pb"
+igda_cmd="igda_pipe_phase_pb"
 while getopts ":hm:c:t:r:j:b:n:" opt; do
         case ${opt} in
                 h )
