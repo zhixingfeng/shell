@@ -101,6 +101,7 @@ echo "max_iter = "$max_iter
 echo "nthread = "$nthread
 echo "method = "$method
 
+# phase for each chromosome
 while IFS=$'\t' read -r chr rStart rEnd; do
 	cur_indir=$indir/detected_snv/$chr
 	cur_reffile=$indir/ref/${chr}.fasta
@@ -109,6 +110,31 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 	echo $cmd
 	$cmd
 done < $indir/chrrange.txt
+
+# sam to bam
+for sam_file in $(ls $outdir/*/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.sam); do
+	cur_chrname=$(basename $(dirname $sam_file))
+	echo $cur_chrname
+	samtools view -H $sam_file > $outdir/$cur_chrname/contigs.sam
+	samtools view $sam_file | awk -v chrname=$cur_chrname '{
+		printf("%s_%s\t", chrname, $1)
+		for (i = 2; i <= (NF-1); i++){
+			printf("%s\t", $i)
+		}
+		printf("%s\n", $NF)
+	}' >> $outdir/$cur_chrname/contigs.sam
+	sam2bam $outdir/$cur_chrname/contigs.sam $nthreads
+done
+
+# combine bam file 
+ls $outdir/*/contigs.bam > $outdir/contigs.fofn
+samtools merge -@ $nthreads -f $outdir/contigs.raw.bam -b $outdir/contigs.fofn
+samtools sort $outdir/contigs.raw.bam -o $outdir/contigs.bam
+samtools index $outdir/contigs.bam
+rm $outdir/contigs.raw.bam
+
+samtools view -h -@ $nthreads $outdir/contigs.bam > $outdir/contigs.sam
+sam2fa $outdir/contigs.sam $outdir/contigs.fa $nthreads
 
 
 
