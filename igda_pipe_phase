@@ -34,10 +34,12 @@ while getopts ":hm:c:t:r:j:b:n:" opt; do
                                 "pb" )
                                         echo "method = pb"
                                         igda_cmd="igda_pipe_phase_pb"
+					min_cvg=10
                                         ;;
                                 "ont" )
                                         echo "method = ont"
                                         igda_cmd="igda_pipe_phase_ont"
+					min_cvg=5
                                         ;;
                                 * )
                                         echo "method should be pb or ont."
@@ -124,18 +126,18 @@ for sam_file in $(ls $outdir/*/realign.ann.tested.ft.count.ft.assembled.count.nc
 		}
 		printf("%s\n", $NF)
 	}' >> $outdir/$cur_chrname/contigs.sam
-	sam2bam $outdir/$cur_chrname/contigs.sam $nthreads
+	sam2bam $outdir/$cur_chrname/contigs.sam $nthread
 done
 
 # combine bam file 
 ls $outdir/*/contigs.bam > $outdir/contigs.fofn
-samtools merge -@ $nthreads -f $outdir/contigs.raw.bam -b $outdir/contigs.fofn
+samtools merge -@ $nthread -f $outdir/contigs.raw.bam -b $outdir/contigs.fofn
 samtools sort $outdir/contigs.raw.bam -o $outdir/contigs.bam
 samtools index $outdir/contigs.bam
 rm $outdir/contigs.raw.bam
 
-samtools view -h -@ $nthreads $outdir/contigs.bam > $outdir/contigs.sam
-sam2fa $outdir/contigs.sam $outdir/contigs.fa $nthreads
+samtools view -h -@ $nthread $outdir/contigs.bam > $outdir/contigs.sam
+sam2fa $outdir/contigs.sam $outdir/contigs.fa $nthread
 
 
 

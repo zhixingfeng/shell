@@ -2,9 +2,10 @@
 min_cvg=5
 min_nn=25
 max_nn=50
+min_jaccard=2.0
 max_iter=1
 nthread=1
-while getopts ":hc:t:m:b:n:" opt; do
+while getopts ":hc:t:m:j:b:n:" opt; do
         case ${opt} in
                 h )
                         echo "igda_pipe_phase_ont -n nthread -b niter -c min_cvg -t min_nn -m max_nn indir reffile outdir"
@@ -12,6 +13,7 @@ while getopts ":hc:t:m:b:n:" opt; do
                         echo -e "\t-c 5, minimal coverage of each contig"
                         echo -e "\t-t 25, minimal number of nearest neighbors"
                         echo -e "\t-m 50, maximal number of nearest neighbors"
+			echo -e "\t-j 2.0, minimal jaccard index for find_nccontigs and tred"
 			echo -e "\t-b maximal number of iteration in ANN, default = 1"
 			echo -e "\t-n number of threads, default = 1"
                         exit 0;;
@@ -21,6 +23,8 @@ while getopts ":hc:t:m:b:n:" opt; do
                         min_nn=$OPTARG;;
                 m )
                         max_nn=$OPTARG;;
+		j )
+                        min_jaccard=$OPTARG;;
 		b )
 			max_iter=$OPTARG;;
 		n )
@@ -38,7 +42,8 @@ if [ $# -ne 3 ] ; then
         echo "default:"
         echo -e "\t-c 5, minimal coverage of each contig"
         echo -e "\t-t 25, minimal number of nearest neighbors"
-        echo -e "\t-m 50, maximal number of nearest neighbors "
+        echo -e "\t-m 50, maximal number of nearest neighbors"
+	echo -e "\t-j 2.0, minimal jaccard index for find_nccontigs and tred"
 	echo -e "\t-b maximal number of iteration in ANN, default = 1"
 	echo -e "\t-n number of threads, default = 1"
 	exit 0
@@ -56,6 +61,7 @@ echo "outdir = "$outdir
 echo "min_cvg = "$min_cvg
 echo "min_nn = "$min_nn
 echo "max_nn = "$max_nn
+echo "min_jaccard = "$min_jaccard
 echo "max_iter = "$max_iter
 echo "nthread = "$nthread
 echo "Start."
@@ -67,10 +73,6 @@ echo "============= recode ==========="
 igda recode -t $nthread $indir/realign.m5 $indir/realign.var $outdir/realign.recode
 
 echo "============= ann ==========="
-#dforest_r=25
-#ann_t=$dforest_r
-#ann_m=$(($ann_t+$ann_t))
-#ann_c=10
 ann_c=$min_cvg
 ann_t=$min_nn
 ann_m=$max_nn
@@ -99,8 +101,8 @@ rm $outdir/realign.ann.tested.ft.count.ft.tmp
 
 echo "============= transitive reduction ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tmp
-igda find_nccontigs $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/realign.ann.tested.ft.count.ft
-igda tred -r $outdir/realign.ann.tested.ft.count.ft
+igda find_nccontigs -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/realign.ann.tested.ft.count.ft
+igda tred -j $min_jaccard -r $outdir/realign.ann.tested.ft.count.ft
 
 echo "============= assemble ==========="
 igda assemble $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tred.dot
@@ -109,7 +111,7 @@ echo "============= recalculate abundance ==========="
 igda abundance $outdir/realign.ann.tested.ft.count.ft.assembled $outdir/realign.recode $indir/realign.m5
 
 echo "============= filter assembled contigs ============"
-igda find_nccontigs $outdir/realign.ann.tested.ft.count.ft.assembled.count $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc
+igda find_nccontigs -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft.assembled.count $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc
 igda test_contigs_pairwise -a 0.6466251 -t 21.90139 $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc  $outdir/realign.recode $reffile
 
 igda_phase2vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $indir/realign.vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.vcf igda
