@@ -1,0 +1,25 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+        echo "add_gq_to_vcf in_vcf_file out_vcf_file"
+        exit 0
+fi
+
+in_vcf_file=$1
+out_vcf_file=$2
+
+awk -F "\t" '{
+	if (substr($0,1,2) == "##"){
+		print $0
+	}else{
+		if (substr($0,1,1) == "#"){
+			print "##FORMAT=<ID=GQ,Number=1,Type=Float,Description=\"Genotype Quality\">"
+			printf("%s\tFORMAT\tSAMPLE\n", $0)
+		}else{
+			printf("%s\tGQ\t100\n", $0)
+		}
+		
+	}
+}' $in_vcf_file > $out_vcf_file
+
+
+
