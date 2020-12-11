@@ -163,7 +163,8 @@ fi
 
 igda getvar -c 0 $outdir/realign.detected $outdir/realign.var
 
-igda_var2vcf $outdir/realign.var $reffile $outdir/realign.vcf
+#igda_var2vcf $outdir/realign.var $reffile $outdir/realign.vcf
+igda var2vcf $outdir/realign.var $reffile $outdir/realign.vcf
 
 echo "Done."
 
