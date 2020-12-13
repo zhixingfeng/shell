@@ -174,7 +174,8 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 	curref_m5file=$outdir/detected_snv/$chr/original.m5
 	curref_encodefile=$outdir/detected_snv/$chr/original.encode
 	
-	getreadsbyref $infile $chr $curref_samfile
+	#getreadsbyref $infile $chr $curref_samfile
+	getreadsbyref_bam $infile $chr $curref_samfile
 	samtools view -h -@ $nthread -b -o $curref_bamfile $curref_samfile
 	samtools index $curref_bamfile
 	igda samtom5 -l $min_read_len $curref_samfile $cur_reffile $curref_m5file

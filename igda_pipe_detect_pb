@@ -8,8 +8,8 @@ dforest_r=25
 min_read_len=1000
 seed=18473
 isfast=1
-mincvg=10
-minbf=50
+mincvg=15
+minbf=10
 while getopts ":hc:p:x:q:r:n:l:s:f:d:b:" opt; do
         case ${opt} in
                 h )
@@ -24,8 +24,8 @@ while getopts ":hc:p:x:q:r:n:l:s:f:d:b:" opt; do
 			echo -e "\t-l 1000"
 			echo -e "\t-s 18473"
 			echo -e "\t-f 1"
-			echo -e "\t-d 10"
-			echo -e "\t-b 50"
+			echo -e "\t-d 15"
+			echo -e "\t-b 10"
 			exit 0;;
 		c )
 			min_condprob=$OPTARG;;
@@ -69,8 +69,8 @@ if [ $# -ne 4 ] ; then
 	echo -e "\t-l 1000"
 	echo -e "\t-s 18473"
 	echo -e "\t-f 1"
-	echo -e "\t-d 10"
-        echo -e "\t-b 50"
+	echo -e "\t-d 15"
+        echo -e "\t-b 10"
 	exit 0
 fi
 
@@ -149,7 +149,7 @@ fi
 
 
 echo "============= detect orphan variants ==========="
-igda detectsingle -c $mincvg -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
+igda detectsingle -c $mincvg -f 0 -b -100 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
 igda detectsingle -c $mincvg -f $min_prob -b $minbf $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
 
 echo "============= combine rsm and orphan variants ==========="
