@@ -11,8 +11,8 @@ method="pb"
 igda_cmd="igda_pipe_detect_pb"
 isfast=1
 segsize=20000
-mincvg=10
-minbf=50
+mincvg=15
+minbf=10
 
 #while getopts ":hc:p:x:q:r:n:l:s:" opt; do
 while getopts ":hn:m:f:g:l:r:c:p:q:x:s:d:b:" opt; do
@@ -39,8 +39,8 @@ while getopts ":hn:m:f:g:l:r:c:p:q:x:s:d:b:" opt; do
 			echo -e "\t-q\tNumber of most similar reads to construct subspaces. [default = 100]"
 			echo -e "\t-x\tThe file that list the loci to be excluded."
 			echo -e "\t-s\tSeed for permutation test (experimental). [default = 0, i.e. no permutation]"
-			echo -e "\t-d\tMinimal depth for each orphan SNV. [default = 10]"
-			echo -e "\t-b\tMinimal BF for each orphan SNV. [default = 50]"
+			echo -e "\t-d\tMinimal depth for each orphan SNV. [default = 15]"
+			echo -e "\t-b\tMinimal log-BF for each orphan SNV. [default = 10]"
 			exit 0;;
 		n )
 			nthread=$OPTARG;;
@@ -114,8 +114,8 @@ if [ $# -ne 4 ] ; then
         echo -e "\t-q\tNumber of most similar reads to construct subspaces. [default = 100]"
         echo -e "\t-x\tThe file that list the loci to be excluded."
         echo -e "\t-s\tSeed for permutation test (experimental). [default = 0, i.e. no permutation]"
-	echo -e "\t-d\tMinimal depth for each orphan SNV. [default = 10]"
-        echo -e "\t-b\tMinimal BF for each orphan SNV. [default = 50]"
+	echo -e "\t-d\tMinimal depth for each orphan SNV. [default = 15]"
+        echo -e "\t-b\tMinimal log-BF for each orphan SNV. [default = 10]"
 	exit 0
 fi
 
@@ -181,7 +181,8 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 	igda samtom5 -l $min_read_len $curref_samfile $cur_reffile $curref_m5file
 	igda encode -t $curref_m5file $curref_encodefile
 	
-	rm $outdir/detected_snv/$chr/original.sam
+	#rm $outdir/detected_snv/$chr/original.sam
+	rm $curref_samfile
 	pushd $outdir/detected_snv/$chr/
 		ln -s original.m5 realign.m5
 		ln -s original.encode realign.encode
@@ -218,6 +219,14 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 			}
 		}' $cur_out_dir/realign.var > $cur_out_dir/realign.var.inrange
 		cat $cur_out_dir/realign.var.inrange >> $outdir/detected_snv/$chr/detected_snv.var
+		
+		# remove cur_samfile
+		rm $cur_samfile
+	
+		# remove intermediate results
+		rm $cur_out_dir/realign.cmpreads* $cur_out_dir/realign.context*
+		rm $cur_out_dir/realign.detected $cur_out_dir/realign.encode
+		rm $cur_out_dir/realign.m5 $cur_out_dir/realign_raw.detected
 	done
 
 	# get vcf file for each chromosome
@@ -225,6 +234,9 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 
 	# add the current vcf file to the final chromosome
 	grep -v '^#' $outdir/detected_snv/$chr/detected_snv.vcf >> $outdir/detected_snv.vcf
+
+	# remove curref_bamfile
+	rm $curref_bamfile $curref_bamfile.bai
 done < $outdir/chrrange.txt
 
 

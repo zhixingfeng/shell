@@ -8,8 +8,10 @@ dforest_r=25
 min_read_len=1000
 seed=18473
 isfast=1
+mincvg=15
+minbf=10
 
-while getopts ":hc:p:x:q:r:n:l:s:f:" opt; do
+while getopts ":hc:p:x:q:r:n:l:s:f:d:b:" opt; do
         case ${opt} in
                 h )
                         echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file -f isfast infile(bam or sam file) reffile contextmodel outdir"
@@ -42,6 +44,10 @@ while getopts ":hc:p:x:q:r:n:l:s:f:" opt; do
                         seed=$OPTARG;;
 		f )
                         isfast=$OPTARG;;
+		d )
+                        mincvg=$OPTARG;;
+                b )
+                        minbf=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -84,6 +90,8 @@ echo "nthread = "$nthread
 echo "min_read_len = "$min_read_len
 echo "seed = "$seed
 echo "isfast = "$isfast
+echo "mincvg = "$mincvg
+echo "minbf = "$minbf
 echo "Start."
 mkdir -p $outdir
 
@@ -136,8 +144,8 @@ fi
 
 
 echo "============= detect orphan variants ==========="
-igda detectsingle -c 1000 -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
-igda detectsingle -c 1000 -f $min_prob -b 50 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
+igda detectsingle -c $mincvg -f 0 -b 0 $outdir/realign.pileup $contextfile $outdir/realign.detectsingle.raw
+igda detectsingle -c $mincvg -f $min_prob -b $minbf $outdir/realign.pileup $contextfile $outdir/realign.detectsingle
 
 echo "============= combine rsm and orphan variants ==========="
 cat $outdir/realign.dforest.ft $outdir/realign.detectsingle | sort -s -u -k1,1n > $outdir/realign_raw.detected

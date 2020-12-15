@@ -114,7 +114,7 @@ echo "============= filter assembled contigs ============"
 igda find_nccontigs -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft.assembled.count $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc
 igda test_contigs_pairwise -a 0.6466251 -t 21.90139 $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc  $outdir/realign.recode $reffile
 
-igda_phase2vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $indir/realign.vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.vcf igda
+#igda_phase2vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $indir/realign.vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.vcf igda
 
 igda_ann2sam $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $reffile $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.sam
 
