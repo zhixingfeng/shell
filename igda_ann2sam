@@ -61,5 +61,5 @@ gawk -F "\t" '{
 	}
 }' ${sam_file}.tmp.fasta $ann_file > $sam_file
 
-
+rm ${sam_file}.tmp.fasta
 

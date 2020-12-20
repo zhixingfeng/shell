@@ -230,8 +230,8 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 	done
 
 	# get vcf file for each chromosome
-	igda_var2vcf $outdir/detected_snv/$chr/detected_snv.var $cur_reffile $outdir/detected_snv/$chr/detected_snv.vcf
-
+	#igda_var2vcf $outdir/detected_snv/$chr/detected_snv.var $cur_reffile $outdir/detected_snv/$chr/detected_snv.vcf
+	igda var2vcf $outdir/detected_snv/$chr/detected_snv.var $cur_reffile $outdir/detected_snv/$chr/detected_snv.vcf
 	# add the current vcf file to the final chromosome
 	grep -v '^#' $outdir/detected_snv/$chr/detected_snv.vcf >> $outdir/detected_snv.vcf
 
