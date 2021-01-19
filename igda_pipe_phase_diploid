@@ -1,0 +1,143 @@
+#!/bin/bash
+min_cvg=10
+min_nn=25
+max_nn=50
+min_jaccard=2.0
+max_iter=1
+nthread=1
+method="pb"
+igda_cmd="igda_pipe_phase_pb_diploid"
+while getopts ":hm:c:t:r:j:b:n:" opt; do
+        case ${opt} in
+                h )
+                        echo "Usage: igda_pipe_phase [options] indir reffile outdir"
+			echo ""
+
+			echo "Input:"
+			echo -e "\tindir is the output directory of igda_pipe_detect"
+			echo -e "\treffile is the reference fasta file."
+			echo ""
+			
+			echo "Options:"
+			echo -e "\t-m\tMethod. \"pb\" for PacBio and \"ont\" for Oxford Nanopore. [default = pb]"
+			echo -e "\t-c\tminimal coverage of each contig. [default = 10]"
+			echo -e "\t-t\tminimal number of nearest neighbors. [default = 25]"
+			echo -e "\t-r\tmaximal number of nearest neighbors. [default = 50]"
+			echo -e "\t-j\tminimal jaccard index for find_nccontigs and tred. [default = 2.0]"
+			echo -e "\t-b\tmaximal number of iteration in ANN. [default = 1]"
+			echo -e "\t-n\tnumber of threads. [default = 1]"
+                        
+			exit 0;;
+          	m )
+			method=$OPTARG
+			case $method in
+                                "pb" )
+                                        echo "method = pb"
+                                        igda_cmd="igda_pipe_phase_pb_diploid"
+					min_cvg=10
+                                        ;;
+                                "ont" )
+                                        echo "method = ont"
+                                        igda_cmd="igda_pipe_phase_ont"
+					min_cvg=5
+                                        ;;
+                                * )
+                                        echo "method should be pb or ont."
+                                        exit 1;;
+                        esac
+			;;
+		c )
+                        min_cvg=$OPTARG;;
+                t )
+                        min_nn=$OPTARG;;
+                r )
+                        max_nn=$OPTARG;;
+		j )
+			min_jaccard=$OPTARG;;
+		b )
+			max_iter=$OPTARG;;
+		n )
+                        nthread=$OPTARG;;
+                \? )
+                        echo "Invalid option: $OPTARG" 1>&2;;
+                : )
+                        echo "Invalid option: $OPTARG requires an argument" 1>&2;;
+        esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 3 ] ; then
+	echo "Usage: igda_pipe_phase [options] indir reffile outdir"
+        echo ""
+
+        echo "Input:"
+        echo -e "\tindir is the output directory of igda_pipe_detect"
+        echo -e "\treffile is the reference fasta file."
+        echo ""
+
+        echo "Options:"
+	echo -e "\t-m\tMethod. \"pb\" for PacBio and \"ont\" for Oxford Nanopore. [default = pb]"
+        echo -e "\t-c\tminimal coverage of each contig. [default = 10]"
+        echo -e "\t-t\tminimal number of nearest neighbors. [default = 25]"
+        echo -e "\t-r\tmaximal number of nearest neighbors. [default = 50]"
+        echo -e "\t-j\tminimal jaccard index for find_nccontigs and tred. [default = 2.0]"
+        echo -e "\t-b\tmaximal number of iteration in ANN. [default = 1]"
+        echo -e "\t-n\tnumber of threads. [default = 1]"
+	
+	exit 0
+fi
+
+
+indir=$1
+reffile=$2
+outdir=$3
+
+mkdir -p $outdir
+echo "indir = "$indir
+echo "reffile = "$reffile
+echo "outdir = "$outdir
+echo "min_cvg = "$min_cvg
+echo "min_nn = "$min_nn
+echo "max_nn = "$max_nn
+echo "min_jaccard = "$min_jaccard
+echo "max_iter = "$max_iter
+echo "nthread = "$nthread
+echo "method = "$method
+
+# phase for each chromosome
+while IFS=$'\t' read -r chr rStart rEnd; do
+	cur_indir=$indir/detected_snv/$chr
+	cur_reffile=$indir/ref/${chr}.fasta
+	cur_outdir=$outdir/$chr
+	cmd="$igda_cmd -c $min_cvg -t $min_nn -m $max_nn -j $min_jaccard -b $max_iter -n $nthread $cur_indir $cur_reffile $cur_outdir"
+	echo $cmd
+	$cmd
+done < $indir/chrrange.txt
+
+# sam to bam
+for sam_file in $(ls $outdir/*/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.sam); do
+	cur_chrname=$(basename $(dirname $sam_file))
+	echo $cur_chrname
+	samtools view -H $sam_file > $outdir/$cur_chrname/contigs.sam
+	samtools view $sam_file | awk -v chrname=$cur_chrname '{
+		printf("%s_%s\t", chrname, $1)
+		for (i = 2; i <= (NF-1); i++){
+			printf("%s\t", $i)
+		}
+		printf("%s\n", $NF)
+	}' >> $outdir/$cur_chrname/contigs.sam
+	sam2bam $outdir/$cur_chrname/contigs.sam $nthread
+done
+
+# combine bam file 
+ls $outdir/*/contigs.bam > $outdir/contigs.fofn
+samtools merge -@ $nthread -f $outdir/contigs.raw.bam -b $outdir/contigs.fofn
+samtools sort $outdir/contigs.raw.bam -o $outdir/contigs.bam
+samtools index $outdir/contigs.bam
+rm $outdir/contigs.raw.bam
+
+samtools view -h -@ $nthread $outdir/contigs.bam > $outdir/contigs.sam
+sam2fa $outdir/contigs.sam $outdir/contigs.fa $nthread
+
+
+

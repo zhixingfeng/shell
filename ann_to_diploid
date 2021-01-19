@@ -1,0 +1,146 @@
+#!/usr/bin/env Rscript
+options(scipen=999)
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 3){
+	#stop("ann_to_diploid ann_file var_file recode_file m5_file outdir\n")
+	stop("ann_to_diploid ann_file var_file outdir\n")
+}
+
+#ann_file <- "../results/igda/sub/phase_10_18971522_22278205/10/realign.ann.tested.ft.count.ft.assembled.count.nc.ft"
+#var_file <- "../results/igda/sub/detect_10_18971522_22278205/detected_snv/10/detected_snv.var"
+#recode_file <- "../results/igda/sub/phase_10_18971522_22278205/10/realign.recode"
+#m5_file <- "../results/igda/sub/detect_10_18971522_22278205/detected_snv/10/realign.m5"
+#outdir <- "../results/igda/sub/phase_10_18971522_22278205/10/expanded_contigs"
+
+library(rGDA)
+ann_file <- args[1]
+var_file <- args[2]
+#recode_file <- args[3]
+#m5_file <- args[4]
+outdir <- args[3]
+
+cmd <- paste("mkdir -p", outdir)
+print(cmd); system(cmd)
+
+library(rGDA)
+# load data
+ann.data <- load.annfile(ann_file)
+var.data <- load.varfile(var_file)
+
+# get snv sites with only one alternative base
+locus.n <- table(var.data$locus)
+locus.uniq <- as.integer(names(locus.n)[locus.n==1])
+var.data.uniq <- var.data[match(locus.uniq,var.data$locus),]
+var.data.uniq <- var.data
+
+# expand contigs
+ann.data.comp <- NULL
+for (i in 1:nrow(ann.data)){
+	if (i %% 100 == 0) {print (i)}
+	# get all detected SNVs within the contig range
+	cur.idx <- match(ann.data$tested_loci[[i]], var.data.uniq$locus)
+	cur.var.data <- var.data.uniq[cur.idx,]
+	
+	# flip SNVs to generate a complementary contig
+	contig.comp <- ann.data[i,]
+	idx.var <- match(floor(contig.comp$cons_seq[[1]]/4), cur.var.data$locus)
+	contig.comp$cons_seq[[1]] <- cur.var.data$code[-idx.var]
+	ann.data.comp <- rbind(ann.data.comp, contig.comp)
+}
+
+ann.data.merged <- rbind(ann.data, ann.data.comp)
+
+comp.file <- paste(outdir, "/contigs.comp.ann", sep = "")
+merged.file <- paste(outdir, "/contigs.merged.ann", sep = "")
+save.annfile(ann.data.comp, comp.file)
+save.annfile(ann.data.merged, merged.file)
+
+# get nc-contigs
+merged.nc.file <- paste(outdir, "/contigs.merged.ann.nc", sep = "")
+#cmd <- paste("igda find_nccontigs -j 0.5", merged.file, merged.nc.file)
+cmd <- paste("igda find_nccontigs -j 0.8", merged.file, merged.nc.file)
+print(cmd);system(cmd)
+
+# assemble
+#cmd <- paste("igda tred -r -l 0 -p 0 -j 0.5", merged.nc.file)
+cmd <- paste("igda tred -r -l 0 -p 0 -j 0.8", merged.nc.file)
+print(cmd);system(cmd)
+
+cmd <- paste("igda assemble", merged.nc.file, paste(merged.nc.file,".tred.dot", sep = ""))
+print(cmd);system(cmd)
+
+#----------- convert contigs to diploid -----------#
+# load assembled ann
+#assemble.file <- paste(merged.nc.file, ".assembled", sep = "")
+#assemble.data.raw <- load.annfile(assemble.file)
+#assemble.data <- assemble.data.raw[sapply(assemble.data.raw$cons_seq, length) > 0, ]
+
+# get gaps (not covered by any contigs)
+#assemble.intervals <- Intervals_full(as.matrix(assemble.data[,2:3]))
+#assemble.intervals.full <- Intervals_full(range(as.matrix(assemble.data[,2:3])))
+#assemble.intercals.gap <- interval_difference(assemble.intervals.full, assemble.intervals)
+
+
+
+# pile up SNVs
+#contig.ids <- mapply(function(x, id) {rep(id,length(x))}, assemble.data$cons_seq, 1:nrow(assemble.data))
+#assemble.pu.var <- split(unlist(contig.ids), unlist(assemble.data$cons_seq))
+
+# pile up reads
+#contig.ids <- mapply(function(s, e, id) {rep(id, e - s + 1)}, assemble.data$start, assemble.data$end, 1:nrow(assemble.data))
+#covered.loci <- mapply(function(s, e) {s : e}, assemble.data$start, assemble.data$end)
+#assemble.pu.read <- split(unlist(contig.ids), unlist(covered.loci))
+
+# get diploid
+#var.uniq <- sort(unique(unlist(assemble.data$cons_seq)))
+#var.uniq.split <- split(var.uniq, floor(var.uniq / 4))
+#locus.uniq <- sort(as.integer(names(var.uniq.split)))
+
+#locus.uniq <- var.uniq.split[sapply(var.uniq.split, length) == 1]
+#var.uniq <- sort(unlist(locus.uniq))
+#if (length(locus.uniq) != length(var.uniq)){
+#	stop("length(locus.uniq) != length(var.uniq)")
+#}
+
+
+#locus.uniq <- floor(var.uniq / 4)
+
+
+#var.uniq.str <- as.character(var.uniq)
+#locus.uniq.str <- as.character(locus.uniq)
+
+
+
+
+
+#ps <- rep(0, length(unique(locus.uniq)))
+#cur.ps.id <- 1
+#for (i in 1:length(var.uniq)){
+	
+#	if (is.phased){
+
+#	}else{
+#		cur.ps.id <- cur.ps.id + 1
+#	}
+#}
+
+
+
+# get variants only appear in one contig
+#contig.ids <- mapply(function(x, id) {rep(id,length(x))}, assemble.data$cons_seq, 1:nrow(assemble.data))
+#var.mapto.contig <- split(unlist(contig.ids), unlist(assemble.data$cons_seq) )
+#var.n <- sapply(var.mapto.contig, length)
+#var.single <- sort(as.integer(names(var.n)[var.n == 1]))
+
+# only retain single variants
+#assemble.data.single <- assemble.data
+#for (i in 1:nrow(assemble.data.single)){
+#	cur.idx <- !is.na(match(assemble.data$cons_seq[[i]], var.single))
+#	assemble.data.single$cons_seq[[i]] <- assemble.data$cons_seq[[i]][cur.idx]
+#}
+
+
+
+
+
+

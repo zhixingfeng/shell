@@ -1,0 +1,170 @@
+#!/usr/bin/env Rscript
+options(scipen=999)
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) != 5){
+        stop("ann_to_diploid ann_file recode_file m5_file ref_file outdir\n")
+}
+
+#ann_file <- "../results/igda/sub/phase_10_18971522_22278205/10/expanded_contigs/contigs.merged.ann.nc.assembled"
+#recode_file <- "../results/igda/sub/phase_10_18971522_22278205/10/realign.recode"
+#m5_file <- "../results/igda/sub/detect_10_18971522_22278205/detected_snv/10/realign.m5"
+#ref_file <- "../results/realign/hg19_clean_chr10.fa"
+#outdir <- "../results/igda/sub/phase_10_18971522_22278205/10/expanded_contigs/fill_gap"
+
+library(rGDA)
+library(intervals)
+
+ann_file <- args[1]
+recode_file <- args[2]
+m5_file <- args[3]
+ref_file <- args[4]
+outdir <- args[5]
+
+
+# load assembled ann
+assemble.data.raw <- load.annfile(ann_file)
+assemble.data <- assemble.data.raw[sapply(assemble.data.raw$cons_seq, length) > 0, ]
+
+# get gaps (not covered by any contigs)
+assemble.intervals <- Intervals_full(as.matrix(assemble.data[,2:3]))
+assemble.intervals.full <- Intervals_full(range(as.matrix(assemble.data[,2:3])))
+assemble.intervals.gap <- interval_difference(assemble.intervals.full, assemble.intervals)
+
+# load recode reads
+recode.data <- load.encodefile(recode_file)
+recode.ref.data <- load.encodefile(paste(recode_file, ".ref", sep = ""))
+
+# pileup recode reads
+pu.recode <- pileup_var_fast(recode.data)
+pu.recode.ref <- pileup_var_fast(recode.ref.data)
+
+# fill gaps
+var.uniq <- sort(unique(unlist(assemble.data$cons_seq)))
+var.uniq.split <- split(var.uniq, floor(var.uniq/ 4))
+loci.uniq <- sort(as.integer(names(var.uniq.split)))
+
+ann.filled.cons_seq <- list()
+ann.filled.start <- list()
+ann.filled.end <- list()
+ann.filled.tested_loci <- list()
+t <- 1
+
+for (i in 1:nrow(assemble.intervals.gap)){
+	# get loci closest to the gap
+	left.locus <- max(loci.uniq[loci.uniq <= assemble.intervals.gap[i,1]])
+	right.locus <- min(loci.uniq[loci.uniq >= assemble.intervals.gap[i,2]])
+
+	# get variants closest to the gap
+	left.var <- var.uniq.split[[as.character(left.locus)]]
+	right.var <- var.uniq.split[[as.character(right.locus)]]
+
+	if (length(left.var) == 0 | length(right.var) == 0){
+		stop("length(left.var) == 0 | length(right.var) == 0")
+	}
+	if (length(left.var) > 1 | length(right.var) > 1) next
+
+	# get pileup closest to the gap
+	idx.l <- match(left.var, pu.recode$code)
+	idx.ref.l <- match(left.locus, pu.recode.ref$loci)
+
+	idx.r <- match(right.var, pu.recode$code)
+	idx.ref.r <- match(right.locus, pu.recode.ref$loci)
+	
+	if ( any( is.na( c(idx.l, idx.ref.l, idx.r, idx.ref.r) ) ) ) { next }	
+	
+	# check if the gap can be filled
+	idx.11 <- intersect(pu.recode$pu.dat[[idx.l]], pu.recode$pu.dat[[idx.r]])
+	idx.00 <- intersect(pu.recode.ref$pu.dat[[idx.ref.l]], pu.recode.ref$pu.dat[[idx.ref.r]])
+	idx.10 <- intersect(pu.recode$pu.dat[[idx.l]], pu.recode.ref$pu.dat[[idx.ref.r]])
+	idx.01 <- intersect(pu.recode.ref$pu.dat[[idx.ref.l]], pu.recode$pu.dat[[idx.r]])
+	
+	n.11 <- length(idx.11)
+	n.00 <- length(idx.00)
+	n.10 <- length(idx.10)
+	n.01 <- length(idx.01)
+	
+	n <- n.11 + n.00 + n.10 + n.01
+	n.11.00 <- n.11 + n.00
+	n.10.01 <- n.10 + n.01	
+	
+    # fill gap
+    if (n < 3) { next }
+    
+	if (n.11.00 >= 0.8*n){
+		ann.filled.cons_seq[[t]] <- c(left.var, right.var)
+        ann.filled.cons_seq[[t + 1]] <- integer(0)
+        
+        ann.filled.start[[t]] <- left.locus; ann.filled.end[[t]] <- right.locus
+        ann.filled.start[[t + 1]] <- left.locus; ann.filled.end[[t + 1]] <- ann.filled.end[[t]]
+        
+        ann.filled.tested_loci[[t]] <- c(left.locus, right.locus)
+        ann.filled.tested_loci[[t + 1]] <- c(left.locus, right.locus)
+        t <- t + 2
+        
+	}else{
+		if (n.10.01 >= 0.8*n){
+			ann.filled.cons_seq[[t]] <- left.var
+            ann.filled.cons_seq[[t + 1]] <- right.var
+            
+            ann.filled.start[[t]] <- left.locus; ann.filled.end[[t]] <- right.locus
+            ann.filled.start[[t + 1]] <- left.locus; ann.filled.end[[t + 1]] <- ann.filled.end[[t]]
+        
+            ann.filled.tested_loci[[t]] <- c(left.locus, right.locus)
+            ann.filled.tested_loci[[t + 1]] <- c(left.locus, right.locus)
+            t <- t + 2
+		}
+	}
+}
+ann.filled.start <- unlist(ann.filled.start)
+ann.filled.end <- unlist(ann.filled.end)
+
+buf <- lapply(1:length(ann.filled.cons_seq), function(x) {integer(0)})
+
+ann.filled <- data.frame(cbind(ann.filled.cons_seq, ann.filled.start, ann.filled.end, matrix(0, length(ann.filled.cons_seq), 6), buf, buf, ann.filled.tested_loci, buf),stringsAsFactors = FALSE)
+
+names(ann.filled) <- names(assemble.data)
+ann.filled$start <- as.integer(ann.filled$start)
+ann.filled$end <- as.integer(ann.filled$end)
+ann.filled$contig_count <- as.numeric(ann.filled$contig_count)
+ann.filled$contig_cvg <- as.numeric(ann.filled$contig_cvg)
+ann.filled$log_bf_null <- as.numeric(ann.filled$log_bf_null)
+ann.filled$log_bf_ind <- as.numeric(ann.filled$log_bf_ind)
+ann.filled$min_rr_null <- as.numeric(ann.filled$min_rr_null)
+ann.filled$min_rr_ind <- as.numeric(ann.filled$min_rr_ind)
+
+# output filled gaps
+system(paste("mkdir -p", outdir))
+out.annfile <- paste(outdir, "/gap.ann", sep = "")
+out.samfile <- paste(outdir, "/gap.sam", sep = "")
+save.annfile(ann.filled, out.annfile)
+
+cmd <- paste("igda_ann2sam", out.annfile, ref_file, out.samfile)
+print(cmd); system(cmd)
+
+# combine gap and original contigs
+out.combine.annfile <- paste(outdir, "/combined.ann", sep = "")
+cmd <- paste("cat", ann_file, out.annfile, ">", out.combine.annfile)
+print(cmd); system(cmd)
+
+# assemble the combined contigs
+out.combine.nc.annfile <- paste(outdir, "/combined.ann.nc", sep = "")
+out.combine.nc.tred.dot.annfile <- paste(outdir, "/combined.ann.nc.tred.dot", sep = "")
+out.combine.nc.assembled.annfile <- paste(outdir, "/combined.ann.nc.assembled", sep = "")
+out.combine.nc.assembled.sam.annfile <- paste(outdir, "/combined.ann.nc.assembled.sam", sep = "")
+
+cmd <- paste("igda find_nccontigs", out.combine.annfile, out.combine.nc.annfile)
+print(cmd); system(cmd)
+
+cmd <- paste("igda tred -j 1 -l 0 -p 0 -r", out.combine.nc.annfile)
+print(cmd); system(cmd)
+
+cmd <- paste("igda assemble", out.combine.nc.annfile, out.combine.nc.tred.dot.annfile)
+print(cmd); system(cmd)
+
+cmd <- paste("igda_ann2sam", out.combine.nc.assembled.annfile, ref_file, out.combine.nc.assembled.sam.annfile)
+print(cmd); system(cmd)
+
+
+
+
+

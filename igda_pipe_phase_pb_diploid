@@ -104,7 +104,9 @@ sort -k2,2n -k3,3n -k1,1 -u $outdir/realign.ann.tested.ft.count.ft.tmp > $outdir
 echo "============= transitive reduction ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tmp
 igda find_nccontigs -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft.tmp $outdir/realign.ann.tested.ft.count.ft
-igda tred -r -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft
+#igda tred -r -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft
+#igda tred -l 0.2 -p 0.2 -r -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft
+igda tred -l 0 -p 0 -r -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft
 
 echo "============= assemble ==========="
 igda assemble $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.tred.dot
@@ -115,6 +117,8 @@ igda abundance $outdir/realign.ann.tested.ft.count.ft.assembled $outdir/realign.
 echo "============= filter assembled contigs ============"
 igda find_nccontigs -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft.assembled.count $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc
 igda test_contigs_pairwise $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc  $outdir/realign.recode $reffile
+
+#igda_phase2vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $indir/realign.vcf $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.vcf igda
 
 igda_ann2sam $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $reffile $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.sam
 
