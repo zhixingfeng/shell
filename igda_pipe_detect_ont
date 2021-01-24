@@ -108,6 +108,13 @@ echo "============= predict context effect ==========="
 igda_context_pred $contextmodel $outdir/realign.context $outdir/contexteffect
 contextfile=$outdir/contexteffect/predition.txt
 
+echo "============= estimate dforest_r ==========="
+cvg_m_125=$(awk '{print $9}' $outdir/realign.pileup | igda_median | awk '{print int($1*0.00125)}')
+if [ $cvg_m_125 -gt $dforest_r ];then
+    dforest_r=$cvg_m_125
+fi
+echo $dforest_r > $outdir/dforest_r.txt
+
 
 echo "============= encode ==========="
 igda encode -t $outdir/realign.m5 $outdir/realign.encode
