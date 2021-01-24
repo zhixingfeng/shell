@@ -116,8 +116,17 @@ echo "============= filter assembled contigs ============"
 igda find_nccontigs -j $min_jaccard $outdir/realign.ann.tested.ft.count.ft.assembled.count $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc
 igda test_contigs_pairwise $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc  $outdir/realign.recode $reffile
 
+#igda_ann2sam $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $reffile $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.sam
+
+echo "============= merge highly similar assembled contigs ============"
+mv $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.unmerged
+igda find_nccontigs -j 0.9 $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.unmerged $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.unmerged.nc
+igda tred -r -d 1000 -j 0.9 -l 0 -p 0 $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.unmerged.nc 
+igda assemble $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.unmerged.nc $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.unmerged.nc.tred.dot
+ln -s ./realign.ann.tested.ft.count.ft.assembled.count.nc.ft.unmerged.nc.assembled $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft
+
+echo "============= ann to sam ============"
 igda_ann2sam $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft $reffile $outdir/realign.ann.tested.ft.count.ft.assembled.count.nc.ft.sam
 
 echo "Done."
-
 
