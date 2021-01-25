@@ -10,8 +10,9 @@ seed=18473
 isfast=1
 mincvg=15
 minbf=10
+auto_par=1
 
-while getopts ":hc:p:x:q:r:n:l:s:f:d:b:" opt; do
+while getopts ":hc:p:x:q:r:n:l:s:f:d:b:a:" opt; do
         case ${opt} in
                 h )
                         echo "igda_pipe_detect_ont -s seed -n nthread -l min_readlen -r minimal_nreads_in_rsm -c min_condprob -p min_prob -q topn_cmpreads -x exclude_loci_file -f isfast infile(bam or sam file) reffile contextmodel outdir"
@@ -48,6 +49,8 @@ while getopts ":hc:p:x:q:r:n:l:s:f:d:b:" opt; do
                         mincvg=$OPTARG;;
                 b )
                         minbf=$OPTARG;;
+                a )
+                        auto_par=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -108,11 +111,13 @@ echo "============= predict context effect ==========="
 igda_context_pred $contextmodel $outdir/realign.context $outdir/contexteffect
 contextfile=$outdir/contexteffect/predition.txt
 
-echo "============= estimate dforest_r ==========="
-cvg_m_125=$(awk '{print $9}' $outdir/realign.pileup | igda_median | awk '{print int($1*0.00125)}')
-if [ $cvg_m_125 -gt $dforest_r ];then
-    dforest_r=$cvg_m_125
-fi
+if [ $auto_par -eq 1]; then
+    echo "============= estimate dforest_r ==========="
+    cvg_m_125=$(awk '{print $9}' $outdir/realign.pileup | igda_median | awk '{print int($1*0.00125)}')
+    if [ $cvg_m_125 -gt $dforest_r ];then
+        dforest_r=$cvg_m_125
+    fi
+fi 
 echo $dforest_r > $outdir/dforest_r.txt
 
 

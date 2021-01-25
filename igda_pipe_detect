@@ -13,9 +13,10 @@ isfast=1
 segsize=20000
 mincvg=15
 minbf=10
+auto_par=1
 
 #while getopts ":hc:p:x:q:r:n:l:s:" opt; do
-while getopts ":hn:m:f:g:l:r:c:p:q:x:s:d:b:" opt; do
+while getopts ":hn:m:f:g:l:r:c:p:q:x:s:d:b:a:" opt; do
         case ${opt} in
                 h )
 			echo "Usage: igda_pipe_detect [options] infile(bam file) reffile contextmodel outdir"
@@ -41,6 +42,7 @@ while getopts ":hn:m:f:g:l:r:c:p:q:x:s:d:b:" opt; do
 			echo -e "\t-s\tSeed for permutation test (experimental). [default = 0, i.e. no permutation]"
 			echo -e "\t-d\tMinimal depth for each orphan SNV. [default = 15]"
 			echo -e "\t-b\tMinimal log-BF for each orphan SNV. [default = 10]"
+            echo -e "\t-a\tIs auto select parameters, 1=yes, 0=no. [default = 1]"
 			exit 0;;
 		n )
 			nthread=$OPTARG;;
@@ -84,6 +86,8 @@ while getopts ":hn:m:f:g:l:r:c:p:q:x:s:d:b:" opt; do
 			mincvg=$OPTARG;;
 		b )
 			minbf=$OPTARG;;
+        a )
+            auto_par=$OPTARG;;
                 \? )
                         echo "Invalid option: $OPTARG" 1>&2;;
                 : )
@@ -116,6 +120,7 @@ if [ $# -ne 4 ] ; then
         echo -e "\t-s\tSeed for permutation test (experimental). [default = 0, i.e. no permutation]"
 	echo -e "\t-d\tMinimal depth for each orphan SNV. [default = 15]"
         echo -e "\t-b\tMinimal log-BF for each orphan SNV. [default = 10]"
+        echo -e "\t-a\tIs auto select parameters, 1=yes, 0=no. [default = 1]"
 	exit 0
 fi
 
@@ -143,6 +148,7 @@ echo "exclude_loci_file = "$exclude_loci_file
 echo "seed = "$seed
 echo "mincvg = "$mincvg
 echo "minbf = "$minbf
+echo "auto_par = "$auto_par
 echo "Start."
 mkdir -p $outdir
 
@@ -204,9 +210,9 @@ while IFS=$'\t' read -r chr rStart rEnd; do
 		# detect SNVs
 		cur_out_dir=$outdir/detect_split/$chr/${chr}_${cur_start}_${cur_end}
 		if [[ $exclude_loci_file == "" ]]; then
-			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -s $seed -d $mincvg -b $minbf"
+			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -s $seed -d $mincvg -b $minbf -a $auto_par"
 		else
-			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -x $exclude_loci_file -s $seed -d $mincvg -b $minbf"
+			cur_cmd="$igda_cmd -n $nthread -f $isfast -l $min_read_len -r $dforest_r -c $min_condprob -p $min_prob -q $topn_cmpreads -x $exclude_loci_file -s $seed -d $mincvg -b $minbf -a $auto_par"
 		fi
 		cur_cmd=$cur_cmd" $cur_samfile $cur_reffile $contextmodel $cur_out_dir"
 		echo $cur_cmd;$cur_cmd
