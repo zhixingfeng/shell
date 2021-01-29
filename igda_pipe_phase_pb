@@ -80,15 +80,15 @@ echo "ann_t=$ann_t, ann_m=$ann_m, ann_c=$ann_c"
 igda ann -n $nthread -b $max_iter -j 0.5 -c $ann_c -t $ann_t -m $ann_m  $outdir/realign.recode $outdir/realign.encode.rdim $indir/realign.m5 $indir/realign.var $reffile $outdir/realign.ann
 
 echo "============= test contigs ==========="
-#igda test_contigs -a 1.332824 -t 89.04769 $outdir/realign.ann $outdir/realign.recode $indir/realign.m5 $reffile
-igda test_contigs -b 10 -a 1.332824 -t 89.04769 $outdir/realign.ann $outdir/realign.recode $indir/realign.m5 $reffile
+igda test_contigs -a 1.332824 -t 89.04769 $outdir/realign.ann $outdir/realign.recode $indir/realign.m5 $reffile
+#igda test_contigs -b 10 -a 1.332824 -t 89.04769 $outdir/realign.ann $outdir/realign.recode $indir/realign.m5 $reffile
 
 echo "============= calculate abundance ==========="
 igda abundance $outdir/realign.ann.tested.ft $outdir/realign.recode $indir/realign.m5
 
 echo "============= test contigs pairwisely ==========="
-#igda test_contigs_pairwise -a 1.332824 -t 89.04769 $outdir/realign.ann.tested.ft.count $outdir/realign.recode $reffile
-igda test_contigs_pairwise -b 10 -a 1.332824 -t 89.04769 $outdir/realign.ann.tested.ft.count $outdir/realign.recode $reffile
+igda test_contigs_pairwise -a 1.332824 -t 89.04769 $outdir/realign.ann.tested.ft.count $outdir/realign.recode $reffile
+#igda test_contigs_pairwise -b 10 -a 1.332824 -t 89.04769 $outdir/realign.ann.tested.ft.count $outdir/realign.recode $reffile
 
 echo "============= correct contigs ==========="
 mv $outdir/realign.ann.tested.ft.count.ft $outdir/realign.ann.tested.ft.count.ft.raw
