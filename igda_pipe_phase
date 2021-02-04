@@ -92,6 +92,12 @@ indir=$1
 reffile=$2
 outdir=$3
 
+# check existence of outdir
+if [ -d "$outdir" ];then
+	echo "$outdir already exists."
+	exit 1
+fi
+
 mkdir -p $outdir
 echo "indir = "$indir
 echo "reffile = "$reffile
@@ -129,7 +135,7 @@ for sam_file in $(ls $outdir/*/realign.ann.tested.ft.count.ft.assembled.count.nc
 	sam2bam $outdir/$cur_chrname/contigs.sam $nthread
 done
 
-# combine bam file 
+# combine bam files
 ls $outdir/*/contigs.bam > $outdir/contigs.fofn
 samtools merge -@ $nthread -f $outdir/contigs.raw.bam -b $outdir/contigs.fofn
 samtools sort $outdir/contigs.raw.bam -o $outdir/contigs.bam
@@ -140,4 +146,11 @@ samtools view -h -@ $nthread $outdir/contigs.bam > $outdir/contigs.sam
 sam2fa $outdir/contigs.sam $outdir/contigs.fa $nthread
 
 
+# combine ann files
+merged_ann_file=$outdir/contigs.ann
+rm -rf $merged_ann_file
+for ann_file in $(ls $outdir/*/realign.ann.tested.ft.count.ft.assembled.count.nc.ft); do
+	cur_chr=$(basename $(dirname $ann_file))
+	awk -v cur_chr=$cur_chr '{printf("%s\t", cur_chr); print $0 }' $ann_file >> $merged_ann_file
+done
 

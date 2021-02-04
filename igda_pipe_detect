@@ -130,6 +130,12 @@ reffile=$2
 contextmodel=$3
 outdir=$4
 
+# check existence of outdir
+if [ -d "$outdir" ];then
+        echo "$outdir already exists."
+        exit 1
+fi
+
 echo "infile = "$infile
 echo "reffile = "$reffile
 echo "contextmodel = "$contextmodel
