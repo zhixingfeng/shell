@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "fa2table fafile tablefile(tsv file)"
+        exit 0
+fi
+
+fafile=$1
+tablefile=$2
+
+bioawk -c fastx '{print $name"\t"$seq}' $fafile > $tablefile
+
+
+
