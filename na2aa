@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ $# -ne 2 ] ; then
+        echo "na2aa infile outfile"
+	echo "This program convert DNA to protein (EMBOSS and bioawk are needed, translate using frame 1)"
+        exit 0
+fi
+
+infile=$1
+outfile=$2
+
+transeq $infile $outfile.tmp -frame 1
+
+bioawk -c fastx '{print ">"substr($name, 1, length($name)-2); print $seq}' $outfile.tmp > $outfile
+
+

@@ -1,6 +1,7 @@
 #!/bin/bash
 if [ $# -ne 3 ]; then
         echo "USAGE: getchr_batch namefile fafile outfile"
+	echo "The order of outfile is the same as fafile"
         exit 0
 fi
 

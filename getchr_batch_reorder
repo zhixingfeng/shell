@@ -1,0 +1,25 @@
+#!/bin/bash
+if [ $# -ne 3 ]; then
+        echo "USAGE: getchr_batch namefile fafile outfile"
+	echo "The order of outfile is the same as namefile"
+        exit 0
+fi
+
+namefile=$1
+fafile=$2
+outfile=$3
+
+fa2table $fafile $outfile.tmp
+
+awk -F "\t" '{
+	if (NR == FNR){
+            allele[$1] = $2
+        }else{
+            print ">"$1
+            print allele[$1]
+        }
+}' $outfile.tmp $namefile > $outfile
+
+
+rm $outfile.tmp
+
