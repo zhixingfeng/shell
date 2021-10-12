@@ -8,8 +8,8 @@ fi
 infile=$1
 outfile=$2
 
-transeq $infile $outfile.tmp -frame 1
+transeq $infile $outfile.tmp -frame 1 -trim
 
 bioawk -c fastx '{print ">"substr($name, 1, length($name)-2); print $seq}' $outfile.tmp > $outfile
-
+rm $outfile.tmp
 
