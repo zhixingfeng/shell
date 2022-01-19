@@ -1,0 +1,47 @@
+#!/bin/bash
+if [ $# -ne 1 ] ; then
+        echo "msa2pwm fafile"
+	exit 0
+fi
+
+fafile=$1
+
+uniqlen=$(getchrlen $fafile | sort -k2,2 -u | cut -f 2)
+n_uniqlen=$(echo $uniqlen | wc -l)
+if [ $n_uniqlen -ne 1 ]; then
+	echo "n_uniqlen != 1"
+	exit 1
+fi
+
+bioawk -c fastx -v msalen=$uniqlen 'BEGIN{
+	for (i=1; i<=msalen; i++){
+		key[i]=""
+		pu[i]=""
+	}
+}{
+	split($seq, aa, "")
+	for (i=1; i<=length($seq); i++){
+		freq[i,aa[i]] += 1
+		pu[i] = pu[i]aa[i]
+		if (index(key[i], aa[i]) == 0){
+			key[i]=key[i]aa[i]
+		}
+	}
+}END{
+	for (i=1; i<=msalen; i++){
+		if (length(key[i]) > 1){
+                	split(key[i], keys, "")
+			printf("%s\t", i)
+			for (j=1; j<=length(key[i]); j++){
+				if (j < length(key[i])){
+					printf("%s:%d,", keys[j], freq[i,keys[j]])
+				}else{
+					printf("%s:%d", keys[j], freq[i,keys[j]])
+				}
+			}
+			printf("\t%s\n", pu[i])
+		}
+        }	
+}' $fafile
+
+
